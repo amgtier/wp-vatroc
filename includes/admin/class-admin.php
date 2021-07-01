@@ -15,7 +15,6 @@ class VATROC_Admin {
 
     public function __construct() {
         $this -> init();
-        include_once( VATROC_ABSPATH . '/includes/admin/class-Constants.php' );
         include_once( VATROC_ABSPATH . '/includes/admin/class-adminDashboard.php' );
         include_once( VATROC_ABSPATH . '/includes/admin/class-adminRoster.php' );
     }
@@ -32,7 +31,7 @@ class VATROC_Admin {
             __( 'VATROC', 'vatroc' ),
             'manage_options',
             'vatroc',
-            array( $this, 'dashboard'),
+            array( $this, 'roster'),
             null,
             100
         );

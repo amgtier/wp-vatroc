@@ -45,16 +45,12 @@ class VATROC_RosterList extends WP_List_Table {
 
     public function get_columns() {
         $columns = array(
-            'ID'    => __( 'ID', 'vatroc' ),
             'display_name'  => __( 'Name', 'vatroc' ),
             "{$this->meta_prefix}vatsim_uid"   =>  __( "VATSIM UID", "vatroc" ),
             "{$this->meta_prefix}vatsim_rating"   =>  __( "Rating", "vatroc" ),
             "{$this->meta_prefix}position"   =>  __( "Position", "vatroc" )
         );
 
-        foreach( $metakey_columnname as $key=>$value ) {
-            $columns[ $key ] = $value;
-        }
         return $columns;
     }
 
@@ -66,19 +62,18 @@ class VATROC_RosterList extends WP_List_Table {
 
     public function get_sortable_columns() {
         return array(
-            'ID' => array( 'ID', false )
+            'display_name' => array( 'Name', false )
         );
     }
 
 
     public function column_default( $item, $column_name ) {
         switch( $column_name ) {
-            case 'ID':
             case 'display_name':
             case 'vatroc_vatsim_uid':
             case 'vatroc_vatsim_rating':
             case 'vatroc_position':
-                return $item[ $column_name ];
+                return isset( $item[ $column_name ] ) ? $item[ $column_name ] : NULL;
             default:
                 return print_r( $item, true );
         }
@@ -95,6 +90,10 @@ class VATROC_RosterList extends WP_List_Table {
 
         $data = $wpdb->get_results( $sql, 'ARRAY_A' );
         $usermeta = $wpdb->get_results( $sql_usermeta, 'ARRAY_A' );
+
+        for( $i = 0; $i < count( $data ); $i += 1 ) {
+            $data[ $i ][ "display_name" ] = "<a href='" . get_edit_user_link( $data[ $i ][ "ID" ] ) . "#profile-vatroc-tool' target='_balnk'>{$data[ $i ][ "display_name" ]}</a>";
+        }
 
         foreach( $usermeta as $idx=>$val ) {
             $entry = null;
@@ -117,6 +116,15 @@ class VATROC_RosterList extends WP_List_Table {
         }
 
         return $data;
+    }
+
+
+    protected function column_display_name( $item ) {
+       $actions = array(
+           'edit'      => sprintf('<a href="' . get_edit_user_link( $item[ "ID" ] ) . '">Edit</a>',$_REQUEST['page'],'edit',$item['ID']),
+       );
+
+       return $item[ 'display_name' ] . $this->row_actions($actions);
     }
 };
 
