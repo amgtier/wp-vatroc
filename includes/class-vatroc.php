@@ -25,6 +25,18 @@ class VATROC extends VATROC_Constants {
     }
 
 
+    public static function actionLog( $user_id, $actionKey, $actionValue ) {
+        global $wpdb;
+        $result = $wpdb->insert( "{$wpdb->prefix}vatroc_log", array(
+            'user'  => $user_id,
+            'key'   => $actionKey,
+            'value' => $actionValue
+        ) );
+        var_dump( $result );
+        return $result;
+    }
+
+
     private function define( $name, $value ) {
         if ( ! defined( $name ) ) {
             define( $name, $value );

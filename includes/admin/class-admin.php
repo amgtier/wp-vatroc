@@ -31,7 +31,7 @@ class VATROC_Admin {
             __( 'VATROC', 'vatroc' ),
             'manage_options',
             'vatroc',
-            array( $this, 'roster'),
+            array( $this, 'dashboard'),
             null,
             100
         );

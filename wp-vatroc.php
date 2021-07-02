@@ -25,4 +25,9 @@ function vatroc(){
         return VATROC::instance();
 }
 
+function installer() {
+    include( "installer.php" );
+}
+
 $GLOBALS[ 'VATROC' ] = vatroc();
+register_activation_hook( __file__, "installer" );

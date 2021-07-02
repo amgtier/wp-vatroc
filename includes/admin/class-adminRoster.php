@@ -62,6 +62,7 @@ class VATROC_RosterList extends WP_List_Table {
 
     public function get_sortable_columns() {
         return array(
+            'vatsim_rating' => array( 'Rating', false ),
             'display_name' => array( 'Name', false )
         );
     }
@@ -123,7 +124,7 @@ class VATROC_RosterList extends WP_List_Table {
        $actions = array(
            'edit'      => sprintf('<a href="' . get_edit_user_link( $item[ "ID" ] ) . '">Edit</a>',$_REQUEST['page'],'edit',$item['ID']),
        );
-
+       // return '<a href="/"><span class="dashicons dashicons-media-text"></span></a>' . // personal report
        return $item[ 'display_name' ] . $this->row_actions($actions);
     }
 };
@@ -144,7 +145,6 @@ class VATROC_AdminRoster {
 ?>
 <div class="wrap">
     <h1 class="wp-heading-inline">Manage ATC</h1>
-    <a href="#" class="page-title-action"  >Add New</a>
     <hr class="wp-header-end">
 
 <?php

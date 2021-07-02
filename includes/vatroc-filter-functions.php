@@ -78,16 +78,19 @@ function my_user_profile_edit_action($user) {
 add_action('personal_options_update', 'my_user_profile_update_action');
 add_action('edit_user_profile_update', 'my_user_profile_update_action');
 function my_user_profile_update_action($user) {
-    if ( isset($_POST['vatsim_uid']) ) {
-        if ( strlen( $_POST[ 'vatsim_uid' ] == 0 ) ) delete_user_meta( $user, 'vatroc_vatsim_uid' );
-        else update_user_meta($user, 'vatroc_vatsim_uid', $_POST[ 'vatsim_uid' ] );
-    }
-    if ( isset($_POST['vatsim_rating']) ) {
-        if ( strlen( $_POST[ 'vatsim_rating' ] == 0 ) ) delete_user_meta( $user, 'vatroc_vatsim_rating' );
-        else update_user_meta($user, 'vatroc_vatsim_rating', $_POST[ 'vatsim_rating' ] );
-    }
-    if ( isset($_POST['position']) ) {
-        if ( strlen( $_POST[ 'position' ] == 0 ) ) delete_user_meta( $user, 'vatroc_position' );
-        else update_user_meta($user, 'vatroc_position', $_POST[ 'position' ] );
+    $editables = array(
+        // postname     =>  metakey
+        'vatsim_uid'    =>  'vatroc_vatsim_uid',
+        'vatsim_rating' =>  'vatroc_vatsim_rating',
+        'position'      =>  'vatroc_position'
+    );
+
+    foreach( $editables as $postname=>$metakey ) {
+        if ( isset($_POST[ $postname ]) ) {
+            if ( $_POST[ $postname ] != get_user_meta( $user, $metakey, true ) )
+                VATROC::actionLog( get_current_user_id(), $metakey, $_POST[ $postname ] );
+            if ( strlen( $_POST[ $postname ] == 0 ) ) delete_user_meta( $user, $metakey );
+            else update_user_meta($user, $metakey, $_POST[ $postname ] );
+        }
     }
 }
