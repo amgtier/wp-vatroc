@@ -37,13 +37,20 @@ class VATROC_Admin {
         );
         add_submenu_page(
             'vatroc',
-            __('Roster', 'vatroc'),
-            __('Roster', 'vatroc'),
+            __('ATC Roster', 'vatroc'),
+            __('ATC Roster', 'vatroc'),
             'manage_options',
-            'vatroc-roster',
-            array( $this, 'roster')
+            'vatroc-atcroster',
+            array( $this, 'atc_roster')
         );
-
+        add_submenu_page(
+            'vatroc',
+            __('STAFF Roster', 'vatroc'),
+            __('STAFF Roster', 'vatroc'),
+            'manage_options',
+            'vatroc-staffroster',
+            array( $this, 'staff_roster')
+        );
     }
 
 
@@ -52,8 +59,13 @@ class VATROC_Admin {
     }
 
 
-    public function roster() {
-        VATROC_AdminRoster::output();
+    public function atc_roster() {
+        VATROC_AdminRoster::output( VATROC::$ATC );
+    }
+
+
+    public function staff_roster() {
+        VATROC_AdminRoster::output( VATROC::$STAFF );
     }
 };
 

@@ -26,8 +26,9 @@ add_filter( 'manage_users_custom_column', 'account_linked_user_table_row', 10, 3
 add_action('show_user_profile', 'my_user_profile_edit_action');
 add_action('edit_user_profile', 'my_user_profile_edit_action');
 function my_user_profile_edit_action($user) {
-	$vatsim_rating = get_user_meta( $user->ID, "vatroc_vatsim_rating", true );
-	$position = get_user_meta( $user->ID, "vatroc_position", true );
+    $meta_prefix = VATROC::$meta_prefix;
+	$vatsim_rating = get_user_meta( $user->ID, "{$meta_prefix}vatsim_rating", true );
+	$position = get_user_meta( $user->ID, "{$meta_prefix}position", true );
 ?>
   <h3 id="profile-vatroc-tool">VATROC Tool</h3>
   <table class="form-table">
@@ -36,7 +37,7 @@ function my_user_profile_edit_action($user) {
   	  	<label for="vatsim_uid">VATSIM UID</label>
       </th>
 	  <td>
-        <input name="vatsim_uid" type="text" id="vatsim_uid" value="<?php echo get_user_meta( $user->ID, "vatroc_vatsim_uid", true ); ?>">
+        <input name="vatsim_uid" type="text" id="vatsim_uid" value="<?php echo get_user_meta( $user->ID, "{$meta_prefix}vatsim_uid", true ); ?>">
   	  </td>
 	</tr>
 	<tr>
@@ -71,6 +72,22 @@ function my_user_profile_edit_action($user) {
 		</select>
   	  </td>
 	</tr>
+	<tr>
+	  <th>
+  	  	<label for="staff_number">VATROC STAFF NUMBER</label>
+      </th>
+	  <td>
+        <input name="staff_number" type="number" id="staff_number" value="<?php echo get_user_meta( $user->ID, "{$meta_prefix}staff_number", true ); ?>">
+  	  </td>
+	</tr>
+	<tr>
+	  <th>
+  	  	<label for="staff_role">VATROC STAFF ROLE</label>
+      </th>
+	  <td>
+        <input name="staff_role" type="staff_role" id="staff_role" value="<?php echo get_user_meta( $user->ID, "{$meta_prefix}staff_role", true ); ?>">
+  	  </td>
+	</tr>
   </table>
 <?php 
 }
@@ -82,14 +99,18 @@ function my_user_profile_update_action($user) {
         // postname     =>  metakey
         'vatsim_uid'    =>  'vatroc_vatsim_uid',
         'vatsim_rating' =>  'vatroc_vatsim_rating',
-        'position'      =>  'vatroc_position'
+        'position'      =>  'vatroc_position',
+        'staff_number'  =>  'vatroc_staff_number',
+        'staff_role'    =>  'vatroc_staff_role'
     );
 
     foreach( $editables as $postname=>$metakey ) {
+        error_log( $_POST[ $postname ] );
+        error_log( strlen( $_POST[ $postname ] ) );
         if ( isset($_POST[ $postname ]) ) {
             if ( $_POST[ $postname ] != get_user_meta( $user, $metakey, true ) )
                 VATROC::actionLog( get_current_user_id(), $metakey, $_POST[ $postname ] );
-            if ( strlen( $_POST[ $postname ] == 0 ) ) delete_user_meta( $user, $metakey );
+            if ( strlen( $_POST[ $postname ] ) == 0 ) delete_user_meta( $user, $metakey );
             else update_user_meta($user, $metakey, $_POST[ $postname ] );
         }
     }

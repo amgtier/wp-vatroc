@@ -19,8 +19,12 @@ if ( ! class_exists( 'WP_List_Table' ) ) {
 class VATROC_RosterList extends WP_List_Table {
     public $meta_prefix = "vatroc_";
     public $perPage = 1000;
+    private $list_type;
 
-	public function prepare_items() {
+	public function prepare_items( $type ) {
+
+        $this->list_type = $type;
+
         $columns = $this->get_columns();
         $hidden = $this->get_hidden_columns();
         $sortable = $this->get_sortable_columns();
@@ -44,12 +48,22 @@ class VATROC_RosterList extends WP_List_Table {
 
 
     public function get_columns() {
-        $columns = array(
-            'display_name'  => __( 'Name', 'vatroc' ),
-            "{$this->meta_prefix}vatsim_uid"   =>  __( "VATSIM UID", "vatroc" ),
-            "{$this->meta_prefix}vatsim_rating"   =>  __( "Rating", "vatroc" ),
-            "{$this->meta_prefix}position"   =>  __( "Position", "vatroc" )
-        );
+        switch ( $this->list_type ){
+        case VATROC::$ATC:
+            $columns = array(
+                'display_name'  => __( 'Name', 'vatroc' ),
+                "{$this->meta_prefix}vatsim_uid"   =>  __( "VATSIM UID", "vatroc" ),
+                "{$this->meta_prefix}vatsim_rating"   =>  __( "Rating", "vatroc" ),
+                "{$this->meta_prefix}position"   =>  __( "Position", "vatroc" )
+            ); break;
+        case VATROC::$STAFF:
+            $columns = array(
+                'display_name'  => __( 'Name', 'vatroc' ),
+                "{$this->meta_prefix}vatsim_uid"   =>  __( "VATSIM UID", "vatroc" ),
+                "{$this->meta_prefix}staff_number"   =>  __( "Number", "vatroc" ),
+                "{$this->meta_prefix}staff_role"   =>  __( "Role", "vatroc" )
+            ); break;
+        }
 
         return $columns;
     }
@@ -61,20 +75,32 @@ class VATROC_RosterList extends WP_List_Table {
 
 
     public function get_sortable_columns() {
-        return array(
-            'vatsim_rating' => array( 'Rating', false ),
-            'display_name' => array( 'Name', false )
-        );
+        switch ( $this->list_type ) {
+        case VATROC::$ATC:
+            return array(
+                "{$this->meta_prefix}vatsim_rating" => array( 'Rating', false ),
+                'display_name' => array( 'Name', false )
+            );
+        case VATROC::$STAFF:
+            return array(
+                "{$this->meta_prefix}staff_number" => array( 'Number', false ),
+                'display_name' => array( 'Name', false )
+            );
+        }
     }
 
 
     public function column_default( $item, $column_name ) {
         switch( $column_name ) {
             case 'display_name':
+            case "{$this->meta_prefix}staff_number":
+            case "{$this->meta_prefix}staff_role":
             case 'vatroc_vatsim_uid':
-            case 'vatroc_vatsim_rating':
-            case 'vatroc_position':
                 return isset( $item[ $column_name ] ) ? $item[ $column_name ] : NULL;
+            case 'vatroc_vatsim_rating':
+                return VATROC::$vatsim_rating[ $item[ $column_name ] ]; break;
+            case 'vatroc_position':
+                return VATROC::$atc_position[ $item[ $column_name ] ]; break;
             default:
                 return print_r( $item, true );
         }
@@ -106,17 +132,27 @@ class VATROC_RosterList extends WP_List_Table {
             }
             if ( $i == count( $data ) ) continue;
 
-            switch( $val[ "meta_key" ] ){
-                case "{$this->meta_prefix}vatsim_rating":
-                    $data[ $i ][ $val[ "meta_key" ] ] = VATROC::$vatsim_rating[ $val[ "meta_value" ] ]; break;
-                case "{$this->meta_prefix}position":
-                    $data[ $i ][ $val[ "meta_key" ] ] = VATROC::$atc_position[ $val[ "meta_value" ] ]; break;
-                default:
-                    $data[ $i ][ $val[ "meta_key" ] ] = $val[ "meta_value" ];
-            }
+            $data[ $i ][ $val[ "meta_key" ] ] = $val[ "meta_value" ];
         }
 
-        return $data;
+        $rosters = array();
+        switch ( $this->list_type ) {
+        case VATROC::$ATC:
+            foreach ( $data as $idx=>$val ) {
+                if ( isset( $data[ $idx ][ "{$this->meta_prefix}position" ] ) &&
+                    $data[ $idx ][ "{$this->meta_prefix}position" ] > 0 ) {
+                    array_push( $rosters, $data[ $idx ] );
+                }
+            } break;
+        case VATROC::$STAFF:
+            foreach ( $data as $idx=>$val ) {
+                if ( isset( $data[ $idx ][ "{$this->meta_prefix}staff_role" ] ) ) {
+                    array_push( $rosters, $data[ $idx ] );
+                }
+            } break;
+        }
+
+        return $rosters;
     }
 
 
@@ -134,21 +170,33 @@ class VATROC_AdminRoster {
     }
 
 
-    public static function output() {
-        self::manage_atc();
+    public static function output( $type ) {
+        self::manage_atc( $type );
     }
 
 
-    public static function manage_atc() {
+    public static function manage_atc( $type ) {
         $roster_list = new VATROC_RosterList();
-        $roster_list->prepare_items();
+        $roster_list->prepare_items( $type );
 ?>
 <div class="wrap">
-    <h1 class="wp-heading-inline">Manage ATC</h1>
+    <h1 class="wp-heading-inline">Manage 
+<?php
+        switch ( $type ) {
+        case VATROC::$ATC:
+            echo "ATC";
+            break;
+        case VATROC::$STAFF:
+            echo "Staff";
+            break;
+        default: break;
+        }
+?>
+</h1>
     <hr class="wp-header-end">
 
 <?php
-    $roster_list->display();
+    $roster_list->display( $type );
 ?>
     
 </div>

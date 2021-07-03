@@ -54,6 +54,7 @@ class VATROC_AdminDashboard {
 <?php
     }
     public static function getMetar() {
+        // optimization plan: save in DB and check validality in time
         $curl = new WP_Http_Curl();
         $metarJson = $curl->request( "https://aiss.anws.gov.tw/aes/AwsClientMetar?stations=RCTP,RCKH,RCSS,RCBS,RCCM,RCDC,RCFG,RCFN,RCGI,RCKU,RCKW,RCLY,RCMQ,RCMT,RCNN,RCQC,RCWA,RCYU" );
         $data = json_decode( $metarJson[ "body" ] )->data;

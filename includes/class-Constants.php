@@ -11,6 +11,10 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 class VATROC_Constants {
+    public static $ATC = "atc";
+
+    public static $STAFF = "staff";
+
     public static $meta_prefix = "vatroc_";
 
     public static $vatsim_rating = array(
