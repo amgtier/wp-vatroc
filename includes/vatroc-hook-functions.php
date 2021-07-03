@@ -105,8 +105,6 @@ function my_user_profile_update_action($user) {
     );
 
     foreach( $editables as $postname=>$metakey ) {
-        error_log( $_POST[ $postname ] );
-        error_log( strlen( $_POST[ $postname ] ) );
         if ( isset($_POST[ $postname ]) ) {
             if ( $_POST[ $postname ] != get_user_meta( $user, $metakey, true ) )
                 VATROC::actionLog( get_current_user_id(), $metakey, $_POST[ $postname ] );
@@ -115,3 +113,12 @@ function my_user_profile_update_action($user) {
         }
     }
 }
+
+// https://wp-mix.com/members-only-content-shortcode/
+function member_check_shortcode($atts, $content = null) {
+	if (is_user_logged_in() && !is_null($content) && !is_feed()) {
+		return do_shortcode($content);
+	}
+	return do_shortcode( '[nextend_social_login provider="facebook"]' );
+}
+add_shortcode('login_required', 'member_check_shortcode');

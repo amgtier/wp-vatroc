@@ -15,7 +15,6 @@ if ( ! class_exists( 'WP_List_Table' ) ) {
 }
 
 
-
 class VATROC_RosterList extends WP_List_Table {
     public $meta_prefix = "vatroc_";
     public $perPage = 1000;

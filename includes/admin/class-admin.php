@@ -15,6 +15,7 @@ class VATROC_Admin {
 
     public function __construct() {
         $this -> init();
+        include_once( VATROC_ABSPATH . '/includes/admin/class-adminCurrStatus.php' );
         include_once( VATROC_ABSPATH . '/includes/admin/class-adminDashboard.php' );
         include_once( VATROC_ABSPATH . '/includes/admin/class-adminRoster.php' );
     }
@@ -45,8 +46,8 @@ class VATROC_Admin {
         );
         add_submenu_page(
             'vatroc',
-            __('STAFF Roster', 'vatroc'),
-            __('STAFF Roster', 'vatroc'),
+            __('Staff Roster', 'vatroc'),
+            __('Staff Roster', 'vatroc'),
             'manage_options',
             'vatroc-staffroster',
             array( $this, 'staff_roster')

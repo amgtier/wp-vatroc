@@ -21,7 +21,7 @@ class VATROC extends VATROC_Constants {
 
     public function includes() {
         include_once( VATROC_ABSPATH . 'includes/admin/class-admin.php' );
-        include_once( VATROC_ABSPATH . 'includes/vatroc-filter-functions.php' );
+        include_once( VATROC_ABSPATH . 'includes/vatroc-hook-functions.php' );
     }
 
 

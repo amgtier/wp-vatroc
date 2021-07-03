@@ -11,7 +11,11 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 class VATROC_AdminDashboard {
+    static private $status_table;
     public static function output() {
+        $maxlen_route = 100;
+        self::$status_table = new VATROC_CurrStatusTable();
+        self::$status_table->prepare_items( VATROC::$PILOT );
 ?>
 <div class="wpcontent">
 <div class="wpbody">
@@ -21,6 +25,15 @@ class VATROC_AdminDashboard {
             <h2>VATROC Tool Dashboard</h2>
             <div class="welcome-panel-column-container">
                 <div class="welcome-panel-column">
+                <h3><?php echo __( 'Statistics', 'vatroc' ) ?></h3>
+<?php
+        foreach( self::$status_table->get_active_aerodrome() as $icao=>$dep_arr) {
+            $dep = count( $dep_arr[0] );
+            $arr = count( $dep_arr[1] );
+            echo "<p><b>{$icao}</b><span class='dashicons dashicons-arrow-up-alt2'></span> {$dep}";
+            echo "<span class='dashicons dashicons-arrow-down-alt2'></span> {$arr}</p>";
+        }
+?>
                 </div>
                 <div class="welcome-panel-column">
                 </div>
@@ -29,13 +42,6 @@ class VATROC_AdminDashboard {
             </div>
         </div>
         </div>
-        <!-- <div class="postbox-container">
-            <div class="postbox">
-                <div class="postbox-header">Charts</div>
-                <div class="inside">
-                </div>
-            </div>
-        </div> -->
         <div class="postbox-container">
             <div class="postbox">
                 <div class="postbox-header">Metars</div>
@@ -48,15 +54,34 @@ class VATROC_AdminDashboard {
                 </div>
             </div>
         </div>
+        <div class="postbox-container">
+            <div class="postbox">
+                <div class="postbox-header">Active Flights</div>
+                <div class="inside">
+<?php
+        self::$status_table->display();
+?>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
 </div>
 <?php
     }
+
+
     public static function getMetar() {
         // optimization plan: save in DB and check validality in time
         $curl = new WP_Http_Curl();
-        $metarJson = $curl->request( "https://aiss.anws.gov.tw/aes/AwsClientMetar?stations=RCTP,RCKH,RCSS,RCBS,RCCM,RCDC,RCFG,RCFN,RCGI,RCKU,RCKW,RCLY,RCMQ,RCMT,RCNN,RCQC,RCWA,RCYU" );
+        // $metarJson = $curl->request( "https://aiss.anws.gov.tw/aes/AwsClientMetar?stations=RCTP,RCKH,RCSS,RCBS,RCCM,RCDC,RCFG,RCFN,RCGI,RCKU,RCKW,RCLY,RCMQ,RCMT,RCNN,RCQC,RCWA,RCYU" );
+        // default add RCTP, RCSS, RCKH
+        $active_aerodrome = self::$status_table->get_active_aerodrome();
+        $active_aerodrome[ "RCTP" ] = NULL;
+        $active_aerodrome[ "RCSS" ] = NULL;
+        $active_aerodrome[ "RCKH" ] = NULL;
+        $icaos = implode( array_keys( $active_aerodrome ),',' );
+        $metarJson = $curl->request( "https://aiss.anws.gov.tw/aes/AwsClientMetar?stations=" . $icaos );
         $data = json_decode( $metarJson[ "body" ] )->data;
         return $data;
     }
