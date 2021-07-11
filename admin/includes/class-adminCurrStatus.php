@@ -20,6 +20,12 @@ class VATROC_CurrStatusTable extends WP_List_Table {
     public $perPage = 1000;
     private $list_type;
     private $active_aerodrome = array();
+    private $update_timestamp;
+
+
+    public function get_update_timestamp() {
+        return $this->update_timestamp;
+    }
 
 
     public function get_active_aerodrome() {
@@ -139,17 +145,37 @@ class VATROC_CurrStatusTable extends WP_List_Table {
     // }
 
 
-    public function getVatsimStatus() {
+    private function getRawVatsimStatus( $real_time ) {
         // optimization: save in db and check if db saved is recently enough.
-        $curl = new WP_Http_Curl();
-        $status = $curl->request( "https://data.vatsim.net/v3/vatsim-data.json" );
+        if ( $real_time ) {
+            // from curl
+            $curl = new WP_Http_Curl();
+            return $curl->request( "https://data.vatsim.net/v3/vatsim-data.json" );
+        } else {
+            // from file
+            $log_dir = "/home/amgtier/VATROC_Logs/logs";
+            $latest_file = scandir( $log_dir, 1 );
+            if ( $latest_file ) {
+                $latest_file = $log_dir . '/' . $latest_file[0];
+                $fp = fopen( $latest_file, "r" );
+                if ( $fp ) {
+                    $status = fread( $fp , filesize( $latest_file ) );
+                    fclose( $fp );
+                    return [ "body" =>  $status ];
+                }
+            }
+            return $this->getRawVatsimStatus( true );
+        }
+    }
+
+
+    public function getVatsimStatus() {
+        $status = $this->getRawVatsimStatus( false );
         $pilots = null;
         $result = array();
-        foreach( $status as $key=>$value ) {
-            if ( $key == "body" ) {
-                $pilots = json_decode( $value )->pilots;
-            }
-        }
+        $data = json_decode( $status[ "body" ] );
+        $pilots = $data->pilots;
+        $this->update_timestamp = $data->general->update_timestamp;
         foreach ( $pilots as $idx=>$pilot ) {
             if ( substr( $pilot->flight_plan->departure, 0, 2 ) == VATROC::$icao_prefix ||
                 substr( $pilot->flight_plan->arrival, 0, 2 ) == VATROC::$icao_prefix ) {

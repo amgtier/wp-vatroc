@@ -15,9 +15,11 @@ class VATROC_Admin {
 
     public function __construct() {
         $this -> init();
-        include_once( VATROC_ABSPATH . '/includes/admin/class-adminCurrStatus.php' );
-        include_once( VATROC_ABSPATH . '/includes/admin/class-adminDashboard.php' );
-        include_once( VATROC_ABSPATH . '/includes/admin/class-adminRoster.php' );
+        include_once( VATROC_ABSPATH . '/admin/class-adminDashboard.php' );
+        include_once( VATROC_ABSPATH . '/admin/class-adminRoster.php' );
+        include_once( VATROC_ABSPATH . '/admin/includes/class-adminCurrStatus.php' );
+        include_once( VATROC_ABSPATH . '/admin/includes/class-adminMagicCharts.php' );
+        include_once( VATROC_ABSPATH . '/admin/vatroc-admin-hook-functions.php' );
     }
 
 
@@ -35,6 +37,14 @@ class VATROC_Admin {
             array( $this, 'dashboard'),
             null,
             100
+        );
+        add_submenu_page(
+            'vatroc',
+            __('Magic Charts', 'vatroc'),
+            __('Magic Charts', 'vatroc'),
+            'manage_options',
+            'vatroc-magiccharts',
+            array( $this, 'magic_charts')
         );
         add_submenu_page(
             'vatroc',
@@ -67,6 +77,13 @@ class VATROC_Admin {
 
     public function staff_roster() {
         VATROC_AdminRoster::output( VATROC::$STAFF );
+    }
+
+
+    public function magic_charts() {
+        VATROC_AdminMagicCharts::output();
+        // $am = new VATROC_AdminMagicCharts;
+        // $am->output();
     }
 };
 

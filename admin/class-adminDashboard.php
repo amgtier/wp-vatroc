@@ -11,7 +11,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 class VATROC_AdminDashboard {
-    static private $status_table;
+    static public $status_table;
     public static function output() {
         $maxlen_route = 100;
         self::$status_table = new VATROC_CurrStatusTable();
@@ -23,6 +23,7 @@ class VATROC_AdminDashboard {
         <div class="welcome-panel">
         <div class="welcome-panel-contet">
             <h2>VATROC Tool Dashboard</h2>
+            <h6><?php echo self::$status_table->get_update_timestamp(); ?></h6>
             <div class="welcome-panel-column-container">
                 <div class="welcome-panel-column">
                 <h3><?php echo __( 'Statistics', 'vatroc' ) ?></h3>
@@ -86,5 +87,6 @@ class VATROC_AdminDashboard {
         return $data;
     }
 };
+
 
 return new VATROC_AdminDashboard();
