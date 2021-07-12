@@ -12,10 +12,12 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 class VATROC_AdminDashboard {
     static public $status_table;
+    static public $status_table_atc;
     public static function output() {
         $maxlen_route = 100;
         self::$status_table = new VATROC_CurrStatusTable();
         self::$status_table->prepare_items( VATROC::$PILOT );
+        self::$status_table_atc = new VATROC_CurrStatusTable();
 ?>
 <div class="wpcontent">
 <div class="wpbody">
@@ -50,6 +52,23 @@ class VATROC_AdminDashboard {
 <?php
         foreach( self::getMetar() as $idx=>$data ) {
             echo "<p><b>$data->station</b> <i>$data->message</i></p>";
+        }
+?>
+                </div>
+            </div>
+        </div>
+        <div class="postbox-container">
+            <div class="postbox">
+                <div class="postbox-header">ATC</div>
+                <div class="inside">
+<?php
+        $cnt = 0;
+        foreach( self::$status_table_atc->getVatsimStatus( VATROC::$ATC ) as $idx=>$atc ) {
+            $cnt += 1;
+            echo "<p>${atc['frequency']} ${atc['callsign']} ${atc['name']}</p>";
+        }
+        if ( $cnt == 0 ) {
+            echo "<p>No ATC in TPE FIR</p>";
         }
 ?>
                 </div>

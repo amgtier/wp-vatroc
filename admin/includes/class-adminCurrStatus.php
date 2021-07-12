@@ -131,7 +131,7 @@ class VATROC_CurrStatusTable extends WP_List_Table {
 
 
     public function table_data() {
-        return $this->getVatsimStatus();
+        return $this->getVatsimStatus( $this->list_type );
     }
 
 
@@ -169,35 +169,49 @@ class VATROC_CurrStatusTable extends WP_List_Table {
     }
 
 
-    public function getVatsimStatus() {
+    public function getVatsimStatus( $type ) {
         $status = $this->getRawVatsimStatus( false );
         $pilots = null;
         $result = array();
         $data = json_decode( $status[ "body" ] );
-        $pilots = $data->pilots;
-        $this->update_timestamp = $data->general->update_timestamp;
-        foreach ( $pilots as $idx=>$pilot ) {
-            if ( substr( $pilot->flight_plan->departure, 0, 2 ) == VATROC::$icao_prefix ||
-                substr( $pilot->flight_plan->arrival, 0, 2 ) == VATROC::$icao_prefix ) {
+        if ( $type == VATROC::$PILOT ) {
+            $pilots = $data->pilots;
+            $this->update_timestamp = $data->general->update_timestamp;
+            foreach ( $pilots as $idx=>$pilot ) {
+                if ( substr( $pilot->flight_plan->departure, 0, 2 ) == VATROC::$icao_prefix ||
+                    substr( $pilot->flight_plan->arrival, 0, 2 ) == VATROC::$icao_prefix ) {
 
-                if ( substr( $pilot->flight_plan->departure, 0, 2 ) == VATROC::$icao_prefix ) {
-                    if ( !isset( $this->active_aerodrome[ $pilot->flight_plan->departure ] ) )  $this->active_aerodrome[ $pilot->flight_plan->departure ] = array(array(), array());
-                    array_push( $this->active_aerodrome[ $pilot->flight_plan->departure ][ 0 ], $pilot->callsign );
+                    if ( substr( $pilot->flight_plan->departure, 0, 2 ) == VATROC::$icao_prefix ) {
+                        if ( !isset( $this->active_aerodrome[ $pilot->flight_plan->departure ] ) )  $this->active_aerodrome[ $pilot->flight_plan->departure ] = array(array(), array());
+                        array_push( $this->active_aerodrome[ $pilot->flight_plan->departure ][ 0 ], $pilot->callsign );
+                    }
+
+                    if ( substr( $pilot->flight_plan->arrival, 0, 2 ) == VATROC::$icao_prefix ) {
+                        if ( !isset( $this->active_aerodrome[ $pilot->flight_plan->arrival ] ) )  $this->active_aerodrome[ $pilot->flight_plan->arrival ] = array(array(), array());
+                        array_push( $this->active_aerodrome[ $pilot->flight_plan->arrival ][ 1 ], $pilot->callsign );
+                    }
+
+                    array_push( $result, array(
+                        "callsign"  => $pilot->callsign,
+                        "departure" => $pilot->flight_plan->departure,
+                        "arrival"   => $pilot->flight_plan->arrival,
+                        "altitude"  => $pilot->altitude,
+                        "name"      => $pilot->name,
+                        "route"     => $pilot->flight_plan->route
+                    ) );
                 }
-
-                if ( substr( $pilot->flight_plan->arrival, 0, 2 ) == VATROC::$icao_prefix ) {
-                    if ( !isset( $this->active_aerodrome[ $pilot->flight_plan->arrival ] ) )  $this->active_aerodrome[ $pilot->flight_plan->arrival ] = array(array(), array());
-                    array_push( $this->active_aerodrome[ $pilot->flight_plan->arrival ][ 1 ], $pilot->callsign );
+            }
+        } else if ( $type == VATROC::$ATC ) {
+            $atcs = $data->controllers;
+            foreach( $atcs as $idx=>$atc ) {
+                if ( $atc->facility > 0 && ( substr( $atc->callsign, 0, 2 ) == VATROC::$icao_prefix || substr( $atc->callsign, 0, 3 ) == "TPE" ) ) {
+                    # array_push( $result, $atc );
+                    array_push( $result, array(
+                        "callsign" => $atc->callsign,
+                        "name"     => $atc->name,
+                        "frequency"=> $atc->frequency
+                    ) );
                 }
-
-                array_push( $result, array(
-                    "callsign"  => $pilot->callsign,
-                    "departure" => $pilot->flight_plan->departure,
-                    "arrival"   => $pilot->flight_plan->arrival,
-                    "altitude"  => $pilot->altitude,
-                    "name"      => $pilot->name,
-                    "route"     => $pilot->flight_plan->route
-                ) );
             }
         }
         return $result;
