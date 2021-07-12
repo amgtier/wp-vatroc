@@ -11,8 +11,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 class VATROC_Admin {
-
-
     public function __construct() {
         $this -> init();
         include_once( VATROC_ABSPATH . '/admin/class-adminDashboard.php' );
@@ -29,20 +27,21 @@ class VATROC_Admin {
 
 
     private function add_admin_menu() {
+        $privilege = 'publish_posts';
         add_menu_page(
             __( 'VATROC', 'vatroc' ),
             __( 'VATROC', 'vatroc' ),
-            'manage_options',
+            $privilege,
             'vatroc',
             array( $this, 'dashboard'),
-            null,
-            100
+            'dashicons-superhero',
+            1
         );
         add_submenu_page(
             'vatroc',
             __('Magic Charts', 'vatroc'),
             __('Magic Charts', 'vatroc'),
-            'manage_options',
+            $privilege,
             'vatroc-magiccharts',
             array( $this, 'magic_charts')
         );
@@ -50,7 +49,7 @@ class VATROC_Admin {
             'vatroc',
             __('ATC Roster', 'vatroc'),
             __('ATC Roster', 'vatroc'),
-            'manage_options',
+            $privilege,
             'vatroc-atcroster',
             array( $this, 'atc_roster')
         );
@@ -58,7 +57,7 @@ class VATROC_Admin {
             'vatroc',
             __('Staff Roster', 'vatroc'),
             __('Staff Roster', 'vatroc'),
-            'manage_options',
+            $privilege,
             'vatroc-staffroster',
             array( $this, 'staff_roster')
         );

@@ -156,10 +156,11 @@ class VATROC_RosterList extends WP_List_Table {
 
 
     protected function column_display_name( $item ) {
-       $actions = array(
-           'edit'      => sprintf('<a href="' . get_edit_user_link( $item[ "ID" ] ) . '">Edit</a>',$_REQUEST['page'],'edit',$item['ID']),
-       );
-       // return '<a href="/"><span class="dashicons dashicons-media-text"></span></a>' . // personal report
+        if ( current_user_can( 'manage_options' ) ) {
+            $actions = array(
+                'edit'      => sprintf('<a href="' . get_edit_user_link( $item[ "ID" ] ) . '">Edit</a>',$_REQUEST['page'],'edit',$item['ID']),
+            );
+        }
        return $item[ 'display_name' ] . $this->row_actions($actions);
     }
 };

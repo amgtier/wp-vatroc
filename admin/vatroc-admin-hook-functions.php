@@ -113,3 +113,16 @@ function my_user_profile_update_action($user) {
         }
     }
 }
+
+add_action( 'admin_bar_menu', 'add_vatroctool_barmenu', 100  );
+function add_vatroctool_barmenu ( $admin_bar ) {
+    error_log( "hello admin bar" );
+    $admin_bar->add_menu( array ( 
+        'id'    => 'vatroc-tool',
+        'title' =>  '<span class="ab-icon dashicons dashicons-superhero"></span>VATROC Tools',
+        'href'  =>  admin_url( '?page=vatroc' ),
+        'meta'  =>  array(
+            'title' =>  __( 'VATROC Tools' )
+        )
+    ) );
+}
