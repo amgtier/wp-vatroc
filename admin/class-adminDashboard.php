@@ -13,11 +13,17 @@ if ( ! defined( 'ABSPATH' ) ) {
 class VATROC_AdminDashboard {
     static public $status_table;
     static public $status_table_atc;
+    public function __construct() {
+        add_action( 'admin_enqueue_scripts', [ $this, 'script_load' ] );
+    }
+
+
     public static function output() {
         $maxlen_route = 100;
         self::$status_table = new VATROC_CurrStatusTable();
         self::$status_table->prepare_items( VATROC::$PILOT );
         self::$status_table_atc = new VATROC_CurrStatusTable();
+        echo '<link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">';
 ?>
 <div class="wpcontent">
 <div class="wpbody">
@@ -39,6 +45,8 @@ class VATROC_AdminDashboard {
 ?>
                 </div>
                 <div class="welcome-panel-column">
+                    <div data-sec="120" class="timer-box disabled">2 Min</div>
+                    <div data-sec="180" class="timer-box disabled">3 Min</div>
                 </div>
                 <div class="welcome-panel-column">
                 </div>
@@ -104,6 +112,14 @@ class VATROC_AdminDashboard {
         $metarJson = $curl->request( "https://aiss.anws.gov.tw/aes/AwsClientMetar?stations=" . $icaos );
         $data = json_decode( $metarJson[ "body" ] )->data;
         return $data;
+    }
+
+
+    public function script_load() {
+        wp_enqueue_style( 'vatroc-dashboard', plugin_dir_url( VATROC_PLUGIN_FILE ) . 'admin/css/dashboard.css' );
+        wp_enqueue_script( 'vatroc-dashboard', plugin_dir_url( VATROC_PLUGIN_FILE ) . 'admin/js/dashboard.js', [ 'jquery' ], null, true );
+        wp_enqueue_script( 'jquery-ui-core', false, array( 'jquery' ) );
+        wp_enqueue_script( 'jquery-ui-sortable', false, array( 'jquery' ) );
     }
 };
 
