@@ -1,0 +1,25 @@
+.timer-box {
+    display: inline-block;
+    width: 60px;
+    height: 45px;
+    font-size: 24px;
+    border: 2px dashed #000;
+    text-align: center;
+    vertical-align: middle;
+    padding: 10px;
+    cursor: pointer;
+}
+
+.timer-box:hover {
+    background: #eee;
+}
+
+.timer-box.disabled {
+    color: #eee;
+    border: 2px dashed #eee;
+    cursor: not-allowed;
+}
+
+.timer-box.disabled:hover {
+    background: inherit;
+}

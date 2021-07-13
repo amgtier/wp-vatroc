@@ -116,7 +116,7 @@ class VATROC_AdminMagicCharts {
 
 
     public function script_load () {
-        wp_enqueue_script( 'magic-charts', plugin_dir_url( VATROC_PLUGIN_FILE ) . '/admin/js/magic_charts.js', array( 'jquery' ), null, true );
+        wp_enqueue_script( 'magic-charts', plugin_dir_url( VATROC_PLUGIN_FILE ) . 'admin/js/magic_charts.js', array( 'jquery' ), null, true );
         wp_enqueue_script( 'jquery-ui-core', false, array( 'jquery' ) );
         wp_enqueue_script( 'jquery-ui-resizable', false, array( 'jquery' ) );
         wp_enqueue_script( 'jquery-ui-selectmenu', false, array( 'jquery') );
