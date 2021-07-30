@@ -24,8 +24,7 @@ class VATROC_AdminMagicCharts {
         
         // wordaround to get jquery-ui css
         echo '<link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">';
-        echo "<div class='wrap'>";
-        // self::search_form();
+        echo "<div id='before-chart-box' class='wrap'>";
 
         self::suggestion_box();
         self::selection_box();
@@ -117,9 +116,11 @@ class VATROC_AdminMagicCharts {
 
     public function script_load () {
         wp_enqueue_script( 'magic-charts', plugin_dir_url( VATROC_PLUGIN_FILE ) . 'admin/js/magic_charts.js', array( 'jquery' ), null, true );
+        wp_enqueue_script( 'magic-charts', plugin_dir_url( VATROC_PLUGIN_FILE ) . 'admin/css/magic_charts.css' );
         wp_enqueue_script( 'jquery-ui-core', false, array( 'jquery' ) );
         wp_enqueue_script( 'jquery-ui-resizable', false, array( 'jquery' ) );
         wp_enqueue_script( 'jquery-ui-selectmenu', false, array( 'jquery') );
+        wp_enqueue_script( 'jquery-ui-touch-punch', plugin_dir_url( VATROC_PLUGIN_FILE ) . 'admin/js/jquery.ui.touch-punch.min.js', array( 'jquery') );
     }
 
 

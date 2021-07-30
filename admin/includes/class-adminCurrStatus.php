@@ -170,7 +170,8 @@ class VATROC_CurrStatusTable extends WP_List_Table {
 
 
     public function getVatsimStatus( $type ) {
-        $status = $this->getRawVatsimStatus( false );
+        // $status = $this->getRawVatsimStatus( false );
+        $status = $this->getRawVatsimStatus( true );
         $pilots = null;
         $result = array();
         $data = json_decode( $status[ "body" ] );

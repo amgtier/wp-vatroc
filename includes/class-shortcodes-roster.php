@@ -23,26 +23,74 @@ class VATROC_Shortcode_Roster {
 
 	public function output_staff() {
         $rosters = self::table_data( VATROC::$STAFF );
+        usort( $rosters, "self::sort_staff" );
+        
+        echo "<table>";
+        echo "<thead><tr><th></th><th>ROLE</th><th>NAME</th><th>UID</th><th>EMAIL</th></thead>";
         foreach( $rosters as $idx=>$atc ) {
-            echo sprintf( "<p>VATROC%s %s %s</p>", 
-                $atc[ "vatroc_staff_number" ], 
+            echo sprintf( "<tr><td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>", 
+                $atc[ "vatroc_staff_number" ] ? "VATROC{$atc[ 'vatroc_staff_number' ]}" : "", 
+                $atc[ "vatroc_staff_role" ],
                 $atc[ "display_name" ], 
-                $atc[ "vatroc_staff_role" ]
+                $atc[ "vatroc_vatsim_uid" ]
             );
         }
+        echo "</table>";
     }
 
 
 	public function output_atc() {
-        $rosters = self::table_data( VATROC::$ATC );
-        foreach( $rosters as $idx=>$atc ) {
-            echo sprintf( "<p>%s %s %s %s</p>", 
+        $rosters = self::table_data( VATROC::$ATC_LOCAL );
+        usort( $rosters, "self::sort_atc" );
+        $visiting = self::table_data( VATROC::$ATC_VISITING );
+        $solo = self::table_data( VATROC::$ATC_SOLO );
+        if ( count( $solo ) ) {
+            usort( $solo, "self::sort_atc" );
+            self::roster_table( $solo, VATROC::$ATC_SOLO );
+        }
+        self::roster_table( $rosters, VATROC::$ATC_LOCAL );
+        if ( count( $visiting ) ) {
+            usort( $visiting, "self::sort_atc" );
+            self::roster_table( $visiting, VATROC::$ATC_VISITING );
+        }
+    }
+
+
+    private static function roster_table( $r, $title ) {
+        switch ( $title ) {
+        case VATROC::$ATC_LOCAL:
+            echo "<h1>ATC Roster</h1>"; break;
+        case VATROC::$ATC_VISITING:
+            echo "<h1>Visiting Controller</h1>"; break;
+        case VATROC::$ATC_SOLO:
+            echo "<h1>Solo OJT Validation</h1>"; break;
+        }
+
+        echo "<table>";
+        echo "<thead><tr><th>UID</th><th>NAME</th><th>POSITION</th><th>RATING</th>";
+        switch ( $title ) {
+        case VATROC::$ATC_VISITING:
+            echo "<th>HOME DIVISION</th>"; break;
+        case VATROC::$ATC_SOLO:
+            echo "<th>SOLO VALID UNTIL</th>"; break;
+        }
+        echo "</tr></thead>";
+        foreach( $r as $idx=>$atc ) {
+            echo sprintf( "<tr><td>%s</td><td>%s</td><td>%s</td><td>%s</td>", 
                 $atc[ "vatroc_vatsim_uid" ], 
                 $atc[ "display_name" ], 
-                VATROC::$vatsim_rating[ $atc[ "vatroc_vatsim_rating" ] ], 
-                VATROC::$atc_position[ $atc[ "vatroc_position" ] ] 
+                VATROC::$atc_position[ $atc[ "vatroc_position" ] ],
+                VATROC::$vatsim_rating[ $atc[ "vatroc_vatsim_rating" ] ]
             );
+            switch ( $title ) {
+            case VATROC::$ATC_VISITING:
+                echo "<td>{$atc[ "vatroc_home_division" ]}</td>"; break;
+            case VATROC::$ATC_SOLO:
+                echo "<td>{$atc[ "vatroc_solo_valid_until" ]}</td>"; break;
+            }
+            echo "</tr>";
         }
+        echo "</table>";
     }
 
 
@@ -77,9 +125,26 @@ class VATROC_Shortcode_Roster {
 
         $rosters = array();
         switch ( $type ) {
-        case VATROC::$ATC:
+        case VATROC::$ATC_LOCAL:
             foreach ( $data as $idx=>$val ) {
                 if ( isset( $data[ $idx ][ "{$meta_prefix}position" ] ) &&
+                    ( !isset( $data[ $idx ][ "${meta_prefix}home_division" ] ) || $data[ $idx ][ "${meta_prefix}home_division" ] == "VATROC" ) &&
+                    $data[ $idx ][ "{$meta_prefix}position" ] > 0 ) {
+                    array_push( $rosters, $data[ $idx ] );
+                }
+            } break;
+        case VATROC::$ATC_VISITING:
+            foreach ( $data as $idx=>$val ) {
+                if ( isset( $data[ $idx ][ "{$meta_prefix}position" ] ) &&
+                    ( isset( $data[ $idx ][ "${meta_prefix}home_division" ] ) && $data[ $idx ][ "${meta_prefix}home_division" ] != "VATROC" ) &&
+                    $data[ $idx ][ "{$meta_prefix}position" ] > 0 ) {
+                    array_push( $rosters, $data[ $idx ] );
+                }
+            } break;
+        case VATROC::$ATC_SOLO:
+            foreach ( $data as $idx=>$val ) {
+                if ( isset( $data[ $idx ][ "{$meta_prefix}position" ] ) &&
+                    isset( $data[ $idx ][ "{$meta_prefix}solo_valid_until" ] ) &&
                     $data[ $idx ][ "{$meta_prefix}position" ] > 0 ) {
                     array_push( $rosters, $data[ $idx ] );
                 }
@@ -93,6 +158,31 @@ class VATROC_Shortcode_Roster {
         }
 
         return $rosters;
+    }
+
+
+    private static function sort_atc($a, $b) {
+        $meta_prefix = self::$meta_prefix;
+        if ( $a[ "${meta_prefix}vatsim_rating" ] == $b[ "${meta_prefix}vatsim_rating" ] ) {
+            if ( $a[ "${meta_prefix}position" ] == $b[ "${meta_prefix}position" ] ) {
+                return intval( $a[ "${meta_prefix}vatsim_uid" ] ) > intval( $b[ "${meta_prefix}vatsim_uid" ] );
+            }
+            return intval( $a[ "${meta_prefix}position" ] ) < intval( $b[ "${meta_prefix}position" ] );
+        } else {
+            return intval( $a[ "${meta_prefix}vatsim_rating" ] ) < intval( $b[ "${meta_prefix}vatsim_rating" ] );
+        }
+    }
+
+
+    private static function sort_staff($a, $b) {
+        $meta_prefix = self::$meta_prefix;
+        if ( $a[ "${meta_prefix}staff_number" ] == NULL ) {
+            return true;
+        }
+        if ( $b[ "${meta_prefix}staff_number" ] == NULL ) {
+            return false;
+        }
+        return intval( $a[ "${meta_prefix}staff_number" ] ) > intval( $b[ "${meta_prefix}staff_number" ] );
     }
 };
 

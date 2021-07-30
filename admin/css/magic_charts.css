@@ -1,0 +1,4 @@
+.before-chart-box:hover {
+    background: red;
+    z-index: 100000;
+}

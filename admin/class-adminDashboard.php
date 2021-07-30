@@ -45,14 +45,33 @@ class VATROC_AdminDashboard {
 ?>
                 </div>
                 <div class="welcome-panel-column">
+                    <h3><?php echo __( 'Timer', 'vatroc' ) ?></h3>
                     <div data-sec="120" class="timer-box disabled">2 Min</div>
                     <div data-sec="180" class="timer-box disabled">3 Min</div>
                 </div>
                 <div class="welcome-panel-column">
+                    <div class="postbox-container">
+                        <div class="postbox">
+                            <div class="postbox-header">ATC</div>
+                            <div class="inside">
+<?php
+        $cnt = 0;
+        foreach( self::$status_table_atc->getVatsimStatus( VATROC::$ATC ) as $idx=>$atc ) {
+            $cnt += 1;
+            echo "<p>${atc['frequency']} ${atc['callsign']} ${atc['name']}</p>";
+        }
+        if ( $cnt == 0 ) {
+            echo "<p>No ATC in TPE FIR</p>";
+        }
+?>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
         </div>
+        <div class="postbox-wrapper">
         <div class="postbox-container">
             <div class="postbox">
                 <div class="postbox-header">Metars</div>
@@ -67,23 +86,6 @@ class VATROC_AdminDashboard {
         </div>
         <div class="postbox-container">
             <div class="postbox">
-                <div class="postbox-header">ATC</div>
-                <div class="inside">
-<?php
-        $cnt = 0;
-        foreach( self::$status_table_atc->getVatsimStatus( VATROC::$ATC ) as $idx=>$atc ) {
-            $cnt += 1;
-            echo "<p>${atc['frequency']} ${atc['callsign']} ${atc['name']}</p>";
-        }
-        if ( $cnt == 0 ) {
-            echo "<p>No ATC in TPE FIR</p>";
-        }
-?>
-                </div>
-            </div>
-        </div>
-        <div class="postbox-container">
-            <div class="postbox">
                 <div class="postbox-header">Active Flights</div>
                 <div class="inside">
 <?php
@@ -91,6 +93,7 @@ class VATROC_AdminDashboard {
 ?>
                 </div>
             </div>
+        </div>
         </div>
     </div>
 </div>

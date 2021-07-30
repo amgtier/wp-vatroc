@@ -12,6 +12,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 class VATROC_Constants {
     public static $ATC = "atc";
+    public static $ATC_LOCAL = "atc_local";
+    public static $ATC_VISITING = "atc_visiting";
+    public static $ATC_SOLO = "atc_solo";
     public static $STAFF = "staff";
     public static $PILOT = "pilot";
     public static $meta_prefix = "vatroc_";

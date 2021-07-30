@@ -22,6 +22,7 @@ class VATROC extends VATROC_Constants {
     public function includes() {
         include_once( VATROC_ABSPATH . 'admin/class-admin.php' );
         include_once( VATROC_ABSPATH . 'includes/class-shortcodes-roster.php' );
+        include_once( VATROC_ABSPATH . 'includes/class-shortcodes-homepage.php' );
         include_once( VATROC_ABSPATH . 'includes/vatroc-hook-functions.php' );
     }
 

@@ -1,7 +1,7 @@
 var timeouts = {};
 
 jQuery(document).ready( ($) => {
-    // $( ".postbox-container" ).sortable();
+    $( ".postbox-wrapper" ).sortable();
     $( ".timer-box" ).removeClass( "disabled" );
     $( ".timer-box" ).on( "click", (e) => {
         var box = $(e.target);
@@ -14,14 +14,14 @@ jQuery(document).ready( ($) => {
             clearTimeout( timeouts[ box.index() ] );
             box.html( Math.floor( ( sec + 1 ) / 60 ) + " Min" );
             if ( (sec + 1) % 60 != 0) {
-                box.html( box.html() + ( sec + 1 ) % 60 + " Sec" );
+                box.html( box.html() + ( ( sec + 1 ) % 60 ).toString().padStart(2, '0') + " Sec" );
             }
         }
     });
 });
 
 function countdown(sec, box) {
-    box.html( Math.floor( sec / 60 ) + ":" + sec % 60 );
+    box.html( Math.floor( sec / 60 ) + ":" + ( sec % 60 ).toString().padStart(2, '0') );
     if (sec > 0) {
         timeouts[ box.index() ] = setTimeout( () => {
             countdown(sec - 1, box);

@@ -77,8 +77,10 @@ class VATROC_RosterList extends WP_List_Table {
         switch ( $this->list_type ) {
         case VATROC::$ATC:
             return array(
-                "{$this->meta_prefix}vatsim_rating" => array( 'Rating', false ),
-                'display_name' => array( 'Name', false )
+                'display_name' => array( 'display_name', false ),
+                "{$this->meta_prefix}position" => array( 'vatroc_position', false ),
+                "{$this->meta_prefix}vatsim_uid" => array( 'vatroc_vatsim_uid', false ),
+                "{$this->meta_prefix}vatsim_rating" => array( 'vatroc_vatsim_rating', false )
             );
         case VATROC::$STAFF:
             return array(
@@ -162,6 +164,39 @@ class VATROC_RosterList extends WP_List_Table {
             );
         }
        return $item[ 'display_name' ] . $this->row_actions($actions);
+    }
+
+
+    private function sort_data( $a, $b ) {
+        // Set defaults
+        $orderby = 'vatroc_vatsim_rating';
+        $order = 'desc';
+
+        // If orderby is set, use this as the sort column
+        if(!empty($_GET['orderby']))
+        {
+            $orderby = $_GET['orderby'];
+        }
+
+        // If order is set use this as the order
+        if(!empty($_GET['order']))
+        {
+            $order = $_GET['order'];
+        }
+
+        if ( isset( $_GET[ 'orderby' ] ) ) {
+           if ( $_GET[ 'orderby' ] == "display_name" ) {
+                $result = strcmp( $a[$orderby], $b[$orderby] );
+            } else {
+                $result = intval( $a[$orderby] ) < intval( $b[$orderby] );
+            }
+        }
+
+        if($order === 'asc')
+        {
+            return $result;
+        }
+        return -$result;
     }
 };
 

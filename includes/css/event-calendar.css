@@ -1,0 +1,19 @@
+#tribe-events-pg-template, .tribe-events-pg-template {
+    background: #fff;
+}
+
+.tribe-events {
+    background: rgba( 255, 255, 255, 0.3 );
+}
+
+#vatroc-next-event {
+    position: absolute;
+    top: -20%;
+    // top: -50%;
+    left: 5%;
+    background: rgba( 255, 255, 255, 0.9 );
+    font-size: 1.35 em;
+    z-index: 10;
+    padding: 15px;
+    border-radius: 5px;
+}
