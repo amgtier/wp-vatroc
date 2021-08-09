@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 if ( ! class_exists ( 'VATROC' ) ){
-        include_once dirname( __FILE__ ) . '/includes/class-Constants.php';
+        include_once dirname( __FILE__ ) . '/includes/class-constants.php';
         include_once dirname( __FILE__ ) . '/includes/class-vatroc.php';
 }
 

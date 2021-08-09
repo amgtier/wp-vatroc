@@ -13,11 +13,12 @@ if ( ! defined( 'ABSPATH' ) ) {
 class VATROC_Admin {
     public function __construct() {
         $this -> init();
-        include_once( VATROC_ABSPATH . '/admin/class-adminDashboard.php' );
-        include_once( VATROC_ABSPATH . '/admin/class-adminRoster.php' );
-        include_once( VATROC_ABSPATH . '/admin/includes/class-adminCurrStatus.php' );
-        include_once( VATROC_ABSPATH . '/admin/includes/class-adminMagicCharts.php' );
+        include_once( VATROC_ABSPATH . '/admin/class-admin-dashboard.php' );
+        include_once( VATROC_ABSPATH . '/admin/class-admin-roster.php' );
+        include_once( VATROC_ABSPATH . '/admin/includes/class-admin-curr_status.php' );
+        include_once( VATROC_ABSPATH . '/admin/includes/class-admin-magic_charts.php' );
         include_once( VATROC_ABSPATH . '/admin/vatroc-admin-hook-functions.php' );
+        include_once( VATROC_ABSPATH . '/admin/includes/class-admin-atc.php' );
     }
 
 
