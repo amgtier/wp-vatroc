@@ -158,7 +158,7 @@ class VATROC_RosterList extends WP_List_Table {
 
 
     protected function column_display_name( $item ) {
-        if ( current_user_can( 'manage_options' ) ) {
+        if ( current_user_can( VATROC::$admin_options ) ) {
             $actions = array(
                 'edit'      => sprintf('<a href="' . get_edit_user_link( $item[ "ID" ] ) . '">Edit</a>',$_REQUEST['page'],'edit',$item['ID']),
             );

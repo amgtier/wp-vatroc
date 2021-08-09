@@ -24,59 +24,64 @@ class VATROC_Shortcode_Roster {
 	public function output_staff() {
         $rosters = self::table_data( VATROC::$STAFF );
         usort( $rosters, "self::sort_staff" );
+        $ret = "";
         
-        echo "<table>";
-        echo "<thead><tr><th></th><th>ROLE</th><th>NAME</th><th>UID</th><th>EMAIL</th></thead>";
+        $ret .= "<table>";
+        $ret .= "<thead><tr><th></th><th>ROLE</th><th>NAME</th><th>UID</th><th>EMAIL</th></thead>";
         foreach( $rosters as $idx=>$atc ) {
-            echo sprintf( "<tr><td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>", 
+            $ret .= sprintf( "<tr><td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>", 
                 $atc[ "vatroc_staff_number" ] ? "VATROC{$atc[ 'vatroc_staff_number' ]}" : "", 
                 $atc[ "vatroc_staff_role" ],
                 $atc[ "display_name" ], 
                 $atc[ "vatroc_vatsim_uid" ]
             );
         }
-        echo "</table>";
+        $ret .= "</table>";
+        return $ret;
     }
 
 
 	public function output_atc() {
+        $ret = "";
         $rosters = self::table_data( VATROC::$ATC_LOCAL );
         usort( $rosters, "self::sort_atc" );
         $visiting = self::table_data( VATROC::$ATC_VISITING );
         $solo = self::table_data( VATROC::$ATC_SOLO );
         if ( count( $solo ) ) {
             usort( $solo, "self::sort_atc" );
-            self::roster_table( $solo, VATROC::$ATC_SOLO );
+            $ret .= self::roster_table( $solo, VATROC::$ATC_SOLO );
         }
-        self::roster_table( $rosters, VATROC::$ATC_LOCAL );
+        $ret .= self::roster_table( $rosters, VATROC::$ATC_LOCAL );
         if ( count( $visiting ) ) {
             usort( $visiting, "self::sort_atc" );
-            self::roster_table( $visiting, VATROC::$ATC_VISITING );
+            $ret .= self::roster_table( $visiting, VATROC::$ATC_VISITING );
         }
+        return $ret;
     }
 
 
     private static function roster_table( $r, $title ) {
+        $ret = "";
         switch ( $title ) {
         case VATROC::$ATC_LOCAL:
-            echo "<h1>ATC Roster</h1>"; break;
+            $ret .= "<h1>ATC Roster</h1>"; break;
         case VATROC::$ATC_VISITING:
-            echo "<h1>Visiting Controller</h1>"; break;
+            $ret .= "<h1>Visiting Controller</h1>"; break;
         case VATROC::$ATC_SOLO:
-            echo "<h1>Solo OJT Validation</h1>"; break;
+            $ret .= "<h1>Solo OJT Validation</h1>"; break;
         }
 
-        echo "<table>";
-        echo "<thead><tr><th>UID</th><th>NAME</th><th>POSITION</th><th>RATING</th>";
+        $ret .= "<table>";
+        $ret .= "<thead><tr><th>UID</th><th>NAME</th><th>POSITION</th><th>RATING</th>";
         switch ( $title ) {
         case VATROC::$ATC_VISITING:
-            echo "<th>HOME DIVISION</th>"; break;
+            $ret .= "<th>HOME DIVISION</th>"; break;
         case VATROC::$ATC_SOLO:
-            echo "<th>SOLO VALID UNTIL</th>"; break;
+            $ret .= "<th>SOLO VALID UNTIL</th>"; break;
         }
-        echo "</tr></thead>";
+        $ret .= "</tr></thead>";
         foreach( $r as $idx=>$atc ) {
-            echo sprintf( "<tr><td>%s</td><td>%s</td><td>%s</td><td>%s</td>", 
+            $ret .= sprintf( "<tr><td>%s</td><td>%s</td><td>%s</td><td>%s</td>", 
                 $atc[ "vatroc_vatsim_uid" ], 
                 $atc[ "display_name" ], 
                 VATROC::$atc_position[ $atc[ "vatroc_position" ] ],
@@ -84,13 +89,19 @@ class VATROC_Shortcode_Roster {
             );
             switch ( $title ) {
             case VATROC::$ATC_VISITING:
-                echo "<td>{$atc[ "vatroc_home_division" ]}</td>"; break;
+                $ret .= "<td>{$atc[ "vatroc_home_division" ]}</td>"; break;
             case VATROC::$ATC_SOLO:
-                echo "<td>{$atc[ "vatroc_solo_valid_until" ]}</td>"; break;
+                $ret .= "<td>{$atc[ "vatroc_solo_valid_until" ]}</td>"; break;
             }
-            echo "</tr>";
+
+            if ( current_user_can( VATROC::$admin_options ) ) {
+                $ret .= "<td><a target='_blank' href='" . get_edit_user_link( $atc[ "ID" ] ) . "'>Edit</a></td>";
+            }
+
+            $ret .= "</tr>";
         }
-        echo "</table>";
+        $ret .= "</table>";
+        return $ret;
     }
 
 

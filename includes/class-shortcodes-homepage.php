@@ -39,26 +39,30 @@ class VATROC_Shortcode_Homepage {
                 $smallest_closest_idx = $idx;
             }
         }
+        $ret = "";
         if ( $smallest_closest_idx >= 0 ) {
             $evt = $events[ $smallest_closest_idx ];
-            echo "<div id='vatroc-next-event'>";
-            echo "<p class='vatroc next-event-title' >Next Event</p>";
-            echo "<p class='vatroc next-event-subtitle'>" . get_the_title( $evt ) . " - " . date( "Y-m-d", $smallest_closest_tm ). "</p>";
-            echo "</div>";
+            $ret .= "<div id='vatroc-next-event'>";
+            $ret .= "<p class='vatroc next-event-title' >Next Event</p>";
+            $ret .= "<p class='vatroc next-event-subtitle'>" . get_the_title( $evt ) . " - " . date( "Y-m-d", $smallest_closest_tm ). "</p>";
+            $ret .= "</div>";
         }
+        return $ret;
     }
 
 
 	public function output_atc() {
         $rosters = self::table_data( VATROC::$ATC );
+        $ret = "";
         foreach( $rosters as $idx=>$atc ) {
-            echo sprintf( "<p>%s %s %s %s</p>", 
+            $ret .= sprintf( "<p>%s %s %s %s</p>", 
                 $atc[ "vatroc_vatsim_uid" ], 
                 $atc[ "display_name" ], 
                 VATROC::$vatsim_rating[ $atc[ "vatroc_vatsim_rating" ] ], 
                 VATROC::$atc_position[ $atc[ "vatroc_position" ] ] 
             );
         }
+        return $ret;
     }
 
 

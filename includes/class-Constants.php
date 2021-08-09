@@ -19,6 +19,7 @@ class VATROC_Constants {
     public static $PILOT = "pilot";
     public static $meta_prefix = "vatroc_";
     public static $icao_prefix = "RC";
+    public static $admin_options = "manage_options";
 
     public static $vatsim_rating = array(
         "0" => "Pilot",
