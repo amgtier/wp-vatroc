@@ -18,18 +18,23 @@ class VATROC_Constants {
     public static $STAFF = "staff";
     public static $PILOT = "pilot";
     public static $meta_prefix = "vatroc_";
+    public static $session_meta_prefix = "vatroc_sess_";
+    public static $session_t_meta_prefix = "vatroc_sess_t_";
     public static $icao_prefix = "RC";
     public static $admin_options = "manage_options";
+    public static $atc_options = "publish_posts";
+    public static $ins_options = "edit_users";
 
     public static $vatsim_rating = array(
-        "0" => "Pilot",
-        "1" => "S1",
-        "2" => "S2",
-        "3" => "S+",
-        "4" => "C1",
-        "6" => "C3",
-        "7" => "I1",
-        "8" => "I+"
+        "0" => "Suspended",
+        "1" => "Pilot",
+        "2" => "S1",
+        "3" => "S2",
+        "4" => "S+",
+        "5" => "C1",
+        "7" => "C3",
+        "8" => "I1",
+        "9" => "I+"
     );
 
     public static $atc_position = array(

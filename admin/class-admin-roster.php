@@ -50,17 +50,21 @@ class VATROC_RosterList extends WP_List_Table {
         switch ( $this->list_type ){
         case VATROC::$ATC:
             $columns = array(
+                'avatar'  => __( '', 'vatroc' ),
                 'display_name'  => __( 'Name', 'vatroc' ),
                 "{$this->meta_prefix}vatsim_uid"   =>  __( "VATSIM UID", "vatroc" ),
                 "{$this->meta_prefix}vatsim_rating"   =>  __( "Rating", "vatroc" ),
-                "{$this->meta_prefix}position"   =>  __( "Position", "vatroc" )
+                "{$this->meta_prefix}position"   =>  __( "Position", "vatroc" ),
+                "role_name"   =>  __( "Web Role", "vatroc" )
             ); break;
         case VATROC::$STAFF:
             $columns = array(
+                'avatar'  => __( '', 'vatroc' ),
                 'display_name'  => __( 'Name', 'vatroc' ),
                 "{$this->meta_prefix}vatsim_uid"   =>  __( "VATSIM UID", "vatroc" ),
                 "{$this->meta_prefix}staff_number"   =>  __( "Number", "vatroc" ),
-                "{$this->meta_prefix}staff_role"   =>  __( "Role", "vatroc" )
+                "{$this->meta_prefix}staff_role"   =>  __( "Role", "vatroc" ),
+                "role_name"   =>  __( "Web Role", "vatroc" )
             ); break;
         }
 
@@ -93,7 +97,9 @@ class VATROC_RosterList extends WP_List_Table {
 
     public function column_default( $item, $column_name ) {
         switch( $column_name ) {
+            case 'avatar':
             case 'display_name':
+            case 'role_name':
             case "{$this->meta_prefix}staff_number":
             case "{$this->meta_prefix}staff_role":
             case 'vatroc_vatsim_uid':
@@ -121,6 +127,8 @@ class VATROC_RosterList extends WP_List_Table {
 
         for( $i = 0; $i < count( $data ); $i += 1 ) {
             $data[ $i ][ "display_name" ] = "<a href='" . get_edit_user_link( $data[ $i ][ "ID" ] ) . "#profile-vatroc-tool' target='_balnk'>{$data[ $i ][ "display_name" ]}</a>";
+            $data[ $i ][ "role_name" ] = get_userdata( $data[ $i ][ "ID" ] )->roles[0];
+            $data[ $i ][ "avatar" ] = get_avatar( $data[ $i ][ "ID" ] );
         }
 
         foreach( $usermeta as $idx=>$val ) {

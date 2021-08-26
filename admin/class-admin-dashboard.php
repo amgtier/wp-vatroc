@@ -102,16 +102,22 @@ class VATROC_AdminDashboard {
     }
 
 
-    public static function getMetar() {
+    public static function getMetar( $icaos=NULL ) {
         // optimization plan: save in DB and check validality in time
         $curl = new WP_Http_Curl();
         // $metarJson = $curl->request( "https://aiss.anws.gov.tw/aes/AwsClientMetar?stations=RCTP,RCKH,RCSS,RCBS,RCCM,RCDC,RCFG,RCFN,RCGI,RCKU,RCKW,RCLY,RCMQ,RCMT,RCNN,RCQC,RCWA,RCYU" );
-        // default add RCTP, RCSS, RCKH
-        $active_aerodrome = self::$status_table->get_active_aerodrome();
-        $active_aerodrome[ "RCTP" ] = NULL;
-        $active_aerodrome[ "RCSS" ] = NULL;
-        $active_aerodrome[ "RCKH" ] = NULL;
-        $icaos = implode( array_keys( $active_aerodrome ),',' );
+
+        if ( $icaos == NULL ) {
+            if ( self::$status_table == NULL ) {
+                self::$status_table = new VATROC_CurrStatusTable();
+                self::$status_table->prepare_items( VATROC::$PILOT );
+            }
+            $active_aerodrome = self::$status_table->get_active_aerodrome();
+            $active_aerodrome[ "RCTP" ] = NULL;
+            $active_aerodrome[ "RCSS" ] = NULL;
+            $active_aerodrome[ "RCKH" ] = NULL;
+            $icaos = implode( array_keys( $active_aerodrome ),',' );
+        }
         $metarJson = $curl->request( "https://aiss.anws.gov.tw/aes/AwsClientMetar?stations=" . $icaos );
         $data = json_decode( $metarJson[ "body" ] )->data;
         return $data;

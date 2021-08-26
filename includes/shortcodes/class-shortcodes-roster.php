@@ -42,6 +42,8 @@ class VATROC_Shortcode_Roster {
 
 
 	public function output_atc() {
+        if ( count( $_GET ) > 0 ) { return VATROC_Shortcode_ATC::output_atc(); }
+
         $ret = "";
         $rosters = self::table_data( VATROC::$ATC_LOCAL );
         usort( $rosters, "self::sort_atc" );
@@ -83,7 +85,8 @@ class VATROC_Shortcode_Roster {
         foreach( $r as $idx=>$atc ) {
             $ret .= sprintf( "<tr><td>%s</td><td>%s</td><td>%s</td><td>%s</td>", 
                 $atc[ "vatroc_vatsim_uid" ], 
-                $atc[ "display_name" ], 
+                ( current_user_can( VATROC::$atc_options ) ) ? 
+              sprintf( "<a href='?who=%s' target='_blank'>%s</a>", $atc[ "vatroc_vatsim_uid" ], $atc[ "display_name" ] )  : $atc[ "display_name" ], 
                 VATROC::$atc_position[ $atc[ "vatroc_position" ] ],
                 VATROC::$vatsim_rating[ $atc[ "vatroc_vatsim_rating" ] ]
             );
@@ -94,7 +97,7 @@ class VATROC_Shortcode_Roster {
                 $ret .= "<td>{$atc[ "vatroc_solo_valid_until" ]}</td>"; break;
             }
 
-            if ( current_user_can( VATROC::$admin_options ) ) {
+            if ( current_user_can( VATROC::$ins_options ) ) {
                 $ret .= "<td><a target='_blank' href='" . get_edit_user_link( $atc[ "ID" ] ) . "'>Edit</a></td>";
             }
 
