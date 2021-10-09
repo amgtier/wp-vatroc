@@ -36,16 +36,16 @@ class VATROC_Shortcode_Homepage {
     }
 
     public static function ajax_atc( ) {
-        $ret = "";
         $status_table = new VATROC_CurrStatusTable();
         foreach( $status_table->getVatsimStatus( VATROC::$ATC ) as $idx=>$atc ) {
             $cnt += 1;
-            $ret .= "<p>${atc['frequency']} ${atc['callsign']} ${atc['name']}</p>";
+            $ret .= "<p>${atc['frequency']} <strong>${atc['callsign']}</strong></p>";
         }
         if ( $cnt == 0 ) {
-            $ret .= "<p>No ATC in TPE FIR</p>";
+            echo "<p>Currently No ATC in TPE FIR</p>";
+        } else {
+            echo "<h3>ATC Status</h3>" . $ret;
         }
-        echo $ret;
         wp_die();
     }
 
@@ -63,7 +63,7 @@ class VATROC_Shortcode_Homepage {
     }
         
     public static function ajax_metar( ) {
-        $ret = "";
+        $ret = "<h3>METARs:</h3>";
         $metar = VATROC_AdminDashboard::getMetar( $_POST[ "icaos" ] );
         foreach( $metar as $idx=>$obj ) {
             $ret .= sprintf( "<p><b>%s</b> %s</p>", $obj->station, str_replace( "\/", "/", $obj->message ) );
