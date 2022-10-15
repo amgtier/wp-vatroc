@@ -24,9 +24,9 @@ class VATROC_Shortcode_ATC {
                 $load_from_db = false;
             }
 
-            $events_show_all = true;
-            if ( isset( $_GET[ "event" ] ) && $_GET[ "event" ] == "active" ) {
-                $events_show_all = false;
+            $events_show_all = false;
+            if ( isset( $_GET[ "event" ] ) && $_GET[ "event" ] == "all" ) {
+                $events_show_all = true;
             }
 
             $raw_data = self::load_data( $uid, $load_from_db );
@@ -56,12 +56,12 @@ class VATROC_Shortcode_ATC {
             $ret .= sprintf( "<a href='/atc/' class='btn btn-success'>ATC List</a>", $uid );
             $ret .= sprintf( "<a href='?who=%s&refresh=true' class='btn btn-success'>Refresh</a>", $uid );
             if ( $events_show_all ) {
-                $ret .= sprintf( "<a href='?who=%s&event=active' class='btn btn-success'>Show Active Events Only</a>", $uid );
+                $ret .= sprintf( "<a href='?who=%s' class='btn btn-success'>Show Active Events</a>", $uid );
             } else {
-                $ret .= sprintf( "<a href='?who=%s' class='btn btn-success'>Show All Events</a>", $uid );
+                $ret .= sprintf( "<a href='?who=%s&event=all' class='btn btn-success'>Show All Events</a>", $uid );
             }
             $ret .= self::print_hours_at( $hours_at );
-            $ret .= self::print_events( $sessions, $events_show_all );
+            $ret .= self::print_events_list( $sessions, $events_show_all );
             $ret .= self::print_sessions( $sessions );
 
         } else {
@@ -70,8 +70,12 @@ class VATROC_Shortcode_ATC {
         return $ret;
     }
 
+    private static function sort_event( $evt1, $evt2 ){
+        return strtotime( get_post_meta( $evt1->ID, "_EventStartDate", true ) ) < strtotime( get_post_meta( $evt2->ID, "_EventStartDate", true ) );
+    }
 
-    private static function print_events( $sessions, $events_show_all=true ) {
+
+    private static function print_events_list( $sessions, $events_show_all=false ) {
         $events = array_reverse( get_posts( [ 
             "post_type" => "tribe_events",
             "numberposts" => -1
@@ -82,7 +86,7 @@ class VATROC_Shortcode_ATC {
         $ret .= "<th>date</th>";
         $ret .= "<th>time</th>";
         $ret .= "<th>title</th>";
-        $ret .= "<th>callsign</th>";
+        $ret .= "<th>(hr)callsign [ho recv/init]</th>";
         $ret .= "</thead>";
         $ptr_evt = 0;
         $ptr_sess = 0;
@@ -90,13 +94,12 @@ class VATROC_Shortcode_ATC {
         $len_sess = count( $sessions );
         $evt_count = [];
         $evt_count_active = [];
+        usort( $events, [ "self", "sort_event" ] );
         while ( $ptr_evt < $len_evt ) {
             $evt = $events[ $ptr_evt ];
             $ptr_evt += 1;
-            $evt_start = get_post_meta( $evt->ID, "_EventStartDate", true );
-            $evt_end = get_post_meta( $evt->ID, "_EventEndDate", true );
-            $t_evt_start = strtotime( $evt_start );
-            $t_evt_end = strtotime( $evt_end );
+            $t_evt_start = strtotime( get_post_meta( $evt->ID, "_EventStartDate", true ) );
+            $t_evt_end = strtotime( get_post_meta( $evt->ID, "_EventEndDate", true ) );
 
             $evt_count[ date( "Y", $t_evt_start ) ] += 1;
 
@@ -104,8 +107,8 @@ class VATROC_Shortcode_ATC {
                 $ptr_sess += 1;
             }
 
-            $sess_mid = ( strtotime( $sessions[ $ptr_sess ]->start ) + strtotime( $sessions[ $ptr_sess ]->end ) ) / 2;
-            $event_active = $sess_mid >= $t_evt_start && $sess_mid <= $t_evt_end;
+            $event_active = strtotime( $sessions[ $ptr_sess ]->start ) < $t_evt_end && 
+                strtotime( $sessions[ $ptr_sess ]->end ) > $t_evt_start;
 
             if ( $events_show_all || $event_active ) {
                 $ret .= "<tr>";
@@ -117,10 +120,24 @@ class VATROC_Shortcode_ATC {
                 );
                 if ( $event_active ) {
                     $evt_count_active[ date( "Y", $t_evt_start ) ] += 1;
-                    $ret .= sprintf( "<td><a href='https://stats.vatsim.net/connection/atc-details/%s' target='_blank'>%s</a></td>", 
-                        $sessions[ $ptr_sess ]->connection_id, 
-                        $sessions[ $ptr_sess ]->callsign 
-                    );
+                    $ret .= "<td>";
+                    $first = true;
+                    while( $ptr_sess < $len_sess && strtotime( $sessions[ $ptr_sess ]->start ) <= $t_evt_end && 
+                        strtotime( $sessions[ $ptr_sess]->end ) >= $t_evt_start ) {
+                        if ( !$first ){
+                            $ret .= "<br/>";
+                        }
+                        $first = false;
+                        $ret .= sprintf( "(%s)<a href='https://stats.vatsim.net/connection/atc-details/%s' target='_blank'>%s </a>[%s/%s]", 
+                            round( ( strtotime( $sessions[ $ptr_sess ]->end ) - strtotime( $sessions[ $ptr_sess ]->start ) ) / 3600, 1),
+                            $sessions[ $ptr_sess ]->connection_id, 
+                            $sessions[ $ptr_sess ]->callsign,
+                            $sessions[ $ptr_sess ]->handoffsreceived,
+                            $sessions[ $ptr_sess ]->handoffsinitiated,
+                        );
+                        $ptr_sess += 1;
+                    }
+                    $ret .= "</td>";
                 } else {
                     $ret .= "<td></td>";
                 }
