@@ -17,58 +17,63 @@ class VATROC_Shortcode_ATC {
         if ( count( $_GET ) < 1 ) { return; }
 
         if ( isset( $_GET[ "who" ] ) && is_numeric( $_GET[ "who" ] ) ) {
-            $uid = $_GET[ "who" ];
-            $load_from_db = true;
-            $last_save_t = get_post_meta( get_the_ID(), VATROC::$session_t_meta_prefix . $uid, true );
-            if ( isset( $_GET[ "refresh" ] ) && $_GET[ "refresh" ] == true || strlen( $last_save_t ) == 0 || intval( $last_save_t ) + 3600 * 12 * 30 < time() ) {
-                $load_from_db = false;
+            if ( isset( $_GET[ "timeline" ] ) ) {
+                return self::atc_timeline( $_GET[ "who" ] );
             }
-
-            $events_show_all = false;
-            if ( isset( $_GET[ "event" ] ) && $_GET[ "event" ] == "all" ) {
-                $events_show_all = true;
-            }
-
-            $raw_data = self::load_data( $uid, $load_from_db );
-            $try_cnt = 0;
-            while ( !is_string( $raw_data ) && $try_cnt < 10 ){
-                sprintf( "VATSIM API connection failed. Retrying(%s).", $try_cnt );
-                $try_cnt += 1;
-                $raw_data = self::load_data( $uid, $load_from_db );
-                if ( !is_string( $raw_data ) ) {
-                    $ret = "<h1>Load failed. Please refresh.</h1>";
-                }
-            }
-            $json_sessions = json_decode( $raw_data );
-            if ( $json_sessions->detail ){ return sprintf( "<h1>%s</h1>", $json_sessions->detail ); }
-
-            $sessions = $json_sessions->results;
-            $hours_at = [];
-            foreach ( $sessions as $idx=>$sess ) {
-                if ( $sess->minutes_on_callsign < 10 ) { continue; }
-
-                $hours_at[ $sess->rating ][ "total" ] += $sess->minutes_on_callsign;
-                if ( strpos( $sess->callsign, "O" ) ) {
-                    $hours_at[ $sess->rating ][ "OJT" ] += $sess->minutes_on_callsign;
-                }
-            }
-
-            $ret .= sprintf( "<a href='/atc/' class='btn btn-success'>ATC List</a>", $uid );
-            $ret .= sprintf( "<a href='?who=%s&refresh=true' class='btn btn-success'>Refresh</a>", $uid );
-            if ( $events_show_all ) {
-                $ret .= sprintf( "<a href='?who=%s' class='btn btn-success'>Show Active Events</a>", $uid );
-            } else {
-                $ret .= sprintf( "<a href='?who=%s&event=all' class='btn btn-success'>Show All Events</a>", $uid );
-            }
-            $ret .= self::print_hours_at( $hours_at );
-            $ret .= self::print_events_list( $sessions, $events_show_all );
-            $ret .= self::print_sessions( $sessions );
-
-        } else {
-            $ret = "nonono";
+            return self::atc_activity( $_GET[ "who" ] );
         }
+
+    }
+
+
+    public static function atc_activity( $uid ){
+        $load_from_db = true;
+        $last_save_t = get_post_meta( get_the_ID(), VATROC::$session_t_meta_prefix . $uid, true );
+        if ( isset( $_GET[ "refresh" ] ) && $_GET[ "refresh" ] == true || strlen( $last_save_t ) == 0 || intval( $last_save_t ) + 3600 * 12 * 30 < time() ) {
+            $load_from_db = false;
+        }
+
+        $events_show_all = false;
+        if ( isset( $_GET[ "event" ] ) && $_GET[ "event" ] == "all" ) {
+            $events_show_all = true;
+        }
+
+        $sessions = self::get_sessions( $uid, $load_from_db );
+        $hours_at = [];
+        foreach ( $sessions as $idx=>$sess ) {
+            if ( $sess->minutes_on_callsign < 10 ) { continue; }
+
+            $hours_at[ $sess->rating ][ "total" ] += $sess->minutes_on_callsign;
+            if ( strpos( $sess->callsign, "O" ) ) {
+                $hours_at[ $sess->rating ][ "OJT" ] += $sess->minutes_on_callsign;
+            }
+        }
+
+        $ret .= sprintf( "<a href='/atc/' class='btn btn-success'>ATC List</a>", $uid );
+        $ret .= sprintf( "<a href='?who=%s&refresh=true' class='btn btn-success'>Refresh</a>", $uid );
+        $ret .= sprintf( "<a href='?who=%s&timeline' class='btn btn-success'>Timeline</a>", $uid );
+        if ( $events_show_all ) {
+            $ret .= sprintf( "<a href='?who=%s' class='btn btn-success'>Show Active Events</a>", $uid );
+        } else {
+            $ret .= sprintf( "<a href='?who=%s&event=all' class='btn btn-success'>Show All Events</a>", $uid );
+        }
+        $ret .= self::print_hours_at( $hours_at );
+        $ret .= self::print_events_list( $sessions, $events_show_all );
+        $ret .= self::print_sessions( $sessions );
+
         return $ret;
     }
+
+
+    public static function atc_timeline( $uid ) {
+        $sessions = array_reverse( self::get_sessions( $uid, $load_from_db ) );
+        $ret = "";
+        $ret .= sprintf( "<a href='/atc/' class='btn btn-success'>ATC List</a>", $uid );
+        $ret .= sprintf( "<a href='?who=%s' class='btn btn-success'>Activity</a>", $uid );
+        $ret .= self::gen_timeline_from_sessions( $sessions );
+        return $ret;
+    }
+
 
     private static function sort_event( $evt1, $evt2 ){
         return strtotime( get_post_meta( $evt1->ID, "_EventStartDate", true ) ) < strtotime( get_post_meta( $evt2->ID, "_EventStartDate", true ) );
@@ -232,6 +237,48 @@ class VATROC_Shortcode_ATC {
     }
 
 
+    private static function gen_timeline_from_sessions( $sessions ) {
+        $positions = [ "DEL", "GND", "TWR", "APP", "CTR" ];
+        $ratings = ["S1", "S2", "S+", "C1" ];
+        $visibility = [];
+        foreach( $positions as $idx => $pos ){
+            $visibility[ $pos ] = 0;
+            $visibility[ "O_" . $pos ] = 0;
+        };
+
+        $ret = "<h1 id='sessions'>Sessions</h1>";
+        $ret .= "<table>";
+        $ret .= "<thead>";
+        $ret .= "<th>date</th>";
+        $ret .= "<th>time</th>";
+        $ret .= "<th>duration</th>";
+        $ret .= "<th>rating</th>";
+        $ret .= "<th>callsign</th>";
+        $ret .= "<th>count</th>";
+        $ret .= "</thead>";
+        foreach ( $sessions as $idx=>$sess ) {
+            if ( $sess->minutes_on_callsign < 10 ) { continue; }
+            $suffix = substr( $sess->callsign, count( $sess->callsign ) - 6, 5 );
+            if( !array_key_exists( $suffix, $visibility ) ){
+                $suffix = substr( $sess->callsign, count( $sess->callsign ) - 4, 3 );
+            }
+            if ( ++$visibility[ $suffix ] == 1 ){
+                $ret .= sprintf( "<tr><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>", 
+                    date( "Y-m-d", strtotime( $sess->start ) ),
+                    date( "h:i-", strtotime( $sess->start ) ) .
+                    date( "h:i", strtotime( $sess->end ) ),
+                    round( $sess->minutes_on_callsign / 60, 1 ), 
+                    VATROC::$vatsim_rating[ $sess->rating ],
+                    $sess->callsign,
+                    $visibility[ $suffix ] ,
+                );
+            }
+        }
+        $ret .= "</table>";
+        return $ret;
+    }
+
+
     private static function load_data( $uid, $load=false ) {
         if ( $load ) {
             // $path = dirname( __FILE__ ) . '/' . $uid;
@@ -255,6 +302,24 @@ class VATROC_Shortcode_ATC {
             return $res[ "body" ];
         }
         return $rawtxt;
+    }
+
+
+    private static function get_sessions( $uid, $load_from_db=false ){
+        $raw_data = self::load_data( $uid, $load_from_db );
+        $try_cnt = 0;
+        while ( !is_string( $raw_data ) && $try_cnt < 10 ){
+            sprintf( "VATSIM API connection failed. Retrying(%s).", $try_cnt );
+            $try_cnt += 1;
+            $raw_data = self::load_data( $uid, $load_from_db );
+            if ( !is_string( $raw_data ) ) {
+                $ret = "<h1>Load failed. Please refresh.</h1>";
+            }
+        }
+        $json_sessions = json_decode( $raw_data );
+        if ( $json_sessions->detail ){ return sprintf( "<h1>%s</h1>", $json_sessions->detail ); }
+
+        return $json_sessions->results;
     }
 };
 
