@@ -83,6 +83,9 @@ class VATROC_Shortcode_Roster {
         }
         $ret .= "</tr></thead>";
         foreach( $r as $idx=>$atc ) {
+            if( !current_user_can( VATROC::$ins_options ) && VATROC::$atc_position[ $atc[ "vatroc_position" ] ] === "Applicant" ){
+                continue;
+            }
             $ret .= sprintf( "<tr><td>%s</td><td>%s</td><td>%s</td><td>%s</td>", 
                 $atc[ "vatroc_vatsim_uid" ], 
                 ( current_user_can( VATROC::$atc_options ) ) ? 
