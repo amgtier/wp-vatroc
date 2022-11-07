@@ -84,10 +84,7 @@ function my_user_profile_edit_action($user) {
   	  	<label for="staff_number">VATROC STAFF NUMBER</label>
       </th>
 	  <td>
-<?php if ( $can_edit ) : ?>
-        <input name="staff_number" type="number" id="staff_number" value="<?php echo get_user_meta( $user->ID, "{$meta_prefix}staff_number", true ); ?>">
-<?php else: echo get_user_meta( $user->ID, "{$meta_prefix}staff_number", true ); ?>
-<?php endif; ?>
+<?php my_user_profile_maybe_can_edit( $user, "staff_number", "number" ); ?>
   	  </td>
 	</tr>
 	<tr>
@@ -95,10 +92,7 @@ function my_user_profile_edit_action($user) {
   	  	<label for="staff_role">VATROC STAFF ROLE</label>
       </th>
 	  <td>
-<?php if ( $can_edit ) : ?>
-        <input name="staff_role" type="text" id="staff_role" value="<?php echo get_user_meta( $user->ID, "{$meta_prefix}staff_role", true ); ?>">
-<?php else: echo get_user_meta( $user->ID, "{$meta_prefix}staff_role", true ); ?>
-<?php endif; ?>
+<?php my_user_profile_maybe_can_edit( $user, "staff_role", "text" ); ?>
   	  </td>
 	</tr>
 	<tr>
@@ -106,10 +100,7 @@ function my_user_profile_edit_action($user) {
   	  	<label for="solo_valid_until">Solo Valid Until</label>
       </th>
 	  <td>
-<?php if ( $can_edit ) : ?>
-        <input name="solo_valid_until" type="date" id="solo_valid_until" value="<?php echo get_user_meta( $user->ID, "{$meta_prefix}solo_valid_until", true ); ?>">
-<?php else: echo get_user_meta( $user->ID, "{$meta_prefix}solo_valid_until", true ); ?>
-<?php endif; ?>
+<?php my_user_profile_maybe_can_edit( $user, "solo_valid_until", "date" ); ?>
   	  </td>
 	</tr>
 	<tr>
@@ -117,14 +108,161 @@ function my_user_profile_edit_action($user) {
   	  	<label for="home_division">Visiting Home Division</label>
       </th>
 	  <td>
-<?php if ( $can_edit ) : ?>
-        <input name="home_division" type="home_division" id="home_division" value="<?php echo get_user_meta( $user->ID, "{$meta_prefix}home_division", true ); ?>">
-<?php else: echo get_user_meta( $user->ID, "{$meta_prefix}home_division", true ); ?>
-<?php endif; ?>
+<?php my_user_profile_maybe_can_edit( $user, "home_division", "text" ); ?>
   	  </td>
 	</tr>
   </table>
+  <h3 id="profile-vatroc-progress-dates">VATROC Progress Dates</h3>
+  <table class="form-table">
+	<tr>
+	  <th>
+  	  	<label for="date_application">Application Date</label>
+      </th>
+	  <td>
+<?php my_user_profile_maybe_can_edit( $user, "date_application", "date" ); ?>
+  	  </td>
+	</tr>
+	<tr>
+	  <th>
+  	  	<label for="date_exam">Exam Date</label>
+      </th>
+	  <td>
+<?php my_user_profile_maybe_can_edit( $user, "date_exam", "date" ); ?>
+  	  </td>
+	</tr>
+	<tr>
+	  <th>
+  	  	<label for="date_del_sim">Date DEL SIM</label>
+      </th>
+	  <td>
+<?php my_user_profile_maybe_can_edit( $user, "date_del_sim", "date" ); ?>
+  	  </td>
+	</tr>
+	<tr>
+	  <th>
+  	  	<label for="date_del_ojt">Date DEL OJT</label>
+      </th>
+	  <td>
+<?php my_user_profile_maybe_can_edit( $user, "date_del_ojt", "date" ); ?>
+  	  </td>
+	</tr>
+	<tr>
+	  <th>
+  	  	<label for="date_del_cpt">Date DEL CPT</label>
+      </th>
+	  <td>
+<?php my_user_profile_maybe_can_edit($user,  "date_del_cpt", "date" ); ?>
+  	  </td>
+	</tr>
+	<tr>
+	  <th>
+  	  	<label for="date_gnd_sim">Date GND SIM</label>
+      </th>
+	  <td>
+<?php my_user_profile_maybe_can_edit( $user, "date_gnd_sim", "date" ); ?>
+  	  </td>
+	</tr>
+	<tr>
+	  <th>
+  	  	<label for="date_gnd_ojt">Date GND OJT</label>
+      </th>
+	  <td>
+<?php my_user_profile_maybe_can_edit( $user, "date_gnd_ojt", "date" ); ?>
+  	  </td>
+	</tr>
+	<tr>
+	  <th>
+  	  	<label for="date_gnd_cpt">Date GND CPT</label>
+      </th>
+	  <td>
+<?php my_user_profile_maybe_can_edit( $user, "date_gnd_cpt", "date" ); ?>
+  	  </td>
+	</tr>
+	<tr>
+	  <th>
+  	  	<label for="date_twr_sim">Date TWR SIM</label>
+      </th>
+	  <td>
+<?php my_user_profile_maybe_can_edit( $user, "date_twr_sim", "date" ); ?>
+  	  </td>
+	</tr>
+	<tr>
+	  <th>
+  	  	<label for="date_twr_ojt">Date TWR OJT</label>
+      </th>
+	  <td>
+<?php my_user_profile_maybe_can_edit( $user, "date_twr_ojt", "date" ); ?>
+  	  </td>
+	</tr>
+	<tr>
+	  <th>
+  	  	<label for="date_twr_cpt">Date TWR CPT</label>
+      </th>
+	  <td>
+<?php my_user_profile_maybe_can_edit( $user, "date_twr_cpt", "date" ); ?>
+  	  </td>
+	</tr>
+	<tr>
+	  <th>
+  	  	<label for="date_app_sim">Date APP SIM</label>
+      </th>
+	  <td>
+<?php my_user_profile_maybe_can_edit( $user, "date_app_sim", "date" ); ?>
+  	  </td>
+	</tr>
+	<tr>
+	  <th>
+  	  	<label for="date_app_ojt">Date APP OJT</label>
+      </th>
+	  <td>
+<?php my_user_profile_maybe_can_edit( $user, "date_app_ojt", "date" ); ?>
+  	  </td>
+	</tr>
+	<tr>
+	  <th>
+  	  	<label for="date_app_cpt">Date APP CPT</label>
+      </th>
+	  <td>
+<?php my_user_profile_maybe_can_edit( $user, "date_app_cpt", "date" ); ?>
+  	  </td>
+	</tr>
+	<tr>
+	  <th>
+  	  	<label for="date_ctr_sim">Date CTR SIM</label>
+      </th>
+	  <td>
+<?php my_user_profile_maybe_can_edit( $user, "date_ctr_sim", "date" ); ?>
+  	  </td>
+	</tr>
+	<tr>
+	  <th>
+  	  	<label for="date_ctr_ojt">Date CTR OJT</label>
+      </th>
+	  <td>
+<?php my_user_profile_maybe_can_edit( $user, "date_ctr_ojt", "date" ); ?>
+  	  </td>
+	</tr>
+	<tr>
+	  <th>
+  	  	<label for="date_ctr_cpt">Date CTR CPT</label>
+      </th>
+	  <td>
+<?php my_user_profile_maybe_can_edit( $user, "date_ctr_cpt", "date" ); ?>
+  	  </td>
+	</tr>
 <?php 
+}
+
+function my_user_profile_maybe_can_edit( $user, $name, $type ) {
+
+    $meta_prefix = VATROC::$meta_prefix;
+    $can_edit = current_user_can( 'manage_options' );
+
+if ( $can_edit ) : ?>
+    <input name="<?php echo $name; ?>" type="<?php echo $type; ?>" id="<?php echo $name; ?>" value="<?php echo get_user_meta( $user->ID, "{$meta_prefix}{$name}", true ); ?>">
+<?php else: echo get_user_meta( $user->ID, "{$meta_prefix}{$name}", true ); ?>
+<?php endif;
+
 }
 
 add_action('personal_options_update', 'my_user_profile_update_action');
@@ -138,7 +276,24 @@ function my_user_profile_update_action($user) {
         'staff_number'  =>  'vatroc_staff_number',
         'staff_role'    =>  'vatroc_staff_role',
         'home_division' =>  'vatroc_home_division',
-        'solo_valid_until' =>  'vatroc_solo_valid_until'
+        'solo_valid_until' =>  'vatroc_solo_valid_until',
+        'date_application' =>  'vatroc_date_application',
+        'date_exam' =>  'vatroc_date_exam',
+        'date_del_sim' =>  'vatroc_date_del_sim',
+        'date_del_ojt' =>  'vatroc_date_del_ojt',
+        'date_del_cpt' =>  'vatroc_date_del_cpt',
+        'date_gnd_sim' =>  'vatroc_date_gnd_sim',
+        'date_gnd_ojt' =>  'vatroc_date_gnd_ojt',
+        'date_gnd_cpt' =>  'vatroc_date_gnd_cpt',
+        'date_twr_sim' =>  'vatroc_date_twr_sim',
+        'date_twr_ojt' =>  'vatroc_date_twr_ojt',
+        'date_twr_cpt' =>  'vatroc_date_twr_cpt',
+        'date_app_sim' =>  'vatroc_date_app_sim',
+        'date_app_ojt' =>  'vatroc_date_app_ojt',
+        'date_app_cpt' =>  'vatroc_date_app_cpt',
+        'date_ctr_sim' =>  'vatroc_date_ctr_sim',
+        'date_ctr_ojt' =>  'vatroc_date_ctr_ojt',
+        'date_ctr_cpt' =>  'vatroc_date_ctr_cpt',
     );
 
     foreach( $editables as $postname=>$metakey ) {
