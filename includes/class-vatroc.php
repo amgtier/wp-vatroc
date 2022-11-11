@@ -27,6 +27,8 @@ class VATROC extends VATROC_Constants {
         include_once( VATROC_ABSPATH . 'includes/shortcodes/class-shortcodes-homepage.php' );
         include_once( VATROC_ABSPATH . 'includes/shortcodes/class-shortcodes-atc.php' );
         include_once( VATROC_ABSPATH . 'includes/shortcodes/class-shortcodes-event.php' );
+        include_once( VATROC_ABSPATH . 'includes/shortcodes/class-shortcodes-poll.php' );
+        include_once( VATROC_ABSPATH . 'includes/shortcodes/class-shortcodes-my.php' );
         include_once( VATROC_ABSPATH . 'includes/vatroc-hook-functions.php' );
     }
 
