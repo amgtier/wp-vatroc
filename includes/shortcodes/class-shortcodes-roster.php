@@ -80,6 +80,14 @@ class VATROC_Shortcode_Roster {
             $ret .= "<th>HOME DIVISION</th>"; break;
         case VATROC::$ATC_SOLO:
             $ret .= "<th>SOLO VALID UNTIL</th>"; break;
+        case VATROC::$ATC_LOCAL: 
+            if ( current_user_can( VATROC::$ins_options ) ) {
+                $ret .= "<th>GND OJT</th><th>GND CPT</th>";
+                $ret .= "<th>TWR OJT</th><th>TWR CPT</th>";
+                $ret .= "<th>APP OJT</th><th>APP CPT</th>";
+                $ret .= "<th>CTR OJT</th><th>CTR CPT</th>";
+            }
+            break;
         }
         $ret .= "</tr></thead>";
         foreach( $r as $idx=>$atc ) {
@@ -94,10 +102,18 @@ class VATROC_Shortcode_Roster {
                 VATROC::$vatsim_rating[ $atc[ "vatroc_vatsim_rating" ] ]
             );
             switch ( $title ) {
-            case VATROC::$ATC_VISITING:
-                $ret .= "<td>{$atc[ "vatroc_home_division" ]}</td>"; break;
-            case VATROC::$ATC_SOLO:
-                $ret .= "<td>{$atc[ "vatroc_solo_valid_until" ]}</td>"; break;
+                case VATROC::$ATC_VISITING:
+                    $ret .= "<td>{$atc[ "vatroc_home_division" ]}</td>"; break;
+                case VATROC::$ATC_SOLO:
+                    $ret .= "<td>{$atc[ "vatroc_solo_valid_until" ]}</td>"; break;
+                case VATROC::$ATC_LOCAL:
+                    if ( current_user_can( VATROC::$ins_options ) ) {
+                        $ret .= "<td>" . $atc[ "vatroc_date_gnd_ojt" ] . "</td><td>" . $atc[ "vatroc_date_gnd_cpt" ] . "</td>";
+                        $ret .= "<td>" . $atc[ "vatroc_date_twr_ojt" ] . "</td><td>" . $atc[ "vatroc_date_twr_cpt" ] . "</td>";
+                        $ret .= "<td>" . $atc[ "vatroc_date_app_ojt" ] . "</td><td>" . $atc[ "vatroc_date_app_cpt" ] . "</td>";
+                        $ret .= "<td>" . $atc[ "vatroc_date_ctr_ojt" ] . "</td><td>" . $atc[ "vatroc_date_ctr_cpt" ] . "</td>";
+                    }
+                    break;
             }
 
             if ( current_user_can( VATROC::$ins_options ) ) {
@@ -125,7 +141,6 @@ class VATROC_Shortcode_Roster {
         // for( $i = 0; $i < count( $data ); $i += 1 ) {
         //     $data[ $i ][ "display_name" ] = "<a href='" . get_edit_user_link( $data[ $i ][ "ID" ] ) . "#profile-vatroc-tool' target='_balnk'>{$data[ $i ][ "display_name" ]}</a>";
         // }
-
 
         foreach( $usermeta as $idx=>$val ) {
             $entry = null;

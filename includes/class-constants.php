@@ -15,6 +15,7 @@ class VATROC_Constants {
     public static $ATC_LOCAL = "atc_local";
     public static $ATC_VISITING = "atc_visiting";
     public static $ATC_SOLO = "atc_solo";
+    public static $ATC_TIMELINE = "atc_timeline";
     public static $STAFF = "staff";
     public static $PILOT = "pilot";
     public static $meta_prefix = "vatroc_";
