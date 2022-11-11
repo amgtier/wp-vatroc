@@ -22,7 +22,17 @@ class VATROC_Shortcode_Roster {
 
 
     public static function roster_atc_router() {
-        if ( count( $_GET ) > 0 ) { return VATROC_Shortcode_ATC::output_atc(); }
+        if ( count( $_GET ) > 0 ) { 
+            if ( isset( $_GET[ "who" ] ) && is_numeric( $_GET[ "who" ] ) ) {
+                if ( isset( $_GET[ "timeline" ] ) ) {
+                    return VATROC_Shortcode_ATC::atc_timeline( $_GET[ "who" ], $_GET[ "u" ] );
+                }
+                return VATROC_Shortcode_ATC::atc_activity( $_GET[ "who" ], $_GET[ "u" ] );
+            }
+            if ( isset( $_GET[ "timeline" ] ) ) {
+                return self::output_atc_timeline();
+            }
+        }
         return self::output_atc();
     }
 
@@ -65,11 +75,22 @@ class VATROC_Shortcode_Roster {
     }
 
 
+	public function output_atc_timeline() {
+        $ret = "";
+        $rosters = self::table_data( VATROC::$ATC_LOCAL );
+        usort( $rosters, "self::sort_atc" );
+        $ret .= self::roster_table( $rosters, VATROC::$ATC_TIMELINE );
+        return $ret;
+    }
+
+
     private static function roster_table( $r, $title ) {
         $ret = "";
         switch ( $title ) {
         case VATROC::$ATC_LOCAL:
             $ret .= "<h1>ATC Roster</h1>"; break;
+        case VATROC::$ATC_TIMELINE:
+            $ret .= "<h1>ATC Roster Timeline</h1>"; break;
         case VATROC::$ATC_VISITING:
             $ret .= "<h1>Visiting Controller</h1>"; break;
         case VATROC::$ATC_SOLO:
@@ -83,12 +104,13 @@ class VATROC_Shortcode_Roster {
             $ret .= "<th>HOME DIVISION</th>"; break;
         case VATROC::$ATC_SOLO:
             $ret .= "<th>SOLO VALID UNTIL</th>"; break;
-        case VATROC::$ATC_LOCAL: 
+        case VATROC::$ATC_TIMELINE: 
             if ( current_user_can( VATROC::$ins_options ) ) {
                 $ret .= "<th>GND OJT</th><th>GND CPT</th>";
                 $ret .= "<th>TWR OJT</th><th>TWR CPT</th>";
                 $ret .= "<th>APP OJT</th><th>APP CPT</th>";
                 $ret .= "<th>CTR OJT</th><th>CTR CPT</th>";
+                $ret .= "<th></th>";
             }
             break;
         }
@@ -100,7 +122,7 @@ class VATROC_Shortcode_Roster {
             $ret .= sprintf( "<tr><td>%s</td><td>%s</td><td>%s</td><td>%s</td>", 
                 $atc[ "vatroc_vatsim_uid" ], 
                 ( current_user_can( VATROC::$atc_options ) ) ? 
-              sprintf( "<a href='?who=%s' target='_blank'>%s</a>", $atc[ "vatroc_vatsim_uid" ], $atc[ "display_name" ] )  : $atc[ "display_name" ], 
+              sprintf( "<a href='?who=%s&u=%s' target='_blank'>%s</a>", $atc[ "vatroc_vatsim_uid" ], $atc[ "ID" ], $atc[ "display_name" ] )  : $atc[ "display_name" ], 
                 VATROC::$atc_position[ $atc[ "vatroc_position" ] ],
                 VATROC::$vatsim_rating[ $atc[ "vatroc_vatsim_rating" ] ]
             );
@@ -109,12 +131,13 @@ class VATROC_Shortcode_Roster {
                     $ret .= "<td>{$atc[ "vatroc_home_division" ]}</td>"; break;
                 case VATROC::$ATC_SOLO:
                     $ret .= "<td>{$atc[ "vatroc_solo_valid_until" ]}</td>"; break;
-                case VATROC::$ATC_LOCAL:
+                case VATROC::$ATC_TIMELINE:
                     if ( current_user_can( VATROC::$ins_options ) ) {
                         $ret .= "<td>" . $atc[ "vatroc_date_gnd_ojt" ] . "</td><td>" . $atc[ "vatroc_date_gnd_cpt" ] . "</td>";
                         $ret .= "<td>" . $atc[ "vatroc_date_twr_ojt" ] . "</td><td>" . $atc[ "vatroc_date_twr_cpt" ] . "</td>";
                         $ret .= "<td>" . $atc[ "vatroc_date_app_ojt" ] . "</td><td>" . $atc[ "vatroc_date_app_cpt" ] . "</td>";
                         $ret .= "<td>" . $atc[ "vatroc_date_ctr_ojt" ] . "</td><td>" . $atc[ "vatroc_date_ctr_cpt" ] . "</td>";
+                        $ret .= sprintf( "<td><a target='_blank' href='?who=%s&u=%s&timeline'>Details</a></td>", $atc[ "vatroc_vatsim_uid" ], $atc[ "ID" ] );
                     }
                     break;
             }

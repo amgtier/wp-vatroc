@@ -13,20 +13,7 @@ class VATROC_Shortcode_ATC {
     }
 
 
-    public static function output_atc() {
-        if ( count( $_GET ) < 1 ) { return; }
-
-        if ( isset( $_GET[ "who" ] ) && is_numeric( $_GET[ "who" ] ) ) {
-            if ( isset( $_GET[ "timeline" ] ) ) {
-                return self::atc_timeline( $_GET[ "who" ] );
-            }
-            return self::atc_activity( $_GET[ "who" ] );
-        }
-
-    }
-
-
-    public static function atc_activity( $uid ){
+    public static function atc_activity( $uid, $u = null ){
         $load_from_db = true;
         $last_save_t = get_post_meta( get_the_ID(), VATROC::$session_t_meta_prefix . $uid, true );
         if ( isset( $_GET[ "refresh" ] ) && $_GET[ "refresh" ] == true || strlen( $last_save_t ) == 0 || intval( $last_save_t ) + 3600 * 12 * 30 < time() ) {
@@ -51,7 +38,10 @@ class VATROC_Shortcode_ATC {
 
         $ret .= sprintf( "<a href='/atc/' class='btn btn-success'>ATC List</a>", $uid );
         $ret .= sprintf( "<a href='?who=%s&refresh=true' class='btn btn-success'>Refresh</a>", $uid );
-        $ret .= sprintf( "<a href='?who=%s&timeline' class='btn btn-success'>Timeline</a>", $uid );
+        $ret .= sprintf( "<a href='?who=%s%s&timeline' class='btn btn-success'>Timeline</a>", 
+            $uid, 
+            $u != null ? "&u=" . $u : null
+        );
         if ( $events_show_all ) {
             $ret .= sprintf( "<a href='?who=%s' class='btn btn-success'>Show Active Events</a>", $uid );
         } else {
@@ -65,12 +55,15 @@ class VATROC_Shortcode_ATC {
     }
 
 
-    public static function atc_timeline( $uid ) {
+    public static function atc_timeline( $uid, $u = null ) {
         $sessions = array_reverse( self::get_sessions( $uid, $load_from_db ) );
         $ret = "";
         $ret .= sprintf( "<a href='/atc/' class='btn btn-success'>ATC List</a>", $uid );
         $ret .= sprintf( "<a href='?who=%s' class='btn btn-success'>Activity</a>", $uid );
-        $ret .= self::gen_timeline_from_sessions( $sessions );
+        if( $u != null ) {
+            $ret .= self::get_timeline_from_metadata( $u );
+        }
+        // $ret .= self::gen_timeline_from_sessions( $sessions );
         return $ret;
     }
 
@@ -246,7 +239,7 @@ class VATROC_Shortcode_ATC {
             $visibility[ "O_" . $pos ] = 0;
         };
 
-        $ret = "<h1 id='sessions'>Sessions</h1>";
+        $ret = "<h1 id='generated-timeline-sessions'>Generated Timeline Sessions</h1>";
         $ret .= "<table>";
         $ret .= "<thead>";
         $ret .= "<th>date</th>";
@@ -276,6 +269,26 @@ class VATROC_Shortcode_ATC {
         }
         $ret .= "</table>";
         return $ret;
+    }
+
+
+    private static function get_timeline_from_metadata( $uid ) {
+        $ret = "";
+        $ret .= "<table>";
+        $ret .= "<thead>";
+        $ret .= "<th></th><th>date</th>";
+        $ret .= "</thead>";
+        $ret .= sprintf( "<tr><td>%s</td><td>%s</td></tr>", "GND_OJT", get_user_meta( $uid, "vatroc_date_gnd_ojt" , true ) );
+        $ret .= sprintf( "<tr><td>%s</td><td>%s</td></tr>", "GND_CPT", get_user_meta( $uid, "vatroc_date_gnd_cpt" , true ) );
+        $ret .= sprintf( "<tr><td>%s</td><td>%s</td></tr>", "TWR_OJT", get_user_meta( $uid, "vatroc_date_twr_ojt" , true ) );
+        $ret .= sprintf( "<tr><td>%s</td><td>%s</td></tr>", "TWR_CPT", get_user_meta( $uid, "vatroc_date_twr_cpt" , true ) );
+        $ret .= sprintf( "<tr><td>%s</td><td>%s</td></tr>", "APP_OJT", get_user_meta( $uid, "vatroc_date_app_ojt" , true ) );
+        $ret .= sprintf( "<tr><td>%s</td><td>%s</td></tr>", "APP_CPT", get_user_meta( $uid, "vatroc_date_app_cpt" , true ) );
+        $ret .= sprintf( "<tr><td>%s</td><td>%s</td></tr>", "CTR_OJT", get_user_meta( $uid, "vatroc_date_ctr_ojt" , true ) );
+        $ret .= sprintf( "<tr><td>%s</td><td>%s</td></tr>", "CTR_CPT", get_user_meta( $uid, "vatroc_date_ctr_cpt" , true ) );
+        $ret .= "</table>";
+        return $ret;
+
     }
 
 
