@@ -1,6 +1,8 @@
 <?php
 class VATROC extends VATROC_Constants {
     public $version = '0.0.1';
+    public static $log = false;
+    public static $log_enabled = false;
     protected static $_instance = null;
 
 
@@ -36,8 +38,32 @@ class VATROC extends VATROC_Constants {
             'key'   => $actionKey,
             'value' => $actionValue
         ) );
-        var_dump( $result );
         return $result;
+    }
+
+
+    public static function log( $message, $level = 'info', $prefix = null, $identifier = null ) {
+        $log_path = plugin_dir_path( __DIR__ ) . "LogVATROC.txt";
+        if ( $level = 'debug' ){
+            if ( $prefix ) {
+                $prefix = "[" . $prefix . "]";
+            }
+            if ( $identifier ) {
+                $identifier = "[" . $identifier. "]";
+            }
+            if ( !file_exists( $log_path ) ) { fopen( $log_path, 'w' ); }
+            if ( is_array( $message ) ){
+                error_log( sprintf( "[%s]%s%s: %s\n", date("Y/m/d H:i:s", time()), $prefix, $identifier, http_build_query( $message ) ), 3, $log_path);
+            } else {
+                error_log( sprintf( "[%s]%s%s: %s\n", date("Y/m/d H:i:s", time()), $prefix, $identifier, $message ), 3, $log_path);
+            }
+            if (self::$log_enabled) {
+                if (empty(self::$log)) {
+                     self::$log = wc_get_logger();
+                }
+                 self::$log -> log($level, $message, array('source' => 'vatroc'));
+            }
+        }
     }
 
 
