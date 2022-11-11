@@ -16,10 +16,15 @@ class VATROC_Shortcode_Roster {
 
 
     public static function init() {
-        add_shortcode( 'vatroc_roster_atc', 'VATROC_Shortcode_Roster::output_atc' );
+        add_shortcode( 'vatroc_roster_atc', 'VATROC_Shortcode_Roster::roster_atc_router' );
         add_shortcode( 'vatroc_roster_staff', 'VATROC_Shortcode_Roster::output_staff' );
     }
 
+
+    public static function roster_atc_router() {
+        if ( count( $_GET ) > 0 ) { return VATROC_Shortcode_ATC::output_atc(); }
+        return self::output_atc();
+    }
 
 	public function output_staff() {
         $rosters = self::table_data( VATROC::$STAFF );
@@ -42,8 +47,6 @@ class VATROC_Shortcode_Roster {
 
 
 	public function output_atc() {
-        if ( count( $_GET ) > 0 ) { return VATROC_Shortcode_ATC::output_atc(); }
-
         $ret = "";
         $rosters = self::table_data( VATROC::$ATC_LOCAL );
         usort( $rosters, "self::sort_atc" );
