@@ -28,17 +28,14 @@ class VATROC_Shortcode_Poll extends VATROC_Poll {
 
     public static function output_poll($attributes) {
         self::enqueue_script();
-        $ret = "";
-        
+
         if (isset( $_GET[ 'log' ] )){
             return self::output_log( get_the_ID() );
         }
 
         ob_start();
         VATROC::get_template( "includes/shortcodes/templates/poll.php" );
-        $ret .= ob_get_clean();
-
-        return $ret;
+        return ob_get_clean();
     }
 
 

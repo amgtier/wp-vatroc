@@ -46,7 +46,13 @@ class VATROC extends VATROC_Constants {
     }
 
 
-    public static function dlog( ){
+    public static function debug_section( $level = null ) {
+        $level = $level ?: self::$admin_options;
+        return current_user_can( $level );
+    }
+
+
+    public static function dlog(){
         $log_path = plugin_dir_path( __DIR__ ) . "deLogVATROC.txt";
         $prefix = 'debug';
         $identifier = null;

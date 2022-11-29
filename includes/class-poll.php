@@ -81,11 +81,6 @@ class VATROC_Poll {
 
 
     protected static function get_vote_display( $uid ){
-        if ( current_user_can( VATROC::$admin_options ) ) {
-            return "<img title='" . get_userdata( $uid )->nickname . 
-                "' src='" . get_avatar_url( $uid ) . "'/>";
-        }
-            
         $str_pos = VATROC_My::get_pos_str( $uid, "short" );
         ob_start();
 ?>
@@ -101,7 +96,7 @@ class VATROC_Poll {
 
 
     protected static function get_vote_by_name( $uid, $votes, $date, $value ){
-        if ( current_user_can( VATROC::$admin_options ) ) {
+        if ( VATROC::debug_section() ) {
             return array_reverse( array_map(
                 "self::get_vote_display",
                 array_keys( isset( $votes[ $date ][ $value ] ) ? $votes[ $date ][ $value ] : [] )
@@ -110,7 +105,6 @@ class VATROC_Poll {
 
         $keys = array_keys( isset( $votes[ $date ][ $value ] ) ? $votes[ $date ][ $value ] : [] );
         usort( $keys, function ( $a, $b ) {
-            VATROC::dlog($a, $b);
             $a_pos = get_user_meta( $a, "vatroc_position", true);
             $b_pos = get_user_meta( $b, "vatroc_position", true);
             return $a_pos <= $b_pos;
