@@ -39,9 +39,9 @@ class VATROC_Constants {
     );
 
     public static $atc_position = array(
-        "0" => "Pilot",
-        "1" => "Applicant",
-        "2" => "GND Sim",
+        "0" => "Applicant",
+        "1" => "DEL OJT",
+        "2" => "DEL",
         "3" => "GND OJT",
         "4" => "GND",
         "6" => "TWR OJT",
