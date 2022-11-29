@@ -33,9 +33,21 @@ class VATROC_Shortcode_Poll extends VATROC_Poll {
             return self::output_log( get_the_ID() );
         }
 
+        $is_admin = self::is_admin();
+        if(VATROC::debug_section()){
+            echo "<div>";
+            echo "is_admin:" . $is_admin;
+            echo "</div>";
+        }
+
         ob_start();
         VATROC::get_template( "includes/shortcodes/templates/poll.php" );
         return ob_get_clean();
+    }
+
+
+    public static function is_admin() {
+        return VATROC::is_admin() && isset( $_GET[ 'm' ] );
     }
 
 
@@ -57,7 +69,8 @@ class VATROC_Shortcode_Poll extends VATROC_Poll {
 
 
     public static function get_options() {
-        $votes = VATROC_Poll::make_votes( get_the_ID() );
+        $post_id = get_the_ID();
+        $votes = VATROC_Poll::make_votes( $post_id );
         $uid = get_current_user_id();
 
         $ret = [];
@@ -66,7 +79,10 @@ class VATROC_Shortcode_Poll extends VATROC_Poll {
             self::get_dates( self::get_next_month(), self::get_next_year() )
         );
         foreach( $dates as $k => $date ){
+            $is_option_hidden = VATROC_Poll::is_option_hidden( $post_id, $date );
+            if( !VATROC_Shortcode_Poll::is_admin() && $is_option_hidden ){ continue; }
             $ret[ $date ] = [
+                "hidden" => $is_option_hidden,
                 "user_accept" => array_key_exists( $uid, @( $votes[ $date ][ "accept" ] ?: [] ) ),
                 "user_tentative" => array_key_exists( $uid, @( $votes[ $date ][ "tentative" ] ?: [] ) ),
                 "user_reject" => array_key_exists( $uid, @( $votes[ $date ][ "reject" ] ?: [] ) ),

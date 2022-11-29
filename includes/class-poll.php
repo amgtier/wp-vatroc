@@ -11,6 +11,7 @@ class VATROC_Poll {
 
 
     public static function init() {
+        add_action( "wp_ajax_vatroc_poll_toggle_hide", "VATROC_Poll::ajax_toggle_hide" );
         add_action( "wp_ajax_vatroc_poll_vote", "VATROC_Poll::ajax_set_vote" );
         add_action( "wp_ajax_nopriv_vatroc_poll_vote", "VATROC_Poll::ajax_set_vote" ); // for not logged-in users
     }
@@ -44,6 +45,19 @@ class VATROC_Poll {
             ]
         ));
         
+        wp_die();
+    }
+
+
+    public static function ajax_toggle_hide() {
+        if ( !VATROC::is_admin() ) { wp_die(); }
+        
+        $post_id = $_POST[ "id" ];
+        $name = $_POST[ "name" ];
+
+        $option_meta = self::toggle_option_meta( $post_id, $name, "hidden");
+        echo wp_json_encode( $option_meta );
+
         wp_die();
     }
 
@@ -116,6 +130,39 @@ class VATROC_Poll {
         return $ret;
     }
 
+
+    private static function get_option_meta_key( $option ) {
+        return self::$meta_key . "-" . $option;
+    }
+
+
+    private static function update_option_meta( $post_id, $option, $field, $value ) {
+        $curr_meta = get_post_meta( $post_id, self::get_option_meta_key( $option ), true);
+        if ( $curr_meta == null ) {
+            $curr_meta = [];
+        }
+        $curr_meta[ $field ] = $value;
+        update_post_meta( $post_id, self::get_option_meta_key( $option ), $curr_meta );
+        return $curr_meta;
+    }
+
+
+    private static function toggle_option_meta( $post_id, $option, $field ) {
+        $curr_meta = get_post_meta( $post_id, self::get_option_meta_key( $option ), true);
+        return self::update_option_meta( $post_id, $option, "hidden", !( $curr_meta[ $field ] ?? false ));
+    }
+
+
+    public static function get_option_meta( $post_id, $option ) {
+        $curr_meta = get_post_meta( $post_id, self::get_option_meta_key( $option ), true);
+        return $curr_meta ?? [];
+    }
+
+
+    public static function is_option_hidden( $post_id, $option ) {
+        $curr_meta = self::get_option_meta( $post_id, $option );
+        return $curr_meta[ "hidden" ] ?? false;
+    }
 };
 
 VATROC_Poll::init();
