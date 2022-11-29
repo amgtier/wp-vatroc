@@ -46,9 +46,29 @@ class VATROC extends VATROC_Constants {
     }
 
 
-    public static function debug_section( $level = null ) {
-        $level = $level ?: self::$admin_options;
-        return current_user_can( $level );
+    public static function is_admin() {
+        return current_user_can( self::$admin_options );
+    }
+
+
+    public static function is_staff( $uid ) {
+        $user = new WP_User( $uid );
+        return ! empty( $user->roles ) && 
+        is_array( $user->roles ) && 
+        in_array( 'editor', $user->roles );
+    }
+
+
+    public static function is_priviledged_atc( $uid ) {
+        $user = new WP_User( $uid );
+        return ! empty( $user->roles ) && 
+        is_array( $user->roles ) && 
+        in_array( 'author', $user->roles );
+    }
+
+
+    public static function debug_section() {
+        return get_current_user_id() == 1;
     }
 
 

@@ -29,7 +29,7 @@ function my_user_profile_edit_action($user) {
     $meta_prefix = VATROC::$meta_prefix;
 	$vatsim_rating = get_user_meta( $user->ID, "{$meta_prefix}vatsim_rating", true );
 	$position = get_user_meta( $user->ID, "{$meta_prefix}position", true );
-    $can_edit = current_user_can( 'manage_options' );
+    $can_edit = current_user_can( VATROC::$admin_options );
 ?>
   <h3 id="profile-vatroc-tool">VATROC Tool</h3>
   <table class="form-table">
@@ -256,7 +256,7 @@ function my_user_profile_edit_action($user) {
 function my_user_profile_maybe_can_edit( $user, $name, $type ) {
 
     $meta_prefix = VATROC::$meta_prefix;
-    $can_edit = current_user_can( 'manage_options' );
+    $can_edit = current_user_can( VATROC::$admin_options );
 
 if ( $can_edit ) : ?>
     <input name="<?php echo $name; ?>" type="<?php echo $type; ?>" id="<?php echo $name; ?>" value="<?php echo get_user_meta( $user->ID, "{$meta_prefix}{$name}", true ); ?>">
@@ -298,7 +298,7 @@ function my_user_profile_update_action($user) {
 
     foreach( $editables as $postname=>$metakey ) {
         if ( isset($_POST[ $postname ]) ) {
-            if ( $postname == 'vatsim_uid' || current_user_can( 'manage_options' ) ) {
+            if ( $postname == 'vatsim_uid' || current_user_can( VATROC::$admin_options ) ) {
                 if ( $_POST[ $postname ] != get_user_meta( $user, $metakey, true ) )
                     VATROC::actionLog( get_current_user_id(), $metakey, $_POST[ $postname ] );
                 if ( strlen( $_POST[ $postname ] ) == 0 ) delete_user_meta( $user, $metakey );
