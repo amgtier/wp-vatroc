@@ -110,7 +110,7 @@ class VATROC_Shortcode_Poll extends VATROC_Poll {
         $now = time();
         for ( $d = 1; $d <= $days; $d++ ){
             $t_date = strtotime( "$year-$month-$d" );
-            if($now < $t_date && date( 'w', $t_date ) == 6){
+            if( $now < $t_date && in_array( date( 'w', $t_date ), [0, 6] ) ){
                 $ret[] = "$year/$month/$d";
             }
         }
