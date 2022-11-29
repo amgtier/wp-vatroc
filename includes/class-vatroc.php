@@ -44,6 +44,21 @@ class VATROC extends VATROC_Constants {
     }
 
 
+    public static function dlog( ){
+        $log_path = plugin_dir_path( __DIR__ ) . "deLogVATROC.txt";
+        $prefix = 'debug';
+        $identifier = null;
+        if ( !file_exists( $log_path ) ) { fopen( $log_path, 'w' ); }
+        foreach (func_get_args() as $param) {
+            if ( is_array( $param ) ){
+                error_log( sprintf( "[%s]%s%s: %s\n", date("Y/m/d H:i:s", time()), $prefix, $identifier, urldecode( http_build_query( $param ) ) ), 3, $log_path);
+            } else {
+                error_log( sprintf( "[%s]%s%s: %s\n", date("Y/m/d H:i:s", time()), $prefix, $identifier, $param ), 3, $log_path);
+            }
+        }
+    }
+
+
     public static function log( $message, $level = 'info', $prefix = null, $identifier = null ) {
         $log_path = plugin_dir_path( __DIR__ ) . "LogVATROC.txt";
         if ( $level = 'debug' ){
@@ -55,7 +70,7 @@ class VATROC extends VATROC_Constants {
             }
             if ( !file_exists( $log_path ) ) { fopen( $log_path, 'w' ); }
             if ( is_array( $message ) ){
-                error_log( sprintf( "[%s]%s%s: %s\n", date("Y/m/d H:i:s", time()), $prefix, $identifier, http_build_query( $message ) ), 3, $log_path);
+                error_log( sprintf( "[%s]%s%s: %s\n", date("Y/m/d H:i:s", time()), $prefix, $identifier, urldecode( http_build_query( $message ) ) ), 3, $log_path);
             } else {
                 error_log( sprintf( "[%s]%s%s: %s\n", date("Y/m/d H:i:s", time()), $prefix, $identifier, $message ), 3, $log_path);
             }
@@ -73,5 +88,10 @@ class VATROC extends VATROC_Constants {
         if ( ! defined( $name ) ) {
             define( $name, $value );
         }
+    }
+
+
+    public static function get_template( $path ) {
+        include(plugin_dir_path( __DIR__ ) . $path);
     }
 }
