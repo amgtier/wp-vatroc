@@ -58,7 +58,6 @@ class VATROC_Shortcode_My {
         echo self::get_nickname();
         wp_die();
     }
-
 };
 
 VATROC_Shortcode_My::init();

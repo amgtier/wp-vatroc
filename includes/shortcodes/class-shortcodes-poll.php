@@ -69,7 +69,7 @@ class VATROC_Shortcode_Poll extends VATROC_Poll {
             self::get_dates( self::get_next_month(), self::get_next_year() )
         );
         foreach( $dates as $k => $date ){
-            $ret[$date] = [
+            $ret[ $date ] = [
                 "user_accept" => array_key_exists( $uid, @( $votes[ $date ][ "accept" ] ?: [] ) ),
                 "user_tentative" => array_key_exists( $uid, @( $votes[ $date ][ "tentative" ] ?: [] ) ),
                 "user_reject" => array_key_exists( $uid, @( $votes[ $date ][ "reject" ] ?: [] ) ),
