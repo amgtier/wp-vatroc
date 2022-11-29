@@ -1,0 +1,65 @@
+.flexbox-row {
+  display: flex;
+  flex-direction: row;
+  width: 100%;
+  gap: 15px;
+  align-items: center;
+}
+
+.flexbox-column {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.flexbox-space-evenly {
+  justify-content: space-evenly;
+}
+
+.flexbox-start {
+  justify-content: start;
+}
+
+.result img{
+  width: 50px;
+  height: 50px;
+  border-radius: 50px;
+}
+
+[data-value='accept'] img{
+  border: 5px solid #5cb85c;
+}
+
+.res[value='accept']{
+  border: 5px solid #5cb85c;
+}
+
+.res[value='accept'].active{
+  background-color: #5cb85c;
+}
+
+[data-value='tentative'] img{
+  opacity: 30%;
+  border: 5px solid #7c8184;
+}
+
+.res[value='tentative']{
+  border: 5px solid #7c8184;
+}
+
+.res[value='tentative'].active{
+  background-color: #7c8184;
+}
+
+[data-value='reject'] img{
+  opacity: 30%;
+  border: 5px solid #d9534f;
+}
+
+.res[value='reject']{
+  border: 5px solid #d9534f;
+}
+
+.res[value='reject'].active{
+  background-color: #d9534f;
+}
