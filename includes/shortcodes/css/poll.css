@@ -71,7 +71,8 @@
   width: 50px;
 }
 
-.vote-display-rating {
+/* move out to my */
+.avatar-rating {
   width: 16px;
   height: 16px;
   position: absolute;
@@ -93,4 +94,9 @@
 
 .T, .G, .D {
   background-color: #9cbfdd;
+}
+
+/* move out to util */
+.nowrap {
+  white-space: nowrap;
 }

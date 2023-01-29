@@ -75,9 +75,11 @@ class VATROC_Shortcode_Poll extends VATROC_Poll {
 
         $ret = [];
         $dates = array_merge(
+            VATROC_Poll::get_added_vote_date_option( $post_id ),
             self::get_dates( self::get_curr_month(), self::get_curr_year() ),
-            self::get_dates( self::get_next_month(), self::get_next_year() )
+            self::get_dates( self::get_next_month(), self::get_next_year() ),
         );
+        $dates = array_unique( $dates );
         foreach( $dates as $k => $date ){
             $is_option_hidden = VATROC_Poll::is_option_hidden( $post_id, $date );
             if( !VATROC_Shortcode_Poll::is_admin() && $is_option_hidden ){ continue; }
@@ -124,7 +126,7 @@ class VATROC_Shortcode_Poll extends VATROC_Poll {
         for ( $d = 1; $d <= $days; $d++ ){
             $t_date = strtotime( "$year-$month-$d" );
             if( $now < $t_date && in_array( date( 'w', $t_date ), [0, 6] ) ){
-                $ret[] = "$year/$month/$d";
+                $ret[] = "$year/$month/" . sprintf( "%02d", $d );
             }
         }
         return $ret;

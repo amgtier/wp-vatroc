@@ -12,6 +12,7 @@ class VATROC_Poll {
 
     public static function init() {
         add_action( "wp_ajax_vatroc_poll_toggle_hide", "VATROC_Poll::ajax_toggle_hide" );
+        add_action( "wp_ajax_vatroc_poll_create_option", "VATROC_Poll::ajax_create_option" );
         add_action( "wp_ajax_vatroc_poll_vote", "VATROC_Poll::ajax_set_vote" );
         add_action( "wp_ajax_nopriv_vatroc_poll_vote", "VATROC_Poll::ajax_set_vote" ); // for not logged-in users
     }
@@ -62,6 +63,40 @@ class VATROC_Poll {
     }
 
 
+    public static function ajax_create_option() {
+        $post_id = $_POST[ "id" ];
+        $name = $_POST[ "name" ];
+        $type = $_POST[ "type" ];
+
+        $name = str_replace( "-", "/", $name );
+        
+        if( $type == "date" ){
+            echo wp_json_encode(
+                self::add_vote_date_option( $post_id, $name )
+            );
+        }
+        wp_die();
+    }
+
+
+    private static function add_vote_date_option( $post_id, $name ){
+        $meta_key = self::$meta_key . '-added-options';
+        $curr_meta = get_post_meta( $post_id, $meta_key, true);
+        if ( $curr_meta == null ){
+            $curr_meta = [];
+        }
+        array_unshift( $curr_meta, $name );
+        update_post_meta( $post_id, $meta_key, array_unique( $curr_meta ) );
+        return $curr_meta;
+    }
+
+
+    protected static function get_added_vote_date_option( $post_id ){
+        $meta_key = self::$meta_key . '-added-options';
+        return get_post_meta( $post_id, $meta_key, true) ?: [];
+    }
+
+
     private static function vote_check_dup( $post_id, $user_id, $name, $value ){
         $post_meta = array_reverse( get_post_meta( $post_id, self::$meta_key ) );
         foreach ( $post_meta as $idx => $vote ){
@@ -95,14 +130,10 @@ class VATROC_Poll {
 
 
     protected static function get_vote_display( $uid ){
-        $str_pos = VATROC_My::get_pos_str( $uid, "short" );
         ob_start();
 ?>
         <div class='vote-display-wrapper'>
-        <div class='vote-display-rating <?php echo $str_pos;  ?>'>
-            <?php echo $str_pos; ?>
-        </div>
-        <?php echo VATROC_My::html_my_avatar( $uid ); ?>
+            <?php echo VATROC_My::html_my_avatar_with_position( $uid, VATROC::is_admin() ); ?>
         </div>
 <?php
         return ob_get_clean();
@@ -110,13 +141,6 @@ class VATROC_Poll {
 
 
     protected static function get_vote_by_name( $uid, $votes, $date, $value ){
-        if ( VATROC::debug_section() ) {
-            return array_reverse( array_map(
-                "self::get_vote_display",
-                array_keys( isset( $votes[ $date ][ $value ] ) ? $votes[ $date ][ $value ] : [] )
-            ));
-        }
-
         $keys = array_keys( isset( $votes[ $date ][ $value ] ) ? $votes[ $date ][ $value ] : [] );
         usort( $keys, function ( $a, $b ) {
             $a_pos = get_user_meta( $a, "vatroc_position", true);

@@ -6,6 +6,10 @@ jQuery(document).ready( ($) => {
   if ( $( ".hide-option" ).length ) {
     ajax_toggle_hide_option( $ );
   }
+
+  if ( $( "input#create-option" ).length ) {
+    ajax_create_option( $ );
+  }
 });
 
 function ajax_button_res( $ ) {
@@ -28,7 +32,6 @@ function ajax_button_res( $ ) {
         const btn = $("button.res[name='" + data.name + "'][value='" + data.value + "']")
         $(btn[0]).addClass( "active" );
 
-        console.log(obj.value);
         $(".result[data-option='" + obj.name + "'] [data-value='accept']").html(
           obj.value['accept'].join("")
         );
@@ -56,9 +59,36 @@ function ajax_toggle_hide_option( $ ){
 
     $.post( ajax_object.ajax_url, data, 
       res => {
-        console.log(res);
         $(target).html( res.hidden ? "unhide" : "hide" );
       }
     );
   })
+}
+
+
+function ajax_create_option( $ ){
+  const input = $( "input#create-option" )[0];
+  const submit_button = $( "button#submit-option" )[0];
+  const form = $( "form#create-option" )[0];
+  
+  $(input).on( "focus", ( event )=>{
+    $(submit_button).attr('hidden', false);
+  });
+
+  $(form).submit((event)=> {
+    event.preventDefault();
+
+    const data = {
+      action: 'vatroc_poll_create_option',
+      id: ajax_object.page_id,
+      name: $(input).val(),
+      type: 'date',
+    }
+
+    $.post( ajax_object.ajax_url, data,
+      res=>{
+        $(submit_button).attr( 'hidden', true );
+        location.reload();
+      })
+  });
 }
