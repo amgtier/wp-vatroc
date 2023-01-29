@@ -15,9 +15,9 @@ function account_linked_user_table_row( $val, $column_name, $user_id ) {
 
     switch ( $column_name ) {
         case 'fb':
-			$nextend_provider = new NextendSocialProviderFacebook();
-			$fblink = get_user_meta( $user_id, 'fblink', true );
-			return $nextend_provider->isUserConnected( $user_id ) ? $fblink == NULL ? "Linked" : sprintf( "<a href='%s' target='_blank'>Linked*</a>", $fblink ) : "";
+            $nextend_provider = new NextendSocialProviderFacebook();
+            $fblink = get_user_meta( $user_id, 'fblink', true );
+            return $nextend_provider->isUserConnected( $user_id ) ? $fblink == NULL ? "Linked" : sprintf( "<a href='%s' target='_blank'>Linked*</a>", $fblink ) : "";
         default:  
     }
     return $val;
@@ -25,21 +25,21 @@ function account_linked_user_table_row( $val, $column_name, $user_id ) {
 add_filter( 'manage_users_custom_column', 'account_linked_user_table_row', 10, 3 );
 
 function account_linked_sort_column_query( $query ){
-	$orderby = $query->get( 'orderby' );
-	if ( 'Facebook' == $orderby ){
-		$meta_query = array(
-			'relation' => 'OR',
-			array(
-				'key' => 'fb_user_access_token',
-				'compare' => 'NOT EXISTS',
-			),
-			array(
-				'key' => 'fb_user_access_token',
-			),
-		);
-		$query->set( 'meta_query', $meta_query );
-		$query->set( 'orderby', 'meta_value' );
-	}
+    $orderby = $query->get( 'orderby' );
+    if ( 'Facebook' == $orderby ){
+        $meta_query = array(
+            'relation' => 'OR',
+            array(
+                'key' => 'fb_user_access_token',
+                'compare' => 'NOT EXISTS',
+            ),
+            array(
+                'key' => 'fb_user_access_token',
+            ),
+        );
+        $query->set( 'meta_query', $meta_query );
+        $query->set( 'orderby', 'meta_value' );
+    }
 }
 add_action( 'pre_get_users', 'account_linked_sort_column_query' );
 // https://wordpress.stackexchange.com/questions/293318/make-custom-column-sortable
@@ -48,25 +48,25 @@ add_action('show_user_profile', 'my_user_profile_edit_action');
 add_action('edit_user_profile', 'my_user_profile_edit_action');
 function my_user_profile_edit_action($user) {
     $meta_prefix = VATROC::$meta_prefix;
-	$vatsim_rating = get_user_meta( $user->ID, "{$meta_prefix}vatsim_rating", true );
-	$position = get_user_meta( $user->ID, "{$meta_prefix}position", true );
+    $vatsim_rating = get_user_meta( $user->ID, "{$meta_prefix}vatsim_rating", true );
+    $position = get_user_meta( $user->ID, "{$meta_prefix}position", true );
     $can_edit = current_user_can( VATROC::$admin_options );
 ?>
   <h3 id="profile-vatroc-tool">VATROC Tool</h3>
   <table class="form-table">
-	<tr>
-	  <th>
-  	  	<label for="vatsim_uid">VATSIM UID</label>
+    <tr>
+      <th>
+            <label for="vatsim_uid">VATSIM UID</label>
       </th>
-	  <td>
+      <td>
         <input name="vatsim_uid" type="text" id="vatsim_uid" value="<?php echo get_user_meta( $user->ID, "{$meta_prefix}vatsim_uid", true ); ?>">
-  	  </td>
-	</tr>
-	<tr>
-	  <th>
-  	  	<label for="vatsim_rating">VATSIM Rating</label>
+        </td>
+    </tr>
+    <tr>
+      <th>
+            <label for="vatsim_rating">VATSIM Rating</label>
       </th>
-	  <td>
+      <td>
 <?php if ( $can_edit ) : ?>
         <select name="vatsim_rating" id="vatsim_rating" >
             <option disabled val=""></option>
@@ -76,16 +76,16 @@ function my_user_profile_edit_action($user) {
                 echo "<option value='{$key}' {$selected} >{$val}</option>";
             }
 ?>
-		</select>
-  	  </td>
+        </select>
+        </td>
 <?php else: echo VATROC::$vatsim_rating[ $vatsim_rating ]; ?>
 <?php endif; ?>
-	</tr>
-	<tr>
-	  <th>
-  	  	<label for="position">Position</label>
+    </tr>
+    <tr>
+      <th>
+            <label for="position">Position</label>
       </th>
-	  <td>
+      <td>
 <?php if ( $can_edit ) : ?>
         <select name="position" id="position" value="<?php echo get_user_meta( $user->ID, "vatroc_position", true ); ?>" <?php if ( !$can_edit ) echo "disabled"; ?>>
             <option disabled val=""></option>
@@ -95,182 +95,182 @@ function my_user_profile_edit_action($user) {
                 echo "<option value='{$key}' {$selected} >{$val}</option>";
             }
 ?>
-		</select>
+        </select>
 <?php else: echo VATROC::$atc_position[ $position ]; ?>
 <?php endif; ?>
-  	  </td>
-	</tr>
-	<tr>
-	  <th>
-  	  	<label for="staff_number">VATROC STAFF NUMBER</label>
+        </td>
+    </tr>
+    <tr>
+      <th>
+            <label for="staff_number">VATROC STAFF NUMBER</label>
       </th>
-	  <td>
+      <td>
 <?php my_user_profile_maybe_can_edit( $user, "staff_number", "number" ); ?>
-  	  </td>
-	</tr>
-	<tr>
-	  <th>
-  	  	<label for="staff_role">VATROC STAFF ROLE</label>
+        </td>
+    </tr>
+    <tr>
+      <th>
+            <label for="staff_role">VATROC STAFF ROLE</label>
       </th>
-	  <td>
+      <td>
 <?php my_user_profile_maybe_can_edit( $user, "staff_role", "text" ); ?>
-  	  </td>
-	</tr>
-	<tr>
-	  <th>
-  	  	<label for="solo_valid_until">Solo Valid Until</label>
+        </td>
+    </tr>
+    <tr>
+      <th>
+            <label for="solo_valid_until">Solo Valid Until</label>
       </th>
-	  <td>
+      <td>
 <?php my_user_profile_maybe_can_edit( $user, "solo_valid_until", "date" ); ?>
-  	  </td>
-	</tr>
-	<tr>
-	  <th>
-  	  	<label for="home_division">Visiting Home Division</label>
+        </td>
+    </tr>
+    <tr>
+      <th>
+            <label for="home_division">Visiting Home Division</label>
       </th>
-	  <td>
+      <td>
 <?php my_user_profile_maybe_can_edit( $user, "home_division", "text" ); ?>
-  	  </td>
-	</tr>
+        </td>
+    </tr>
   </table>
   <h3 id="profile-vatroc-progress-dates">VATROC Progress Dates</h3>
   <table class="form-table">
-	<tr>
-	  <th>
-  	  	<label for="date_application">Application Date</label>
+    <tr>
+      <th>
+            <label for="date_application">Application Date</label>
       </th>
-	  <td>
+      <td>
 <?php my_user_profile_maybe_can_edit( $user, "date_application", "date" ); ?>
-  	  </td>
-	</tr>
-	<tr>
-	  <th>
-  	  	<label for="date_exam">Exam Date</label>
+        </td>
+    </tr>
+    <tr>
+      <th>
+            <label for="date_exam">Exam Date</label>
       </th>
-	  <td>
+      <td>
 <?php my_user_profile_maybe_can_edit( $user, "date_exam", "date" ); ?>
-  	  </td>
-	</tr>
-	<tr>
-	  <th>
-  	  	<label for="date_del_sim">Date DEL SIM</label>
+        </td>
+    </tr>
+    <tr>
+      <th>
+            <label for="date_del_sim">Date DEL SIM</label>
       </th>
-	  <td>
+      <td>
 <?php my_user_profile_maybe_can_edit( $user, "date_del_sim", "date" ); ?>
-  	  </td>
-	</tr>
-	<tr>
-	  <th>
-  	  	<label for="date_del_ojt">Date DEL OJT</label>
+        </td>
+    </tr>
+    <tr>
+      <th>
+            <label for="date_del_ojt">Date DEL OJT</label>
       </th>
-	  <td>
+      <td>
 <?php my_user_profile_maybe_can_edit( $user, "date_del_ojt", "date" ); ?>
-  	  </td>
-	</tr>
-	<tr>
-	  <th>
-  	  	<label for="date_del_cpt">Date DEL CPT</label>
+        </td>
+    </tr>
+    <tr>
+      <th>
+            <label for="date_del_cpt">Date DEL CPT</label>
       </th>
-	  <td>
+      <td>
 <?php my_user_profile_maybe_can_edit($user,  "date_del_cpt", "date" ); ?>
-  	  </td>
-	</tr>
-	<tr>
-	  <th>
-  	  	<label for="date_gnd_sim">Date GND SIM</label>
+        </td>
+    </tr>
+    <tr>
+      <th>
+            <label for="date_gnd_sim">Date GND SIM</label>
       </th>
-	  <td>
+      <td>
 <?php my_user_profile_maybe_can_edit( $user, "date_gnd_sim", "date" ); ?>
-  	  </td>
-	</tr>
-	<tr>
-	  <th>
-  	  	<label for="date_gnd_ojt">Date GND OJT</label>
+        </td>
+    </tr>
+    <tr>
+      <th>
+            <label for="date_gnd_ojt">Date GND OJT</label>
       </th>
-	  <td>
+      <td>
 <?php my_user_profile_maybe_can_edit( $user, "date_gnd_ojt", "date" ); ?>
-  	  </td>
-	</tr>
-	<tr>
-	  <th>
-  	  	<label for="date_gnd_cpt">Date GND CPT</label>
+        </td>
+    </tr>
+    <tr>
+      <th>
+            <label for="date_gnd_cpt">Date GND CPT</label>
       </th>
-	  <td>
+      <td>
 <?php my_user_profile_maybe_can_edit( $user, "date_gnd_cpt", "date" ); ?>
-  	  </td>
-	</tr>
-	<tr>
-	  <th>
-  	  	<label for="date_twr_sim">Date TWR SIM</label>
+        </td>
+    </tr>
+    <tr>
+      <th>
+            <label for="date_twr_sim">Date TWR SIM</label>
       </th>
-	  <td>
+      <td>
 <?php my_user_profile_maybe_can_edit( $user, "date_twr_sim", "date" ); ?>
-  	  </td>
-	</tr>
-	<tr>
-	  <th>
-  	  	<label for="date_twr_ojt">Date TWR OJT</label>
+        </td>
+    </tr>
+    <tr>
+      <th>
+            <label for="date_twr_ojt">Date TWR OJT</label>
       </th>
-	  <td>
+      <td>
 <?php my_user_profile_maybe_can_edit( $user, "date_twr_ojt", "date" ); ?>
-  	  </td>
-	</tr>
-	<tr>
-	  <th>
-  	  	<label for="date_twr_cpt">Date TWR CPT</label>
+        </td>
+    </tr>
+    <tr>
+      <th>
+            <label for="date_twr_cpt">Date TWR CPT</label>
       </th>
-	  <td>
+      <td>
 <?php my_user_profile_maybe_can_edit( $user, "date_twr_cpt", "date" ); ?>
-  	  </td>
-	</tr>
-	<tr>
-	  <th>
-  	  	<label for="date_app_sim">Date APP SIM</label>
+        </td>
+    </tr>
+    <tr>
+      <th>
+            <label for="date_app_sim">Date APP SIM</label>
       </th>
-	  <td>
+      <td>
 <?php my_user_profile_maybe_can_edit( $user, "date_app_sim", "date" ); ?>
-  	  </td>
-	</tr>
-	<tr>
-	  <th>
-  	  	<label for="date_app_ojt">Date APP OJT</label>
+        </td>
+    </tr>
+    <tr>
+      <th>
+            <label for="date_app_ojt">Date APP OJT</label>
       </th>
-	  <td>
+      <td>
 <?php my_user_profile_maybe_can_edit( $user, "date_app_ojt", "date" ); ?>
-  	  </td>
-	</tr>
-	<tr>
-	  <th>
-  	  	<label for="date_app_cpt">Date APP CPT</label>
+        </td>
+    </tr>
+    <tr>
+      <th>
+            <label for="date_app_cpt">Date APP CPT</label>
       </th>
-	  <td>
+      <td>
 <?php my_user_profile_maybe_can_edit( $user, "date_app_cpt", "date" ); ?>
-  	  </td>
-	</tr>
-	<tr>
-	  <th>
-  	  	<label for="date_ctr_sim">Date CTR SIM</label>
+        </td>
+    </tr>
+    <tr>
+      <th>
+            <label for="date_ctr_sim">Date CTR SIM</label>
       </th>
-	  <td>
+      <td>
 <?php my_user_profile_maybe_can_edit( $user, "date_ctr_sim", "date" ); ?>
-  	  </td>
-	</tr>
-	<tr>
-	  <th>
-  	  	<label for="date_ctr_ojt">Date CTR OJT</label>
+        </td>
+    </tr>
+    <tr>
+      <th>
+            <label for="date_ctr_ojt">Date CTR OJT</label>
       </th>
-	  <td>
+      <td>
 <?php my_user_profile_maybe_can_edit( $user, "date_ctr_ojt", "date" ); ?>
-  	  </td>
-	</tr>
-	<tr>
-	  <th>
-  	  	<label for="date_ctr_cpt">Date CTR CPT</label>
+        </td>
+    </tr>
+    <tr>
+      <th>
+            <label for="date_ctr_cpt">Date CTR CPT</label>
       </th>
-	  <td>
+      <td>
 <?php my_user_profile_maybe_can_edit( $user, "date_ctr_cpt", "date" ); ?>
-  	  </td>
-	</tr>
+        </td>
+    </tr>
 <?php 
 }
 
