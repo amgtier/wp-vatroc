@@ -5,6 +5,7 @@ function account_linked_user_table( $column ) {
     return $column;
 }
 add_filter( 'manage_users_columns', 'account_linked_user_table' );
+add_filter( 'manage_users_sortable_columns', 'account_linked_user_table' );
 
 
 function account_linked_user_table_row( $val, $column_name, $user_id ) {
@@ -14,14 +15,34 @@ function account_linked_user_table_row( $val, $column_name, $user_id ) {
 
     switch ( $column_name ) {
         case 'fb':
-            $fb_id = $wpdb->get_var( sprintf( 'SELECT identifier FROM `%s` WHERE ID="%s";', $table_name, $user_id ) );
-            return $fb_id != NULL ? sprintf( "<a href='%s' target='_blank'>Linked</a>", get_user_meta( $user_id, 'fblink', true ) ) : "";
+			$nextend_provider = new NextendSocialProviderFacebook();
+			$fblink = get_user_meta( $user_id, 'fblink', true );
+			return $nextend_provider->isUserConnected( $user_id ) ? $fblink == NULL ? "Linked" : sprintf( "<a href='%s' target='_blank'>Linked*</a>", $fblink ) : "";
         default:  
     }
     return $val;
 }
 add_filter( 'manage_users_custom_column', 'account_linked_user_table_row', 10, 3 );
 
+function account_linked_sort_column_query( $query ){
+	$orderby = $query->get( 'orderby' );
+	if ( 'Facebook' == $orderby ){
+		$meta_query = array(
+			'relation' => 'OR',
+			array(
+				'key' => 'fb_user_access_token',
+				'compare' => 'NOT EXISTS',
+			),
+			array(
+				'key' => 'fb_user_access_token',
+			),
+		);
+		$query->set( 'meta_query', $meta_query );
+		$query->set( 'orderby', 'meta_value' );
+	}
+}
+add_action( 'pre_get_users', 'account_linked_sort_column_query' );
+// https://wordpress.stackexchange.com/questions/293318/make-custom-column-sortable
 
 add_action('show_user_profile', 'my_user_profile_edit_action');
 add_action('edit_user_profile', 'my_user_profile_edit_action');
