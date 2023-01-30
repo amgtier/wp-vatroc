@@ -7,6 +7,10 @@ jQuery(document).ready( ($) => {
     ajax_toggle_hide_option( $ );
   }
 
+  if ( $( ".option-description" ).length ) {
+    ajax_update_option_description( $ );
+  }
+
   if ( $( "input#create-option" ).length ) {
     ajax_create_option( $ );
   }
@@ -63,6 +67,30 @@ function ajax_toggle_hide_option( $ ){
       }
     );
   })
+}
+
+var option_desc_timeout;
+function ajax_update_option_description( $ ){
+  console.log("hooked2");
+  $( ".option-description" ).on( "keyup", (event) => {
+    const target = $($(event)[0].target);
+    target.addClass( "ajax-danger" );
+    clearTimeout( option_desc_timeout );
+    option_desc_timeout = setTimeout(()=>{
+      const data = {
+        action: 'vatroc_poll_update_description',
+        name: target.data('name'),
+        id: ajax_object.page_id,
+        value: target.val(),
+      }
+
+      $.post( ajax_object.ajax_url, data, 
+        res => {
+          target.removeClass( "ajax-danger" );
+        }
+      );
+    }, 500);
+})
 }
 
 

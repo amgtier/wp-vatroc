@@ -12,6 +12,7 @@ class VATROC_Poll {
 
     public static function init() {
         add_action( "wp_ajax_vatroc_poll_toggle_hide", "VATROC_Poll::ajax_toggle_hide" );
+        add_action( "wp_ajax_vatroc_poll_update_description", "VATROC_Poll::ajax_update_description" );
         add_action( "wp_ajax_vatroc_poll_create_option", "VATROC_Poll::ajax_create_option" );
         add_action( "wp_ajax_vatroc_poll_vote", "VATROC_Poll::ajax_set_vote" );
         add_action( "wp_ajax_nopriv_vatroc_poll_vote", "VATROC_Poll::ajax_set_vote" ); // for not logged-in users
@@ -50,6 +51,22 @@ class VATROC_Poll {
     }
 
 
+    public static function ajax_create_option() {
+        $post_id = $_POST[ "id" ];
+        $name = $_POST[ "name" ];
+        $type = $_POST[ "type" ];
+
+        $name = str_replace( "-", "/", $name );
+        
+        if( $type == "date" ){
+            echo wp_json_encode(
+                self::add_vote_date_option( $post_id, $name )
+            );
+        }
+        wp_die();
+    }
+
+
     public static function ajax_toggle_hide() {
         if ( !VATROC::is_admin() ) { wp_die(); }
         
@@ -63,18 +80,17 @@ class VATROC_Poll {
     }
 
 
-    public static function ajax_create_option() {
+    public static function ajax_update_description() {
+        if ( !VATROC::is_admin() ) { wp_die(); }
+        
         $post_id = $_POST[ "id" ];
         $name = $_POST[ "name" ];
-        $type = $_POST[ "type" ];
+        $description = $_POST[ "value" ];
+        VATROC::dlog($_POST);
 
-        $name = str_replace( "-", "/", $name );
-        
-        if( $type == "date" ){
-            echo wp_json_encode(
-                self::add_vote_date_option( $post_id, $name )
-            );
-        }
+        $option_meta = self::update_option_meta( $post_id, $name, "description", $description );
+        echo wp_json_encode( $option_meta );
+
         wp_die();
     }
 
@@ -186,6 +202,12 @@ class VATROC_Poll {
     public static function is_option_hidden( $post_id, $option ) {
         $curr_meta = self::get_option_meta( $post_id, $option );
         return $curr_meta[ "hidden" ] ?? false;
+    }
+
+
+    public static function get_description( $post_id, $option ) {
+        $curr_meta = self::get_option_meta( $post_id, $option );
+        return $curr_meta[ "description" ] ?? null;
     }
 };
 

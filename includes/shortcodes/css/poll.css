@@ -100,3 +100,25 @@
 .nowrap {
   white-space: nowrap;
 }
+
+.text-center {
+  justify-content: center;
+}
+
+.flexbox-nogap {
+  gap: 0;
+  width: auto;
+}
+
+.flexbox-active {
+  background: #7c8184;
+  color: #fff;
+}
+
+.flexbox-active textarea {
+  color: #fff;
+}
+
+.ajax-danger {
+  border: 3px solid #d9534f !important;
+}

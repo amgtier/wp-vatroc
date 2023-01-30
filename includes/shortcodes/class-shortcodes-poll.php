@@ -36,7 +36,8 @@ class VATROC_Shortcode_Poll extends VATROC_Poll {
         $is_admin = self::is_admin();
         if(VATROC::debug_section()){
             echo "<div>";
-            echo "is_admin:" . $is_admin;
+            echo "is_admin:" . $is_admin . "<br/>";
+            echo "page_id:" . get_the_ID() . "<br/>";
             echo "</div>";
         }
 
@@ -85,6 +86,7 @@ class VATROC_Shortcode_Poll extends VATROC_Poll {
             if( !VATROC_Shortcode_Poll::is_admin() && $is_option_hidden ){ continue; }
             $ret[ $date ] = [
                 "hidden" => $is_option_hidden,
+                "description" => VATROC_Poll::get_description( $post_id, $date ),
                 "user_accept" => array_key_exists( $uid, @( $votes[ $date ][ "accept" ] ?: [] ) ),
                 "user_tentative" => array_key_exists( $uid, @( $votes[ $date ][ "tentative" ] ?: [] ) ),
                 "user_reject" => array_key_exists( $uid, @( $votes[ $date ][ "reject" ] ?: [] ) ),

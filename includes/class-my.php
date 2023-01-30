@@ -21,6 +21,24 @@ class VATROC_My {
         return ob_get_clean();
     }
 
+    public static function html_my_avatar_with_position( $uid, $is_avatar_clickable = false ){
+        $str_pos = VATROC_My::get_pos_str( $uid, "short" );
+        ob_start();
+?>
+        <?php if ( $is_avatar_clickable ): ?>
+        <a href="<?php echo get_edit_user_link( $uid, null ); ?>" target="_blank">
+        <?php endif; ?>
+            <div class='avatar-rating <?php echo $str_pos;  ?>'>
+                <?php echo $str_pos; ?>
+            </div>
+            <?php echo VATROC_My::html_my_avatar( $uid ); ?>
+        <?php if ( $is_avatar_clickable ): ?>
+        </a>
+        <?php endif; ?>
+<?php
+        return ob_get_clean();
+    }
+
     public static function get_pos_str( $uid, $type = "long" ){
         $pos = get_user_meta( $uid, "vatroc_position", true);
         $str_pos = '';
