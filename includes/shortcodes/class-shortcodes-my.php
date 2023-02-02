@@ -19,6 +19,34 @@ class VATROC_Shortcode_My {
     public static function output_my() {
         $ret = "";
         $ret .= self::applicant();
+        $ret .= self::atc();
+        return $ret;
+    }
+
+
+    private static function atc() {
+        $vote_post_id = 3897;
+        $options = VATROC_Shortcode_Poll::get_options( $vote_post_id );
+        $next_events = [];
+        $html_next_events = "";
+        foreach( $options as $date=> $result ){
+            $desc = VATROC_Poll::get_description( $vote_post_id, $date );
+            if ( $desc ){
+                $next_events[ $date ] = $result;
+                $html_next_events .= sprintf("<div class='flexbox-row flexbox-start'><div class='flexbox-column flexbox-nogap'>%1s %2s</div><div class='flexbox-column flexbox-nogap'>", $date, $desc);
+                ob_start();
+                VATROC::get_template( "includes/shortcodes/templates/poll/response-buttons.php", [ "result" => $result, "option" => $date, "page_id" => $vote_post_id ] );
+                $html_next_events .= ob_get_clean();
+                $html_next_events .= "</div></div>";
+                $html_next_events .= get_the_ID();
+            }
+        }
+        $html_next_events .= "";
+
+
+        $ret = "";
+        $ret .= "<h1>ATC section</h1>";
+        $ret .= $html_next_events;
         return $ret;
     }
 
@@ -35,12 +63,12 @@ class VATROC_Shortcode_My {
 
         ob_start();
 ?>
-  <form id="edit-nickname" method="get" action="#">
-  <label for="nickname">顯示名稱
-      <input type="text" id="nickname" name="nickname" value="<?php echo VATROC_Shortcode_My::get_nickname(); ?>" />
-      <button id="submit-nickname" hidden>送出修改</button>
-  </label>
-</form>
+    <form id="edit-nickname" method="get" action="#">
+        <label for="nickname">顯示名稱
+            <input type="text" id="nickname" name="nickname" value="<?php echo VATROC_Shortcode_My::get_nickname(); ?>" required />
+            <button id="submit-nickname" hidden>送出修改</button>
+        </label>
+    </form>
 <?php
         $ret = ob_get_clean();
         return $ret;
