@@ -15,14 +15,7 @@ class VATROC_Shortcode_Poll extends VATROC_Poll {
         add_action( 'wp_enqueue_script', 'VATROC_Shortcode_Poll::enqueue_script' );
         wp_enqueue_script( 'vatroc-poll', plugin_dir_url( VATROC_PLUGIN_FILE ) . 'includes/shortcodes/js/poll.js', array( 'jquery' ), null, true );
         wp_enqueue_style( 'vatroc-poll', plugin_dir_url( VATROC_PLUGIN_FILE ) . 'includes/shortcodes/css/poll.css' );
-        wp_localize_script( 
-            'vatroc-poll', 
-            'ajax_object', 
-            [ 
-                'ajax_url' => admin_url( 'admin-ajax.php' ), 
-                'page_id' => get_the_ID() 
-            ],
-        );
+        VATROC::enqueue_ajax_object();
     }
 
 
@@ -69,8 +62,8 @@ class VATROC_Shortcode_Poll extends VATROC_Poll {
     }
 
 
-    public static function get_options() {
-        $post_id = get_the_ID();
+    public static function get_options( $post_id = null ) {
+        $post_id = $post_id ?: get_the_ID();
         $votes = VATROC_Poll::make_votes( $post_id );
         $uid = get_current_user_id();
 
