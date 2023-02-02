@@ -101,7 +101,7 @@ class VATROC_Shortcode_Poll extends VATROC_Poll {
 
 
     private static function get_curr_month() {
-        return date( 'm' );
+        return date( 'm' ) % 12;
     }
 
 
