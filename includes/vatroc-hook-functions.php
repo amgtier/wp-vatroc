@@ -1,12 +1,40 @@
 <?php
 // https://wp-mix.com/members-only-content-shortcode/
-function member_check_shortcode($atts, $content = null) {
-	if (is_user_logged_in() && !is_null($content) && !is_feed()) {
-		return do_shortcode($content);
+add_shortcode( 'vatroc_login_required', 'member_check_shortcode' );
+function member_check_shortcode( $atts, $content = null ) {
+	if ( is_user_logged_in() && !is_null($content) && !is_feed() ) {
+		return do_shortcode( $content );
 	}
 	return do_shortcode( '[nextend_social_login provider="facebook"]' );
 }
-add_shortcode('login_required', 'member_check_shortcode');
+
+
+add_shortcode( 'vatroc_collapse' , 'collapse_section' );
+function collapse_section( $atts, $content ) {
+	$wrapper_start = $wrapper_end = "";
+	switch ( $atts[ "wrapper" ] ) {
+		case "card":
+			$wrapper_start = "<div class='card card-body'>";
+			$wrapper_end = "</div>";
+			break;
+	}
+
+	ob_start()
+?>
+		<p>
+			<button class="btn btn-primary" data-toggle="collapse" data-target="#collapseSection" aria-expanded="false" aria-controls="collapseSection">
+				<?php echo $atts[ "label" ] ?>
+			</button>
+		</p>
+		<div class='collapse' id='collapseSection'>
+			<?php echo $wrapper_start; ?>
+				<?php echo $content; ?>
+			<?php echo $wrapper_end; ?>
+		</div>
+<?php
+	return do_shortcode( ob_get_clean() );
+}
+
 
 add_action( 'wp_enqueue_scripts', 'load_customize_scripts');
 function load_customize_scripts() {

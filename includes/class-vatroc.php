@@ -18,8 +18,9 @@ class VATROC extends VATROC_Constants {
         include_once( ABSPATH . 'wp-admin/includes/plugin.php' );
         $this->define( 'VATROC_ABSPATH', dirname( VATROC_PLUGIN_FILE ) . '/' );
         add_action( 'init', array( $this, 'includes' ), 8 );
+        self::enqueue_scripts();
     }
-
+    
 
     public function includes() {
         include_once( VATROC_ABSPATH . 'admin/class-admin.php' );
@@ -33,11 +34,19 @@ class VATROC extends VATROC_Constants {
         include_once( VATROC_ABSPATH . 'includes/shortcodes/class-shortcodes-poll.php' );
         include_once( VATROC_ABSPATH . 'includes/shortcodes/class-shortcodes-my.php' );
         include_once( VATROC_ABSPATH . 'includes/vatroc-hook-functions.php' );
+    }
+
+
+    function enqueue_scripts() {  
+        add_action( 'wp_enqueue_scripts', 'enqueue_scripts', 1000000001 );
+        wp_enqueue_script( 'boot2','https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js', array( 'jquery' ),'',true );
+        wp_enqueue_script( 'boot3','https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/js/bootstrap.min.js', array( 'jquery' ),'',true );
+        
         wp_enqueue_style( 'styles', plugin_dir_url( VATROC_PLUGIN_FILE ) . 'includes/css/styles.css' );
         wp_enqueue_style( 'flex', plugin_dir_url( VATROC_PLUGIN_FILE ) . 'includes/css/flex.css' );
     }
 
-
+    
     public static function actionLog( $user_id, $actionKey, $actionValue ) {
         global $wpdb;
         $result = $wpdb->insert( "{$wpdb->prefix}vatroc_log", array(
