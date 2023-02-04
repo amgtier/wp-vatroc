@@ -13,48 +13,38 @@ class VATROC_Shortcode_My {
         add_shortcode( 'vatroc_my_vatroc', 'VATROC_Shortcode_My::output_My' );
         add_shortcode( 'vatroc_my_editable_nickname', 'VATROC_Shortcode_My::editable_nickname' );
         add_action( "wp_ajax_vatroc_my_set_nickname", "VATROC_Shortcode_My::ajax_set_nickname" );
+        wp_enqueue_style( 'vatroc-poll', plugin_dir_url( VATROC_PLUGIN_FILE ) . 'includes/shortcodes/css/poll.css' );
     }
 
 
     public static function output_my() {
+
+        // $is_admin = self::is_admin();
+        // if(VATROC::debug_section()){
+        //     echo "<div>";
+        //     echo "is_admin:" . $is_admin . "<br/>";
+        //     echo "page_id:" . get_the_ID() . "<br/>";
+        //     echo "</div>";
+        // }
+
         $ret = "";
-        $ret .= self::applicant();
+        $ret .= self::trainee();
         $ret .= self::atc();
         return $ret;
     }
 
 
     private static function atc() {
-        $vote_post_id = 3897;
-        $options = VATROC_Shortcode_Poll::get_options( $vote_post_id );
-        $next_events = [];
-        $html_next_events = "";
-        foreach( $options as $date=> $result ){
-            $desc = VATROC_Poll::get_description( $vote_post_id, $date );
-            if ( $desc ){
-                $next_events[ $date ] = $result;
-                $html_next_events .= sprintf("<div class='flexbox-row flexbox-start'><div class='flexbox-column flexbox-nogap'>%1s %2s</div><div class='flexbox-column flexbox-nogap'>", $date, $desc);
-                ob_start();
-                VATROC::get_template( "includes/shortcodes/templates/poll/response-buttons.php", [ "result" => $result, "option" => $date, "page_id" => $vote_post_id ] );
-                $html_next_events .= ob_get_clean();
-                $html_next_events .= "</div></div>";
-                $html_next_events .= get_the_ID();
-            }
-        }
-        $html_next_events .= "";
-
-
-        $ret = "";
-        $ret .= "<h1>ATC section</h1>";
-        $ret .= $html_next_events;
-        return $ret;
+        ob_start();
+        VATROC::get_template( "includes/shortcodes/templates/my/atc-section.php" );
+        return ob_get_clean();
     }
 
 
-    private static function applicant() {
-        $ret = "";
-        $ret .= "<h1>Applicant section</h1>";
-        return $ret;
+    private static function trainee() {
+        ob_start();
+        VATROC::get_template( "includes/shortcodes/templates/my/trainee-section.php" );
+        return ob_get_clean();
     }
 
 

@@ -25,6 +25,7 @@ class VATROC extends VATROC_Constants {
         include_once( VATROC_ABSPATH . 'admin/class-admin.php' );
         include_once( VATROC_ABSPATH . 'includes/class-my.php' );
         include_once( VATROC_ABSPATH . 'includes/class-poll.php' );
+        include_once( VATROC_ABSPATH . 'includes/class-event.php' );
         include_once( VATROC_ABSPATH . 'includes/shortcodes/class-shortcodes-roster.php' );
         include_once( VATROC_ABSPATH . 'includes/shortcodes/class-shortcodes-homepage.php' );
         include_once( VATROC_ABSPATH . 'includes/shortcodes/class-shortcodes-atc.php' );
@@ -32,6 +33,8 @@ class VATROC extends VATROC_Constants {
         include_once( VATROC_ABSPATH . 'includes/shortcodes/class-shortcodes-poll.php' );
         include_once( VATROC_ABSPATH . 'includes/shortcodes/class-shortcodes-my.php' );
         include_once( VATROC_ABSPATH . 'includes/vatroc-hook-functions.php' );
+        wp_enqueue_style( 'styles', plugin_dir_url( VATROC_PLUGIN_FILE ) . 'includes/css/styles.css' );
+        wp_enqueue_style( 'flex', plugin_dir_url( VATROC_PLUGIN_FILE ) . 'includes/css/flex.css' );
     }
 
 
@@ -119,7 +122,20 @@ class VATROC extends VATROC_Constants {
     }
 
 
-    public static function get_template( $path ) {
-        include(plugin_dir_path( __DIR__ ) . $path);
+    public static function get_template( $path, $variables = [] ) {
+        extract( $variables );
+        include( plugin_dir_path( __DIR__ ) . $path );
+    }
+
+    
+    public static function enqueue_ajax_object( $page_id = null ) {
+        wp_localize_script( 
+            'vatroc-poll', 
+            'ajax_object', 
+            [ 
+                'ajax_url' => admin_url( 'admin-ajax.php' ), 
+                'page_id' => $page_id ?: get_the_ID() 
+            ],
+        );
     }
 }

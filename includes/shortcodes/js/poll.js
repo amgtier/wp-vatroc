@@ -71,7 +71,6 @@ function ajax_toggle_hide_option( $ ){
 
 var option_desc_timeout;
 function ajax_update_option_description( $ ){
-  console.log("hooked2");
   $( ".option-description" ).on( "keyup", (event) => {
     const target = $($(event)[0].target);
     target.addClass( "ajax-danger" );

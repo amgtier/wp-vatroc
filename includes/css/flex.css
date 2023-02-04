@@ -1,0 +1,14 @@
+
+.flexbox-nogap {
+    gap: 0;
+    width: auto;
+}
+  
+.flexbox-active {
+    background: #7c8184;
+    color: #fff;
+}
+  
+.flexbox-active textarea {
+    color: #fff;
+}

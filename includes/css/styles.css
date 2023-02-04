@@ -1,0 +1,11 @@
+.nowrap {
+    white-space: nowrap;
+}
+  
+.text-center {
+    justify-content: center;
+}
+  
+.ajax-danger {
+    border: 3px solid #d9534f !important;
+}
