@@ -10,8 +10,9 @@ class VATROC_Shortcode_My {
 
 
     public static function init() {
-        add_shortcode( 'vatroc_my_vatroc', 'VATROC_Shortcode_My::output_My' );
+        add_shortcode( 'vatroc_my_vatroc', 'VATROC_Shortcode_My::output_my' );
         add_shortcode( 'vatroc_my_editable_nickname', 'VATROC_Shortcode_My::editable_nickname' );
+        add_shortcode( 'vatroc_my_avatar', 'VATROC_Shortcode_My::my_avatar' );
         add_action( "wp_ajax_vatroc_my_set_nickname", "VATROC_Shortcode_My::ajax_set_nickname" );
         wp_enqueue_style( 'vatroc-poll', plugin_dir_url( VATROC_PLUGIN_FILE ) . 'includes/shortcodes/css/poll.css' );
     }
@@ -31,6 +32,17 @@ class VATROC_Shortcode_My {
         $ret .= self::trainee();
         $ret .= self::atc();
         return $ret;
+    }
+
+
+    public static function my_avatar( $atts ) {
+        $uid = get_current_user_id();
+        switch ( $atts[ "type" ]) {
+            case "with_position":
+                return VATROC_My::html_my_avatar_with_position( $uid );
+                break;
+        }
+        return VATROC_My::html_my_avatar( $uid );
     }
 
 

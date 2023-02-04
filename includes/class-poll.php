@@ -127,17 +127,17 @@ class VATROC_Poll {
     }
 
 
-    protected static function make_votes( $post_id ){
+    protected static function prepare_votes( $post_id ){
         $post_meta = array_reverse( get_post_meta( $post_id, self::$meta_key ) );
         $votes = [];
-        foreach ( $post_meta as $idx => $vote ){
+        foreach ( $post_meta as $_ => $vote ){
             $has_vote = false;
             foreach( @$votes[ $vote[ "name" ] ] ?? [] as $value => $curr_votes ){
-                if(isset($curr_votes[ $vote[ "user" ] ])){
+                if( isset( $curr_votes[ $vote[ "user" ] ] ) ){
                     $has_vote = true;
                 }
             }
-            if(!$has_vote){
+            if( !$has_vote ){
                 $votes[ $vote[ "name" ] ][ $vote[ "value" ] ][ $vote[ "user" ] ] = true;
             }
         }
@@ -208,6 +208,87 @@ class VATROC_Poll {
     public static function get_description( $post_id, $option ) {
         $curr_meta = self::get_option_meta( $post_id, $option );
         return $curr_meta[ "description" ] ?? null;
+    }
+
+    
+    public static function get_options_monthly_availability( $post_id, $params ) {
+        $show_all = $params[ "show_all" ];
+        $votes = self::prepare_votes( $post_id );
+        $uid = get_current_user_id();
+
+        $ret = [];
+        $dates = array_merge(
+            self::get_added_vote_date_option( $post_id ),
+            self::get_dates( self::get_curr_month(), self::get_curr_year() ),
+            self::get_dates( self::get_next_month(), self::get_next_year() ),
+        );
+        VATROC::dlog( $dates );
+        if ( $show_all ){
+            // VATROC::dlog( "show_ALL" );
+            $dates = array_merge(
+                array_keys( $votes ),
+                $dates
+            );
+            VATROC::dlog( $dates );
+        }
+        $dates = array_unique( $dates );
+        usort( $dates, [ self, "sort_date"] );
+        foreach( $dates as $k => $date ){
+            $is_option_hidden = self::is_option_hidden( $post_id, $date );
+            if( !VATROC_Shortcode_Poll::is_admin() && $is_option_hidden ){ continue; }
+            $ret[ $date ] = [
+                "hidden" => $is_option_hidden,
+                "description" => self::get_description( $post_id, $date ),
+                "user_accept" => array_key_exists( $uid, @( $votes[ $date ][ "accept" ] ?: [] ) ),
+                "user_tentative" => array_key_exists( $uid, @( $votes[ $date ][ "tentative" ] ?: [] ) ),
+                "user_reject" => array_key_exists( $uid, @( $votes[ $date ][ "reject" ] ?: [] ) ),
+                "accept" => self::get_vote_by_name( $uid, $votes, $date, "accept" ),
+                "tentative" => self::get_vote_by_name( $uid, $votes, $date, "tentative" ),
+                "reject" => self::get_vote_by_name( $uid, $votes, $date, "reject" ),
+                "unknown" => self::get_vote_by_name( $uid, $votes, $date, "unknown" ),
+            ];
+        };
+        return $ret;
+    }
+
+
+    private function sort_date( $a, $b ) {
+        return strtotime( $a ) > strtotime( $b );
+    }
+
+
+    private static function get_curr_month() {
+        return date( 'm' ) % 12;
+    }
+
+
+    private static function get_curr_year() {
+        return date( 'Y' );
+    }
+
+
+    private static function get_next_month() {
+        $next_month = ( date( 'm' ) + 1 ) % 12;
+        return $next_month == 0 ? 12 : $next_month;
+    }
+
+
+    private static function get_next_year() {
+        return date( 'Y' ) + ( date( 'm' ) + 1 > 12 ? 1 : 0 );
+    }
+
+
+    private static function get_dates( $month, $year ) {
+        $days = cal_days_in_month( CAL_GREGORIAN, $month, $year );
+        $ret = [];
+        $now = time();
+        for ( $d = 1; $d <= $days; $d++ ){
+            $t_date = strtotime( "$year-$month-$d" );
+            if( $now < $t_date && in_array( date( 'w', $t_date ), [0, 6] ) ){
+                $ret[] = "$year/$month/" . sprintf( "%02d", $d );
+            }
+        }
+        return $ret;
     }
 };
 

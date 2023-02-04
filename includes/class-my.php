@@ -7,6 +7,13 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 class VATROC_My {
     public static function init() {
+        self::enqueue_scripts();
+        wp_enqueue_style( 'my', plugin_dir_url( VATROC_PLUGIN_FILE ) . 'includes/css/my.css' );
+    }
+
+
+    function enqueue_scripts() {  
+        add_action( 'wp_enqueue_scripts', 'enqueue_scripts', 1000000001 );
     }
 
 
@@ -16,6 +23,7 @@ class VATROC_My {
     <img 
         title='<?php echo get_userdata( $uid )->nickname; ?>' 
         src='<?php echo get_avatar_url( $uid ); ?>'
+        class='b-avatar'
     />
 <?php
         return ob_get_clean();
@@ -28,10 +36,12 @@ class VATROC_My {
         <?php if ( $is_avatar_clickable ): ?>
         <a href="<?php echo get_edit_user_link( $uid, null ); ?>" target="_blank">
         <?php endif; ?>
-            <div class='avatar-rating <?php echo $str_pos;  ?>'>
-                <?php echo $str_pos; ?>
+            <div class='position-display-wrapper'>
+                <div class='avatar-rating <?php echo $str_pos;  ?>'>
+                    <?php echo $str_pos; ?>
+                </div>
+                <?php echo VATROC_My::html_my_avatar( $uid ); ?>
             </div>
-            <?php echo VATROC_My::html_my_avatar( $uid ); ?>
         <?php if ( $is_avatar_clickable ): ?>
         </a>
         <?php endif; ?>

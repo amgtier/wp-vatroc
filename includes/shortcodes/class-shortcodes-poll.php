@@ -12,14 +12,14 @@ class VATROC_Shortcode_Poll extends VATROC_Poll {
 
 
     public static function enqueue_script() {
-        add_action( 'wp_enqueue_script', 'VATROC_Shortcode_Poll::enqueue_script' );
+        add_action( 'wp_enqueue_script', 'VATROC_Shortcode_Poll::enqueue_script', 1000000001 );
         wp_enqueue_script( 'vatroc-poll', plugin_dir_url( VATROC_PLUGIN_FILE ) . 'includes/shortcodes/js/poll.js', array( 'jquery' ), null, true );
         wp_enqueue_style( 'vatroc-poll', plugin_dir_url( VATROC_PLUGIN_FILE ) . 'includes/shortcodes/css/poll.css' );
         VATROC::enqueue_ajax_object();
     }
 
 
-    public static function output_poll($attributes) {
+    public static function output_poll( $atts ) {
         self::enqueue_script();
 
         if (isset( $_GET[ 'log' ] )){
@@ -27,15 +27,23 @@ class VATROC_Shortcode_Poll extends VATROC_Poll {
         }
 
         $is_admin = self::is_admin();
-        if(VATROC::debug_section()){
+
+        ob_start();
+        if( VATROC::debug_section() ){
             echo "<div>";
             echo "is_admin:" . $is_admin . "<br/>";
             echo "page_id:" . get_the_ID() . "<br/>";
             echo "</div>";
         }
-
-        ob_start();
-        VATROC::get_template( "includes/shortcodes/templates/poll.php" );
+        if ( VATROC::debug_section() ){
+            echo "<div>Poll WIP</div>";
+        }
+        VATROC::get_template( "includes/shortcodes/templates/poll.php", [ 
+            "type" => $atts[ "type" ], 
+            "post_id" => $atts[ "post_id" ],
+            "params" => [
+                "show_all" => isset( $_GET[ "show_all" ] ),
+        ] ] );
         return ob_get_clean();
     }
 
@@ -62,69 +70,13 @@ class VATROC_Shortcode_Poll extends VATROC_Poll {
     }
 
 
-    public static function get_options( $post_id = null ) {
+    public static function get_options( $type = null, $post_id, $params = [] ) {
         $post_id = $post_id ?: get_the_ID();
-        $votes = VATROC_Poll::make_votes( $post_id );
-        $uid = get_current_user_id();
-
-        $ret = [];
-        $dates = array_merge(
-            VATROC_Poll::get_added_vote_date_option( $post_id ),
-            self::get_dates( self::get_curr_month(), self::get_curr_year() ),
-            self::get_dates( self::get_next_month(), self::get_next_year() ),
-        );
-        $dates = array_unique( $dates );
-        foreach( $dates as $k => $date ){
-            $is_option_hidden = VATROC_Poll::is_option_hidden( $post_id, $date );
-            if( !VATROC_Shortcode_Poll::is_admin() && $is_option_hidden ){ continue; }
-            $ret[ $date ] = [
-                "hidden" => $is_option_hidden,
-                "description" => VATROC_Poll::get_description( $post_id, $date ),
-                "user_accept" => array_key_exists( $uid, @( $votes[ $date ][ "accept" ] ?: [] ) ),
-                "user_tentative" => array_key_exists( $uid, @( $votes[ $date ][ "tentative" ] ?: [] ) ),
-                "user_reject" => array_key_exists( $uid, @( $votes[ $date ][ "reject" ] ?: [] ) ),
-                "accept" => self::get_vote_by_name( $uid, $votes, $date, "accept" ),
-                "tentative" => self::get_vote_by_name( $uid, $votes, $date, "tentative" ),
-                "reject" => self::get_vote_by_name( $uid, $votes, $date, "reject" ),
-                "unknown" => self::get_vote_by_name( $uid, $votes, $date, "unknown" ),
-            ];
-        };
-        return $ret;
-    }
-
-
-    private static function get_curr_month() {
-        return date( 'm' ) % 12;
-    }
-
-
-    private static function get_curr_year() {
-        return date( 'Y' );
-    }
-
-
-    private static function get_next_month() {
-        $next_month = ( date( 'm' ) + 1 ) % 12;
-        return $next_month == 0 ? 12 : $next_month;
-    }
-
-
-    private static function get_next_year() {
-        return date( 'Y' ) + ( date( 'm' ) + 1 > 12 ? 1 : 0 );
-    }
-
-
-    private static function get_dates( $month, $year ) {
-        $days = cal_days_in_month( CAL_GREGORIAN, $month, $year );
-        $ret = [];
-        $now = time();
-        for ( $d = 1; $d <= $days; $d++ ){
-            $t_date = strtotime( "$year-$month-$d" );
-            if( $now < $t_date && in_array( date( 'w', $t_date ), [0, 6] ) ){
-                $ret[] = "$year/$month/" . sprintf( "%02d", $d );
-            }
+        switch ( $type ) {
+            case "monthly_availability":
+                return VATROC_Poll::get_options_monthly_availability( $post_id, $params );
         }
-        return $ret;
+        return [];
     }
 };
 

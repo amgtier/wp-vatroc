@@ -20,12 +20,6 @@
   justify-content: start;
 }
 
-.result img{
-  width: 50px;
-  height: 50px;
-  border-radius: 50px;
-}
-
 [data-value='accept'] img{
   border: 5px solid #5cb85c;
 }
@@ -64,34 +58,6 @@
   background-color: #d9534f;
 }
 
-.vote-display-wrapper {
-  position: relative;
+.vote-display-wrapper{
   display: inline-block;
-  height: 50px;
-  width: 50px;
-}
-
-/* move out to my */
-.avatar-rating {
-  width: 16px;
-  height: 16px;
-  position: absolute;
-  bottom: 3px;
-  right: 0px;
-  border-radius: 8px;
-  color: #fff;
-  padding-left: 3.5px;
-  font-size: 0.5em;
-}
-
-.C {
-  background-color: #16c8f2;
-}
-
-.A {
-  background-color: #4083be;
-}
-
-.T, .G, .D {
-  background-color: #9cbfdd;
 }

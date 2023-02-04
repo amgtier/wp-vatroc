@@ -1,0 +1,33 @@
+.position-display-wrapper {
+    position: relative;
+}
+
+.b-avatar{
+    border-radius: 50px !important;
+    height: 50px !important;
+    width: 50px !important;
+}
+
+.avatar-rating {
+    width: 16px;
+    height: 16px;
+    position: absolute;
+    bottom: 3px;
+    right: 0px;
+    border-radius: 8px;
+    color: #fff;
+    padding-left: 3.5px;
+    font-size: 0.5em;
+}
+
+.C {
+    background-color: #16c8f2;
+}
+
+.A {
+    background-color: #4083be;
+}
+
+.T, .G, .D {
+    background-color: #9cbfdd;
+}
