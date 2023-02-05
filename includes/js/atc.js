@@ -1,4 +1,5 @@
 jQuery(document).ready( ($) => {
+  console.log(ajax_object);
     if( $( ".sess-set-as" ).length ){
       ajax_sess_set_as( $ );
     }

@@ -16,7 +16,7 @@ class VATROC_ATC {
 
 
     public static function enqueue_script() {
-        wp_enqueue_script( 'vatroc-atc', plugin_dir_url( VATROC_PLUGIN_FILE ) . 'includes/shortcodes/atc.js', array( 'jquery' ), null, true );
+        wp_enqueue_script( 'vatroc-atc', plugin_dir_url( VATROC_PLUGIN_FILE ) . 'includes/js/atc.js', array( 'jquery' ), null, true );
         VATROC::enqueue_ajax_object( 'vatroc-atc' );
     }
 
@@ -24,7 +24,7 @@ class VATROC_ATC {
     public static function get_timeline_link( $vatsim_id = null, $uid = null ) {
         $vatsim_id = $vatsim_id ?: $_GET[ "who" ];
         $uid = $uid ?: $_GET[ "u" ];
-        return "?who=" . $vatsim_id . ($uid != null ? "&u=" . $uid : null) . "&timeline";
+        return "?timeline&who=" . $vatsim_id . ($uid != null ? "&u=" . $uid : null) . "";
     }
 
 
@@ -349,33 +349,42 @@ class VATROC_ATC {
     }
 
 
-    private static function get_timeline_from_metadata( $uid ) {
+    private static function get_timeline_from_metadata( $uids ) {
+        $arr_uids = explode( ",", $uids );
+        $uid = $arr_uids[0];
+
         ob_start();
-        $last_date = 0;
+        $last_dates = [];
 ?>
         <table>
         <thead>
-        <th></th><th>date</th>
+        <th></th>
+        <?php foreach( $arr_uids as $_ => $uid): ?>
+            <th>date ( <?php echo get_user_meta( $uid, "vatroc_vatsim_uid", true ); ?>)</th>
+        <?php endforeach; ?>
         </thead>
-        <?php foreach ( VATROC::$atc_dates_in_sess as $key => $value ){
-            $date = get_user_meta( $uid, "vatroc_date_" . $key , true );
-            $date_timestamp = strtotime( $date );
-            $delta = 0;
-            if ( $date != null ){
-                if( $last_date > 0 ){
-                    $delta = ( $date_timestamp - $last_date ) / 86400;
-                }
-                $last_date = $date_timestamp;
-            } else {
-                $last_date = 0;
-            }
-            ?>
+        <?php foreach ( VATROC::$atc_dates_in_sess as $key => $value ): 
+?>
             <tr>
                 <td><?php echo $value; ?></td>
-                <td><?php echo $date; ?> <?php echo $delta > 0 ? "(" . $delta . " days )" : ""; ?></td>
+<?php
+                foreach ( $arr_uids as $_ => $uid ):
+                    $date = get_user_meta( $uid, "vatroc_date_" . $key , true );
+                    $date_timestamp = strtotime( $date );
+                    $delta = 0;
+                    if ( $date != null ){
+                        if( $last_dates[ $uid ] > 0 ){
+                            $delta = ( $date_timestamp - $last_dates[ $uid ] ) / 86400;
+                        }
+                        $last_dates[ $uid ] = $date_timestamp;
+                    } else {
+                        $last_dates[ $uid ] = 0;
+                    }
+?>
+                    <td><?php echo $date; ?> <?php echo $delta > 0 ? "(" . $delta . " days )" : ""; ?></td>
+                <?php endforeach; ?>
             </tr>
-            <?php
-        }
+        <?php endforeach;
         return ob_get_clean() . "</table>";
 
     }

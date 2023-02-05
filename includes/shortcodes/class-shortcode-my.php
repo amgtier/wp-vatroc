@@ -95,7 +95,17 @@ class VATROC_Shortcode_My {
         $uid = $_POST[ "user" ];
         $date = $_POST[ "date" ];
         $key = $_POST[ "key" ];
+        
+        VATROC::log( sprintf( "%s updated %s %s. old: %s; new: %s.",
+            get_current_user_id(), 
+            $uid,
+            $key,
+            get_user_meta( $uid, "vatroc_date_" . $key, true ),
+            $date)
+        );
+
         update_user_meta( $uid, "vatroc_date_" . $key, $date );
+        
         wp_die();
     }
 };
