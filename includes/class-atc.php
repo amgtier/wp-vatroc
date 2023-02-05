@@ -43,38 +43,41 @@ class VATROC_ATC {
                 $hours_at[ $sess->rating ][ "OJT" ] += $sess->minutes_on_callsign;
             }
         }
+        ob_start();
+?>
 
-        $ret .= sprintf( "<a href='/atc/' class='btn btn-success'>ATC List</a>", $uid );
-        $ret .= sprintf( "<a href='?who=%s&refresh=true' class='btn btn-success'>Refresh</a>", $uid );
-        $ret .= sprintf( "<a href='?who=%s%s&timeline' class='btn btn-success'>Timeline</a>", 
-            $uid, 
-            $u != null ? "&u=" . $u : null
-        );
-        if ( $events_show_all ) {
-            $ret .= sprintf( "<a href='?who=%s' class='btn btn-success'>Show Active Events</a>", $uid );
-        } else {
-            $ret .= sprintf( "<a href='?who=%s&event=all' class='btn btn-success'>Show All Events</a>", $uid );
-        }
-        $ret .= self::print_hours_at( $hours_at );
-        $ret .= self::print_events_list( $sessions, $events_show_all );
-        $ret .= self::print_sessions( $sessions );
+        <a href='/atc/' class='btn btn-success'>ATC List</a>
+        <a href='?who=<?php echo $uid; ?>&refresh=true' class='btn btn-success'>Refresh</a>
+        <a href='?who=<?php echo $uid . ($u != null ? "&u=" . $u : null); ?>&timeline' class='btn btn-success'
+        >Timeline</a>
+        <?php if ( $events_show_all ): ?>
+            <a href='?who=<?php echo $uid; ?>' class='btn btn-success'>Show Active Events</a>
+        <?php else: ?>
+            <a href='?who=<?php echo $uid; ?>&event=all' class='btn btn-success'>Show All Events</a>
+<?php 
+        endif;
+        echo self::print_hours_at( $hours_at );
+        echo self::print_events_list( $sessions, $events_show_all );
+        echo self::print_sessions( $sessions );
 
-        return $ret;
+        return ob_get_clean();
     }
 
 
     public static function atc_timeline( $uid, $u = null ) {
         self::enqueue_script();
         $sessions = array_reverse( self::get_sessions( $uid, $load_from_db ) );
-        $ret = "";
-        $ret .= sprintf( "<a href='/atc/' class='btn btn-success'>ATC List</a>", $uid );
-        $ret .= sprintf( "<a href='?who=%s' class='btn btn-success'>Activity</a>", $uid );
-        if( $u != null ) {
-            $ret .= self::get_timeline_from_metadata( $u );
+        ob_start();
+?>
+        <a href='/atc/' class='btn btn-success'>ATC List</a>
+        <a href='?who=<?php echo $uid; ?>' class='btn btn-success'>Activity</a>
+<?php 
+        if( $u != null ){
+            echo self::get_timeline_from_metadata( $u );
         }
-        $ret .= self::gen_timeline_from_sessions( $sessions );
+        echo self::gen_timeline_from_sessions( $sessions );
         
-        return $ret;
+        return ob_get_clean();
     }
 
 
@@ -88,14 +91,18 @@ class VATROC_ATC {
             "post_type" => "tribe_events",
             "numberposts" => -1
         ] ) );
-        $ret = "<h1 id='event-list'>Event List</h1>";
-        $ret .= "<table>";
-        $ret .= "<thead>";
-        $ret .= "<th>date</th>";
-        $ret .= "<th>time</th>";
-        $ret .= "<th>title</th>";
-        $ret .= "<th>(hr)callsign [ho recv/init]</th>";
-        $ret .= "</thead>";
+
+        ob_start();
+?>
+        <h1 id='event-list'>Event List</h1>
+        <table>
+            <thead>
+                <th>date</th>
+                <th>time</th>
+                <th>title</th>
+                <th>(hr)callsign [ho recv/init]</th>
+            </thead>
+<?php
         $ptr_evt = 0;
         $ptr_sess = 0;
         $len_evt = count( $events );
@@ -119,92 +126,108 @@ class VATROC_ATC {
                 strtotime( $sessions[ $ptr_sess ]->end ) > $t_evt_start;
 
             if ( $events_show_all || $event_active ) {
-                $ret .= "<tr>";
-                $ret .= sprintf( "<td>%s</td><td>%s</td><td><a href='%s'>%s</a></td>", 
-                    date( "Y-m-d", $t_evt_start ) ,
-                    date( "H:i-", $t_evt_start ) . date( "H:i", $t_evt_end ),
-                    get_permalink( $evt ), 
-                    get_the_title( $evt ) 
-                );
+?>
+                <tr>
+                    <td><?php echo date( "Y-m-d", $t_evt_start ); ?></td>
+                    <td><?php echo date( "H:i-", $t_evt_start ) . date( "H:i", $t_evt_end ); ?></td>
+                    <td><a href='<?php echo get_permalink( $evt ); ?>'><?php echo get_the_title( $evt ) ; ?></a></td>
+<?php
                 if ( $event_active ) {
                     $evt_count_active[ date( "Y", $t_evt_start ) ] += 1;
-                    $ret .= "<td>";
+?>
+                    <td>
+<?php
                     $first = true;
                     while( $ptr_sess < $len_sess && strtotime( $sessions[ $ptr_sess ]->start ) <= $t_evt_end && 
                         strtotime( $sessions[ $ptr_sess]->end ) >= $t_evt_start ) {
                         if ( !$first ){
-                            $ret .= "<br/>";
+?>
+                                <br />
+<?php
                         }
                         $first = false;
-                        $ret .= sprintf( "(%s)<a href='https://stats.vatsim.net/connection/atc-details/%s' target='_blank'>%s </a>[%s/%s]", 
-                            round( ( strtotime( $sessions[ $ptr_sess ]->end ) - strtotime( $sessions[ $ptr_sess ]->start ) ) / 3600, 1),
-                            $sessions[ $ptr_sess ]->connection_id, 
-                            $sessions[ $ptr_sess ]->callsign,
-                            $sessions[ $ptr_sess ]->handoffsreceived,
-                            $sessions[ $ptr_sess ]->handoffsinitiated,
-                        );
+?>
+                            (<?php echo 
+                            round( ( strtotime( $sessions[ $ptr_sess ]->end ) - strtotime( $sessions[ $ptr_sess ]->start ) ) / 3600, 1);
+                            ?>)<a 
+                                href='https://stats.vatsim.net/connection/atc-details/<?php echo $sessions[ $ptr_sess ]->connection_id; ?>' 
+                                target='_blank'
+                                ><?php echo $sessions[ $ptr_sess ]->callsign; ?> </a>[<?php echo $sessions[ $ptr_sess ]->handoffsreceived; 
+                                ?>/<?php echo $sessions[ $ptr_sess ]->handoffsinitiated; ?>]",
+<?php
                         $ptr_sess += 1;
                     }
-                    $ret .= "</td>";
+?>
+                    </td>
+<?php
                 } else {
-                    $ret .= "<td></td>";
+?>
+                    <td></td>
+<?php
                 }
-                $ret .= "</tr>";
+?>
+                    </tr>
+<?php
             }
         }
-        $ret .= "</table>";
+?>
+        </table>
 
-        $stats = "<h1 id='event-stats'>Event Statistics</h1>";
-        $stats .= "<table class='bordered'>";
-        $stats .= "<thead>";
-        $stats .= "<th></th>";
-        foreach( $evt_count as $year=>$cnt ) {
-            // $stats .= sprintf( "<td><tr>%s</tr><tr>%s</tr><tr>%s</tr></td>", $year, $cnt );
-            $stats .= sprintf( "<th>%s</th>", $year );
-        }
-        $stats .= "</thead>";
-        $stats .= "<tr>";
-        $stats .= "<th>active</th>";
-        foreach( $evt_count as $year=>$cnt ) {
-            $stats .= sprintf( "<td>%s</td>", $evt_count_active[ $year ] );
-        }
-        $stats .= "</tr>";
-        $stats .= "<tr>";
-        $stats .= "<th>total</th>";
-        foreach( $evt_count as $year=>$cnt ) {
-            $stats .= sprintf( "<td>%s</td>", $cnt );
-        }
-        $stats .= "</tr>";
-        $stats .= "</table>";
+        <h1 id='event-stats'>Event Statistics</h1>
+        <table class='bordered'>
+            <thead>
+            <th></th>
+        <?php foreach( $evt_count as $year=>$cnt ):
+            // $stats .= sprintf( "<td><tr>%s</tr><tr>%s</tr><tr>%s</tr></td>", $year, $cnt ); ?> 
+            <th><?php echo $year; ?></th>
+        <?php endforeach; ?>
+        </thead>
+        <tr>
+        <th>active</th>
+        <?php foreach( $evt_count as $year=>$cnt ): ?>
+            <td><?php echo $evt_count_active[ $year ]; ?></td>
+        <?php endforeach; ?>
+        </tr>
+        <tr>
+        <th>total</th>
+        <?php foreach( $evt_count as $year=>$cnt ): ?>
+            <td><?php echo $cnt; ?></td>
+        <?php endforeach; ?>
+        </tr>
+        </table>
+<?php
 
-        return $stats . $ret;
+        return ob_get_clean();
     }
 
     
     private static function print_hours_at( $hours_at ) {
         $heads = [];
-        $ret = "<h1>Hour Statistics</h1>";
-        $ret .= "<table>";
-        $ret .= "<thead>";
-        $ret .= "<th></th>";
-        foreach( $hours_at as $rating=>$data ) {
-            $ret .= sprintf( "<th>%s</th>", VATROC::$vatsim_rating[ $rating ] );
-        }
-        $ret .= "</thead>";
-        $ret .= "<tr>";
-        $ret .= "<th>Total</th>";
-        foreach( $hours_at as $rating=>$data ) {
-            $ret .= sprintf( "<td>%s (hr)</td>", intval( $data[ "total" ] / 60 ) );
-        }
-        $ret .= "</tr>";
-        $ret .= "<tr>";
-        $ret .= "<th>OJT</th>";
-        foreach( $hours_at as $rating=>$data ) {
-            $ret .= sprintf( "<td>%s (hr)</td>", intval( $data[ "OJT" ] / 60 ) );
-        }
-        $ret .= "</tr>";
-        $ret .= "</table>";
-        return $ret;
+        ob_start();
+    ?>
+        <h1>Hour Statistics</h1>
+        <table>
+        <thead>
+        <th></th>
+        <?php foreach( $hours_at as $rating=>$data ): ?>
+            <th><?php echo VATROC::$vatsim_rating[ $rating ]; ?></th>
+        <?php endforeach; ?>
+        </thead>
+        <tr>
+        <th>Total</th>
+        <?php foreach( $hours_at as $rating=>$data ): ?>
+            <td><?php echo intval( $data[ "total" ] / 60 ); ?> (hr)</td>
+        <?php endforeach; ?>
+        </tr>
+        <tr>
+        <th>OJT</th>
+        <?php foreach( $hours_at as $rating=>$data ): ?>
+            <td><?php echo intval( $data[ "OJT" ] / 60 ); ?> (hr)</td>
+        <?php endforeach; ?>
+        </tr>
+        </table>
+    <?php
+        return ob_get_clean();
     }
 
 
