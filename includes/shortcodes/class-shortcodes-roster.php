@@ -25,9 +25,9 @@ class VATROC_Shortcode_Roster {
         if ( count( $_GET ) > 0 ) { 
             if ( isset( $_GET[ "who" ] ) && is_numeric( $_GET[ "who" ] ) ) {
                 if ( isset( $_GET[ "timeline" ] ) ) {
-                    return VATROC_Shortcode_ATC::atc_timeline( $_GET[ "who" ], $_GET[ "u" ] );
+                    return VATROC_ATC::atc_timeline( $_GET[ "who" ], $_GET[ "u" ] );
                 }
-                return VATROC_Shortcode_ATC::atc_activity( $_GET[ "who" ], $_GET[ "u" ] );
+                return VATROC_ATC::atc_activity( $_GET[ "who" ], $_GET[ "u" ] );
             }
             if ( isset( $_GET[ "timeline" ] ) ) {
                 return self::output_atc_timeline();

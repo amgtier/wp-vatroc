@@ -5,18 +5,18 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 
-class VATROC_Shortcode_ATC {
+class VATROC_ATC {
     private static $meta_prefix = "vatroc_";
 
 
     public static function init() {
-        add_action( 'wp_enqueue_script', 'VATROC_Shortcode_ATC::enqueue_script', 1000000001 );
+        add_action( 'wp_enqueue_script', 'VATROC_ATC::enqueue_script', 1000000001 );
         self::enqueue_script();
     }
 
 
     public static function enqueue_script() {
-        wp_enqueue_script( 'vatroc-atc', plugin_dir_url( VATROC_PLUGIN_FILE ) . 'includes/shortcodes/js/atc.js', array( 'jquery' ), null, true );
+        wp_enqueue_script( 'vatroc-atc', plugin_dir_url( VATROC_PLUGIN_FILE ) . 'includes/shortcodes/atc.js', array( 'jquery' ), null, true );
         VATROC::enqueue_ajax_object( 'vatroc-atc' );
     }
 
@@ -386,4 +386,4 @@ class VATROC_Shortcode_ATC {
     }
 };
 
-VATROC_Shortcode_ATC::init();
+VATROC_ATC::init();
