@@ -122,7 +122,7 @@ class VATROC_Shortcode_Roster {
             $ret .= sprintf( "<tr><td>%s</td><td>%s</td><td>%s</td><td>%s</td>", 
                 $atc[ "vatroc_vatsim_uid" ], 
                 ( current_user_can( VATROC::$atc_options ) ) ? 
-              sprintf( "<a href='?who=%s&u=%s' target='_blank'>%s</a>", $atc[ "vatroc_vatsim_uid" ], $atc[ "ID" ], $atc[ "display_name" ] )  : $atc[ "display_name" ], 
+              sprintf( "<a href='%s' target='_blank'>%s</a>", VATROC_ATC::get_activity_link( $atc[ "vatroc_vatsim_uid" ], $atc[ "ID" ] ), $atc[ "display_name" ] ) : $atc[ "display_name" ], 
                 VATROC::$atc_position[ $atc[ "vatroc_position" ] ],
                 VATROC::$vatsim_rating[ $atc[ "vatroc_vatsim_rating" ] ]
             );
@@ -137,7 +137,7 @@ class VATROC_Shortcode_Roster {
                         $ret .= "<td>" . $atc[ "vatroc_date_twr_ojt" ] . "</td><td>" . $atc[ "vatroc_date_twr_cpt" ] . "</td>";
                         $ret .= "<td>" . $atc[ "vatroc_date_app_ojt" ] . "</td><td>" . $atc[ "vatroc_date_app_cpt" ] . "</td>";
                         $ret .= "<td>" . $atc[ "vatroc_date_ctr_ojt" ] . "</td><td>" . $atc[ "vatroc_date_ctr_cpt" ] . "</td>";
-                        $ret .= sprintf( "<td><a target='_blank' href='?who=%s&u=%s&timeline'>Details</a></td>", $atc[ "vatroc_vatsim_uid" ], $atc[ "ID" ] );
+                        $ret .= sprintf( "<td><a target='_blank' href='$s'>Details</a></td>", VATROC_ATC::get_timeline_link( $atc[ "vatroc_vatsim_uid" ], $atc[ "ID" ] ) );
                     }
                     break;
             }

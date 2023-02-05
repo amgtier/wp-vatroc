@@ -21,6 +21,20 @@ class VATROC_ATC {
     }
 
 
+    public static function get_timeline_link( $vatsim_id = null, $uid = null ) {
+        $vatsim_id = $vatsim_id ?: $_GET[ "who" ];
+        $uid = $uid ?: $_GET[ "u" ];
+        return "?who=" . $vatsim_id . ($uid != null ? "&u=" . $uid : null) . "&timeline";
+    }
+
+
+    public static function get_activity_link( $vatsim_id = null, $uid = null ) {
+        $vatsim_id = $vatsim_id ?: $_GET[ "who" ];
+        $uid = $uid ?: $_GET[ "u" ];
+        return "?who=$vatsim_id&u=$uid";
+    }
+
+
     public static function atc_activity( $uid, $u = null ){
         $load_from_db = true;
         $last_save_t = get_post_meta( get_the_ID(), VATROC::$session_t_meta_prefix . $uid, true );
@@ -48,8 +62,7 @@ class VATROC_ATC {
 
         <a href='/atc/' class='btn btn-success'>ATC List</a>
         <a href='?who=<?php echo $uid; ?>&refresh=true' class='btn btn-success'>Refresh</a>
-        <a href='?who=<?php echo $uid . ($u != null ? "&u=" . $u : null); ?>&timeline' class='btn btn-success'
-        >Timeline</a>
+        <a href='<?php echo self::get_timeline_link(); ?>' class='btn btn-success'>Timeline</a>
         <?php if ( $events_show_all ): ?>
             <a href='?who=<?php echo $uid; ?>' class='btn btn-success'>Show Active Events</a>
         <?php else: ?>
@@ -70,7 +83,7 @@ class VATROC_ATC {
         ob_start();
 ?>
         <a href='/atc/' class='btn btn-success'>ATC List</a>
-        <a href='?who=<?php echo $uid; ?>' class='btn btn-success'>Activity</a>
+        <a href='<?php echo self::get_activity_link(); ?>' class='btn btn-success'>Activity</a>
 <?php 
         if( $u != null ){
             echo self::get_timeline_from_metadata( $u );
@@ -338,16 +351,28 @@ class VATROC_ATC {
 
     private static function get_timeline_from_metadata( $uid ) {
         ob_start();
+        $last_date = 0;
 ?>
         <table>
         <thead>
         <th></th><th>date</th>
         </thead>
         <?php foreach ( VATROC::$atc_dates_in_sess as $key => $value ){
+            $date = get_user_meta( $uid, "vatroc_date_" . $key , true );
+            $date_timestamp = strtotime( $date );
+            $delta = 0;
+            if ( $date != null ){
+                if( $last_date > 0 ){
+                    $delta = ( $date_timestamp - $last_date ) / 86400;
+                }
+                $last_date = $date_timestamp;
+            } else {
+                $last_date = 0;
+            }
             ?>
             <tr>
                 <td><?php echo $value; ?></td>
-                <td><?php echo get_user_meta( $uid, "vatroc_date_" . $key , true );?></td>
+                <td><?php echo $date; ?> <?php echo $delta > 0 ? "(" . $delta . " days )" : ""; ?></td>
             </tr>
             <?php
         }
