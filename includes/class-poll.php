@@ -37,7 +37,7 @@ class VATROC_Poll {
             "timestamp" => time()
             ] );
 
-        $votes = self::make_votes( $post_id );
+        $votes = self::prepare_votes( $post_id );
         echo wp_json_encode( array(
             "name" => $name,
             "value" => [

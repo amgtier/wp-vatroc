@@ -8,20 +8,18 @@ if ( ! defined( 'ABSPATH' ) ) {
 class VATROC_Shortcode_Poll extends VATROC_Poll {
     public static function init() {
         add_shortcode( 'vatroc_poll', 'VATROC_Shortcode_Poll::output_poll' );
+        add_action( 'wp_enqueue_script', 'VATROC_Shortcode_Poll::enqueue_script', 1000000001 );
     }
 
 
     public static function enqueue_script() {
-        add_action( 'wp_enqueue_script', 'VATROC_Shortcode_Poll::enqueue_script', 1000000001 );
         wp_enqueue_script( 'vatroc-poll', plugin_dir_url( VATROC_PLUGIN_FILE ) . 'includes/shortcodes/js/poll.js', array( 'jquery' ), null, true );
         wp_enqueue_style( 'vatroc-poll', plugin_dir_url( VATROC_PLUGIN_FILE ) . 'includes/shortcodes/css/poll.css' );
-        VATROC::enqueue_ajax_object();
+        VATROC::enqueue_ajax_object( 'vatroc-poll' );
     }
 
 
     public static function output_poll( $atts ) {
-        self::enqueue_script();
-
         if (isset( $_GET[ 'log' ] )){
             return self::output_log( get_the_ID() );
         }

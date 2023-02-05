@@ -14,5 +14,5 @@
 <?php
     wp_enqueue_script( 'vatroc-poll', plugin_dir_url( VATROC_PLUGIN_FILE ) . 'includes/shortcodes/js/poll.js', array( 'jquery' ), null, true );
     wp_enqueue_style( 'vatroc-poll', plugin_dir_url( VATROC_PLUGIN_FILE ) . 'includes/shortcodes/css/poll.css' );
-    VATROC::enqueue_ajax_object( $page_id );
+    VATROC::enqueue_ajax_object( 'vatroc-poll', $page_id );
 ?>
