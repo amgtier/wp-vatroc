@@ -18,7 +18,6 @@ class VATROC_Admin {
         include_once( VATROC_ABSPATH . '/admin/includes/class-admin-curr_status.php' );
         include_once( VATROC_ABSPATH . '/admin/includes/class-admin-magic_charts.php' );
         include_once( VATROC_ABSPATH . '/admin/vatroc-admin-hook-functions.php' );
-        include_once( VATROC_ABSPATH . '/admin/includes/class-admin-atc.php' );
     }
 
 
