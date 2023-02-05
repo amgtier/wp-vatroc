@@ -137,9 +137,9 @@ class VATROC extends VATROC_Constants {
     }
 
     
-    public static function enqueue_ajax_object( $page_id = null ) {
+    public static function enqueue_ajax_object( $handler, $page_id = null ) {
         wp_localize_script( 
-            'vatroc-poll', 
+            $handler, 
             'ajax_object', 
             [ 
                 'ajax_url' => admin_url( 'admin-ajax.php' ), 

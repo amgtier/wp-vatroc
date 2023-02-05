@@ -51,4 +51,28 @@ class VATROC_Constants {
         "10" => "CTR OJT",
         "11" => "CTR"
     );
+
+    public static $atc_dates_offline = array(
+        "application" => "Application",
+        "enrolled" => "Trainee Enrolled",
+        "exam" => "Exam",
+        "del_sim" => "DEL SIM",
+        "gnd_sim" => "GND SIM",
+        "twr_sim" => "TWR SIM",
+        "app_sim" => "APP SIM",
+        "ctr_sim" => "CTR SIM",
+    );
+
+    public static $atc_dates_in_sess = array(
+        "del_ojt" => "DEL OJT",
+        "del_cpt" => "DEL CPT",
+        "gnd_ojt" => "GND OJT",
+        "gnd_cpt" => "GND CPT",
+        "twr_ojt" => "TWR OJT",
+        "twr_cpt" => "TWR CPT",
+        "app_ojt" => "APP OJT",
+        "app_cpt" => "APP CPT",
+        "ctr_ojt" => "CTR OJT",
+        "ctr_cpt" => "CTR CPT",
+    );
 };

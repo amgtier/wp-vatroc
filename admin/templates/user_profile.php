@@ -81,139 +81,24 @@
   </table>
   <h3 id="profile-vatroc-progress-dates">VATROC Progress Dates</h3>
   <table class="form-table">
+    <?php foreach ( VATROC::$atc_dates_offline as $key => $label ): ?>
     <tr>
       <th>
-            <label for="date_application">Application Date</label>
+            <label for="date_<?php echo $key; ?>"><?php echo $label; ?></label>
       </th>
       <td>
-<?php my_user_profile_maybe_can_edit( $user, "date_application", "date" ); ?>
+        <?php my_user_profile_maybe_can_edit( $user, "date_$key", "date" ); ?>
         </td>
     </tr>
+    <?php endforeach; ?>
+    <?php foreach ( VATROC::$atc_dates_in_sess as $key => $label ): ?>
     <tr>
       <th>
-            <label for="date_exam">Exam Date</label>
+            <label for="date_<?php echo $key; ?>"><?php echo $label; ?></label>
       </th>
       <td>
-<?php my_user_profile_maybe_can_edit( $user, "date_exam", "date" ); ?>
+        <?php my_user_profile_maybe_can_edit( $user, "date_$key", "date" ); ?>
         </td>
     </tr>
-    <tr>
-      <th>
-            <label for="date_del_sim">Date DEL SIM</label>
-      </th>
-      <td>
-<?php my_user_profile_maybe_can_edit( $user, "date_del_sim", "date" ); ?>
-        </td>
-    </tr>
-    <tr>
-      <th>
-            <label for="date_del_ojt">Date DEL OJT</label>
-      </th>
-      <td>
-<?php my_user_profile_maybe_can_edit( $user, "date_del_ojt", "date" ); ?>
-        </td>
-    </tr>
-    <tr>
-      <th>
-            <label for="date_del_cpt">Date DEL CPT</label>
-      </th>
-      <td>
-<?php my_user_profile_maybe_can_edit($user,  "date_del_cpt", "date" ); ?>
-        </td>
-    </tr>
-    <tr>
-      <th>
-            <label for="date_gnd_sim">Date GND SIM</label>
-      </th>
-      <td>
-<?php my_user_profile_maybe_can_edit( $user, "date_gnd_sim", "date" ); ?>
-        </td>
-    </tr>
-    <tr>
-      <th>
-            <label for="date_gnd_ojt">Date GND OJT</label>
-      </th>
-      <td>
-<?php my_user_profile_maybe_can_edit( $user, "date_gnd_ojt", "date" ); ?>
-        </td>
-    </tr>
-    <tr>
-      <th>
-            <label for="date_gnd_cpt">Date GND CPT</label>
-      </th>
-      <td>
-<?php my_user_profile_maybe_can_edit( $user, "date_gnd_cpt", "date" ); ?>
-        </td>
-    </tr>
-    <tr>
-      <th>
-            <label for="date_twr_sim">Date TWR SIM</label>
-      </th>
-      <td>
-<?php my_user_profile_maybe_can_edit( $user, "date_twr_sim", "date" ); ?>
-        </td>
-    </tr>
-    <tr>
-      <th>
-            <label for="date_twr_ojt">Date TWR OJT</label>
-      </th>
-      <td>
-<?php my_user_profile_maybe_can_edit( $user, "date_twr_ojt", "date" ); ?>
-        </td>
-    </tr>
-    <tr>
-      <th>
-            <label for="date_twr_cpt">Date TWR CPT</label>
-      </th>
-      <td>
-<?php my_user_profile_maybe_can_edit( $user, "date_twr_cpt", "date" ); ?>
-        </td>
-    </tr>
-    <tr>
-      <th>
-            <label for="date_app_sim">Date APP SIM</label>
-      </th>
-      <td>
-<?php my_user_profile_maybe_can_edit( $user, "date_app_sim", "date" ); ?>
-        </td>
-    </tr>
-    <tr>
-      <th>
-            <label for="date_app_ojt">Date APP OJT</label>
-      </th>
-      <td>
-<?php my_user_profile_maybe_can_edit( $user, "date_app_ojt", "date" ); ?>
-        </td>
-    </tr>
-    <tr>
-      <th>
-            <label for="date_app_cpt">Date APP CPT</label>
-      </th>
-      <td>
-<?php my_user_profile_maybe_can_edit( $user, "date_app_cpt", "date" ); ?>
-        </td>
-    </tr>
-    <tr>
-      <th>
-            <label for="date_ctr_sim">Date CTR SIM</label>
-      </th>
-      <td>
-<?php my_user_profile_maybe_can_edit( $user, "date_ctr_sim", "date" ); ?>
-        </td>
-    </tr>
-    <tr>
-      <th>
-            <label for="date_ctr_ojt">Date CTR OJT</label>
-      </th>
-      <td>
-<?php my_user_profile_maybe_can_edit( $user, "date_ctr_ojt", "date" ); ?>
-        </td>
-    </tr>
-    <tr>
-      <th>
-            <label for="date_ctr_cpt">Date CTR CPT</label>
-      </th>
-      <td>
-<?php my_user_profile_maybe_can_edit( $user, "date_ctr_cpt", "date" ); ?>
-        </td>
-    </tr>
+    <?php endforeach; ?>
+  </table>

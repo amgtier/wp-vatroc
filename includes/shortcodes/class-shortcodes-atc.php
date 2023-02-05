@@ -10,6 +10,14 @@ class VATROC_Shortcode_ATC {
 
 
     public static function init() {
+        add_action( 'wp_enqueue_script', 'VATROC_Shortcode_ATC::enqueue_script', 1000000001 );
+        self::enqueue_script();
+    }
+
+
+    public static function enqueue_script() {
+        wp_enqueue_script( 'vatroc-atc', plugin_dir_url( VATROC_PLUGIN_FILE ) . 'includes/shortcodes/js/atc.js', array( 'jquery' ), null, true );
+        VATROC::enqueue_ajax_object( 'vatroc-atc' );
     }
 
 
@@ -56,6 +64,7 @@ class VATROC_Shortcode_ATC {
 
 
     public static function atc_timeline( $uid, $u = null ) {
+        self::enqueue_script();
         $sessions = array_reverse( self::get_sessions( $uid, $load_from_db ) );
         $ret = "";
         $ret .= sprintf( "<a href='/atc/' class='btn btn-success'>ATC List</a>", $uid );
@@ -63,7 +72,8 @@ class VATROC_Shortcode_ATC {
         if( $u != null ) {
             $ret .= self::get_timeline_from_metadata( $u );
         }
-        // $ret .= self::gen_timeline_from_sessions( $sessions );
+        $ret .= self::gen_timeline_from_sessions( $sessions );
+        
         return $ret;
     }
 
@@ -198,35 +208,63 @@ class VATROC_Shortcode_ATC {
     }
 
 
-    private static function print_sessions( $sessions ) {
-        $ret = "<h1 id='sessions'>Sessions</h1>";
-        $ret .= "<table>";
-        $ret .= "<thead>";
-        $ret .= "<th>date</th>";
-        $ret .= "<th>time</th>";
-        $ret .= "<th>duration</th>";
-        $ret .= "<th>rating</th>";
-        $ret .= "<th>callsign</th>";
-        $ret .= "<th>tracked</th>";
-        $ret .= "<th>h/o sent</th>";
-        $ret .= "<th>h/o recv</th>";
-        $ret .= "</thead>";
+    private static function print_sessions( $sessions ) {        
+
+        $atc_dates = self::get_atc_dates( $_GET[ "u" ]);
+
+        ob_start();
+?>
+        <h1 id='sessions'>Sessions</h1>
+        <table>
+            <thead>
+                <th>date</th>
+                <th>time</th>
+                <th>duration</th>
+                <th>rating</th>
+                <th>callsign</th>
+                <th>tracked</th>
+                <th>h/o sent</th>
+                <th>h/o recv</th>
+                <th>action</th>
+            </thead>
+<?php
         foreach ( $sessions as $idx=>$sess ) {
             if ( $sess->minutes_on_callsign < 10 ) { continue; }
-            $ret .= sprintf( "<tr><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>", 
-                date( "Y-m-d", strtotime( $sess->start ) ),
-                date( "h:i-", strtotime( $sess->start ) ) .
-                date( "h:i", strtotime( $sess->end ) ),
-                round( $sess->minutes_on_callsign / 60, 1 ), 
-                VATROC::$vatsim_rating[ $sess->rating ],
-                $sess->callsign,
-                $sess->aircrafttracked,
-                $sess->handoffsinitiated,
-                $sess->handoffsreceived - $sess->handoffsrefused
-            );
+            $sess_date = date( "Y-m-d", strtotime( $sess->start ) );
+?>
+        <tr>
+            <td><?php echo $sess_date; ?></td>
+            <td><?php echo date( "h:i-", strtotime( $sess->start ) ) .
+            date( "h:i", strtotime( $sess->end ) ); ?></td>
+            <td><?php echo round( $sess->minutes_on_callsign / 60, 1 ); ?></td>
+            <td><?php echo VATROC::$vatsim_rating[ $sess->rating ]; ?></td>
+            <td><?php echo $sess->callsign; ?></td>
+            <td><?php echo $sess->aircrafttracked; ?></td>
+            <td><?php echo $sess->handoffsinitiated; ?></td>
+            <td><?php echo $sess->handoffsreceived - $sess->handoffsrefused; ?></td>
+            <td><?php echo self::sess_action( $sess, $sess_date, $atc_dates ); ?></td>
+        </tr>
+<?php
         }
-        $ret .= "</table>";
+        $ret = ob_get_clean() . "</table>";
         return $ret;
+    }
+
+
+    private static function sess_action( $sess, $date, $atc_dates = null ) {
+        ob_start();
+?>
+        <select class='sess-set-as' name='sess-set-as' data-user='<?php echo  $_GET[ "u" ]; ?>' data-date='<?php echo $date; ?>'>
+            <option disabled selected>Set As</option>
+<?php
+        foreach( VATROC_Constants::$atc_dates_in_sess as $key => $value ){
+            $selected = $atc_dates != null ? $atc_dates[ $key ] == $date : false;
+?>
+            <option value='<?php echo $key; ?>' <?php echo !$selected ?: 'selected'; ?>
+            ><?php echo  $value; ?></option>
+<?php
+        }
+        return  ob_get_clean() . "</select>";
     }
 
 
@@ -239,16 +277,19 @@ class VATROC_Shortcode_ATC {
             $visibility[ "O_" . $pos ] = 0;
         };
 
-        $ret = "<h1 id='generated-timeline-sessions'>Generated Timeline Sessions</h1>";
-        $ret .= "<table>";
-        $ret .= "<thead>";
-        $ret .= "<th>date</th>";
-        $ret .= "<th>time</th>";
-        $ret .= "<th>duration</th>";
-        $ret .= "<th>rating</th>";
-        $ret .= "<th>callsign</th>";
-        $ret .= "<th>count</th>";
-        $ret .= "</thead>";
+        ob_start();
+?>
+        <h1 id='generated-timeline-sessions'>Generated Timeline Sessions</h1>
+        <table>
+            <thead>
+                <th>date</th>
+                <th>time</th>
+                <th>duration</th>
+                <th>rating</th>
+                <th>callsign</th>
+                <th>count</th>
+            </thead>
+<?php
         foreach ( $sessions as $idx=>$sess ) {
             if ( $sess->minutes_on_callsign < 10 ) { continue; }
             $suffix = substr( $sess->callsign, count( $sess->callsign ) - 6, 5 );
@@ -256,38 +297,38 @@ class VATROC_Shortcode_ATC {
                 $suffix = substr( $sess->callsign, count( $sess->callsign ) - 4, 3 );
             }
             if ( ++$visibility[ $suffix ] == 1 ){
-                $ret .= sprintf( "<tr><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>", 
-                    date( "Y-m-d", strtotime( $sess->start ) ),
-                    date( "h:i-", strtotime( $sess->start ) ) .
-                    date( "h:i", strtotime( $sess->end ) ),
-                    round( $sess->minutes_on_callsign / 60, 1 ), 
-                    VATROC::$vatsim_rating[ $sess->rating ],
-                    $sess->callsign,
-                    $visibility[ $suffix ] ,
-                );
+?>
+            <tr>
+                <td><?php echo date( "Y-m-d", strtotime( $sess->start ) ); ?></td>
+                <td><?php echo date( "h:i-", strtotime( $sess->start ) ) . date( "h:i", strtotime( $sess->end ) ); ?></td>
+                <td><?php echo round( $sess->minutes_on_callsign / 60, 1 ); ?></td>
+                <td><?php echo VATROC::$vatsim_rating[ $sess->rating ]; ?></td>
+                <td><?php echo $sess->callsign; ?></td>
+                <td><?php echo $visibility[ $suffix ]; ?></td>
+            </tr>
+<?php
             }
         }
-        $ret .= "</table>";
-        return $ret;
+        return ob_get_clean() . "</table>";
     }
 
 
     private static function get_timeline_from_metadata( $uid ) {
-        $ret = "";
-        $ret .= "<table>";
-        $ret .= "<thead>";
-        $ret .= "<th></th><th>date</th>";
-        $ret .= "</thead>";
-        $ret .= sprintf( "<tr><td>%s</td><td>%s</td></tr>", "GND_OJT", get_user_meta( $uid, "vatroc_date_gnd_ojt" , true ) );
-        $ret .= sprintf( "<tr><td>%s</td><td>%s</td></tr>", "GND_CPT", get_user_meta( $uid, "vatroc_date_gnd_cpt" , true ) );
-        $ret .= sprintf( "<tr><td>%s</td><td>%s</td></tr>", "TWR_OJT", get_user_meta( $uid, "vatroc_date_twr_ojt" , true ) );
-        $ret .= sprintf( "<tr><td>%s</td><td>%s</td></tr>", "TWR_CPT", get_user_meta( $uid, "vatroc_date_twr_cpt" , true ) );
-        $ret .= sprintf( "<tr><td>%s</td><td>%s</td></tr>", "APP_OJT", get_user_meta( $uid, "vatroc_date_app_ojt" , true ) );
-        $ret .= sprintf( "<tr><td>%s</td><td>%s</td></tr>", "APP_CPT", get_user_meta( $uid, "vatroc_date_app_cpt" , true ) );
-        $ret .= sprintf( "<tr><td>%s</td><td>%s</td></tr>", "CTR_OJT", get_user_meta( $uid, "vatroc_date_ctr_ojt" , true ) );
-        $ret .= sprintf( "<tr><td>%s</td><td>%s</td></tr>", "CTR_CPT", get_user_meta( $uid, "vatroc_date_ctr_cpt" , true ) );
-        $ret .= "</table>";
-        return $ret;
+        ob_start();
+?>
+        <table>
+        <thead>
+        <th></th><th>date</th>
+        </thead>
+        <?php foreach ( VATROC::$atc_dates_in_sess as $key => $value ){
+            ?>
+            <tr>
+                <td><?php echo $value; ?></td>
+                <td><?php echo get_user_meta( $uid, "vatroc_date_" . $key , true );?></td>
+            </tr>
+            <?php
+        }
+        return ob_get_clean() . "</table>";
 
     }
 
@@ -333,6 +374,15 @@ class VATROC_Shortcode_ATC {
         if ( $json_sessions->detail ){ return sprintf( "<h1>%s</h1>", $json_sessions->detail ); }
 
         return $json_sessions->results;
+    }
+
+    
+    private static function get_atc_dates( $uid ) {
+        $ret = [];
+        foreach( VATROC_Constants::$atc_dates_in_sess as $key => $val ) {
+            $ret[ $key ] = get_user_meta( $uid, "vatroc_date_" . $key , true );
+        }
+        return $ret;
     }
 };
 
