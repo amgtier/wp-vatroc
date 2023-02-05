@@ -86,7 +86,6 @@ class VATROC_Poll {
         $post_id = $_POST[ "id" ];
         $name = $_POST[ "name" ];
         $description = $_POST[ "value" ];
-        VATROC::dlog($_POST);
 
         $option_meta = self::update_option_meta( $post_id, $name, "description", $description );
         echo wp_json_encode( $option_meta );
@@ -222,14 +221,11 @@ class VATROC_Poll {
             self::get_dates( self::get_curr_month(), self::get_curr_year() ),
             self::get_dates( self::get_next_month(), self::get_next_year() ),
         );
-        VATROC::dlog( $dates );
         if ( $show_all ){
-            // VATROC::dlog( "show_ALL" );
             $dates = array_merge(
                 array_keys( $votes ),
                 $dates
             );
-            VATROC::dlog( $dates );
         }
         $dates = array_unique( $dates );
         usort( $dates, [ self, "sort_date"] );

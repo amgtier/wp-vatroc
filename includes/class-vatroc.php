@@ -84,8 +84,8 @@ class VATROC extends VATROC_Constants {
     }
 
 
-    public static function dlog(){
-        $log_path = plugin_dir_path( __DIR__ ) . "deLogVATROC.txt";
+    public static function dog(){
+        $log_path = plugin_dir_path( __DIR__ ) . "dog.txt";
         $prefix = 'debug';
         $identifier = null;
         if ( !file_exists( $log_path ) ) { fopen( $log_path, 'w' ); }
