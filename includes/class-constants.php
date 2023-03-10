@@ -39,7 +39,8 @@ class VATROC_Constants {
     );
 
     public static $atc_position = array(
-        "0" => "Applicant",
+        "-1" => "Applicant",
+        "0" => "None",
         "1" => "DEL OJT",
         "2" => "DEL",
         "3" => "GND OJT",

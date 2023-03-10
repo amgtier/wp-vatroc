@@ -15,6 +15,7 @@ class VATROC_Shortcode_My {
         add_shortcode( 'vatroc_my_avatar', 'VATROC_Shortcode_My::my_avatar' );
         add_action( "wp_ajax_vatroc_my_set_nickname", "VATROC_Shortcode_My::ajax_set_nickname" );
         add_action( "wp_ajax_vatroc_my_set_atc_date_from_sess", "VATROC_Shortcode_My::ajax_set_atc_date" );
+        add_action( "wp_ajax_vatroc_set_self_applicant", "VATROC_Shortcode_My::ajax_set_self_applicant" );
         wp_enqueue_style( 'vatroc-poll', plugin_dir_url( VATROC_PLUGIN_FILE ) . 'includes/shortcodes/css/poll.css' );
     }
 
@@ -106,6 +107,23 @@ class VATROC_Shortcode_My {
 
         update_user_meta( $uid, "vatroc_date_" . $key, $date );
         
+        wp_die();
+    }
+
+
+    public static function ajax_set_self_applicant() {
+        $new_position = -1; // Applicant
+
+        $uid = get_current_user_id();
+        VATROC::log( sprintf( "%s set themself %s; was %s",
+            $uid,
+            VATROC::$atc_position[ $new_position ],
+            get_user_meta( $uid, "vatroc_position", true ) ?: "null",
+            )
+        );
+
+        update_user_meta( $uid, "vatroc_position", $new_position );
+
         wp_die();
     }
 };
