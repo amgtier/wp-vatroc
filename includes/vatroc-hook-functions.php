@@ -52,3 +52,16 @@ function load_customize_scripts() {
     wp_enqueue_style( 'vatroc-event-calendar', plugin_dir_url( VATROC_PLUGIN_FILE ) . 'includes/css/event-calendar.css' );
 }
 
+add_filter( 'wp_die_ajax_handler', function( $handler ) {
+
+    return function( $message, $title, $args ) use ( $handler ) {
+
+        if ( isset( $args['response'] ) && $args['response'] == 500 ) {
+            header( "HTTP/1.1 500 $title" );
+            die( $message );
+        }
+
+        $handler( $message );
+    };
+
+});
