@@ -1,6 +1,5 @@
 jQuery(document).ready( ($) => {
     if( $( "#set-self-applicant" ).length ){
-        console.log("Hihi")
         ajax_set_self_applicant( $ );
     }
 });
@@ -12,9 +11,15 @@ function ajax_set_self_applicant( $ ){
             action: 'vatroc_set_self_applicant',
         };
 
-        $.post( ajax_object.ajax_url, data,
-            res=>{
-                console.log(res);
+        $.post( ajax_object.ajax_url, data )
+        .done( () => {
+            $(event.target).removeClass();
+            $(event.target).addClass( 'btn-success' );
+            $(event.target).attr( 'disabled', true );
+        })
+        .fail( () => {
+            $(event.target).removeClass();
+            $(event.target).addClass( 'btn-danger' );
         });
     });
 }
