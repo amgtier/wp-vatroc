@@ -40,7 +40,6 @@ add_shortcode( 'vatroc_set_self_applicant', 'set_self_applicant' );
 function set_self_applicant() {
 	ob_start();
 	if(VATROC::debug_section( 503 )){
-		VATROC::dog("hiya");
 		echo VATROC::get_template( "includes/templates/hooks/set-self-applicant.php" );
 	}
 	return do_shortcode( ob_get_clean() );

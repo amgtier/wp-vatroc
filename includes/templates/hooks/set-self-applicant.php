@@ -5,7 +5,11 @@
 ?>
 
 <div class="nowrap">
-    <button type="button" class="btn-default" name="" id="set-self-applicant">Start application</button>
+    <?php if (VATROC_My::get_vatroc_position() == 0): ?>
+        <button type="button" class="btn-primary" name="" id="set-self-applicant">Click me to register!</button>
+    <?php else: ?>
+        <button type="button" class="btn-default" name="" disabled>You are registerd!</button>
+    <?php endif; ?>
 </div>
 
 <?php

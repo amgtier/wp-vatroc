@@ -16,6 +16,7 @@ function ajax_set_self_applicant( $ ){
             $(event.target).removeClass();
             $(event.target).addClass( 'btn-success' );
             $(event.target).attr( 'disabled', true );
+            $(event.target).html( 'Success!' );
         })
         .fail( () => {
             $(event.target).removeClass();

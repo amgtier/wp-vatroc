@@ -114,7 +114,7 @@ class VATROC_Shortcode_My {
     public static function ajax_set_self_applicant() {
         $new_position = -1; // Applicant
         $uid = get_current_user_id();
-        $curr_position = get_user_meta( $uid, "vatroc_position", true ) ?: 0;
+        $curr_position = VATROC_My::get_vatroc_position( $uid );
 
         if ( $curr_position > 0 ){
             wp_die( "User has position higher than Applicant", "Error", 500 );
@@ -127,7 +127,7 @@ class VATROC_Shortcode_My {
             )
         );
 
-        update_user_meta( $uid, "vatroc_position", $new_position );
+        VATROC_My::set_vatroc_position( $uid, $new_position );
 
         wp_die();
     }
