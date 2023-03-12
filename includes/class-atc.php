@@ -59,7 +59,7 @@ class VATROC_ATC {
         }
         ob_start();
 ?>
-
+        <h1> <?php echo $uid; ?> - <?php echo get_user_by( 'ID', $u )->display_name; ?> </h1>
         <a href='/atc/' class='btn btn-success'>ATC List</a>
         <a href='?who=<?php echo $uid; ?>&refresh=true' class='btn btn-success'>Refresh</a>
         <a href='<?php echo self::get_timeline_link(); ?>' class='btn btn-success'>Timeline</a>
