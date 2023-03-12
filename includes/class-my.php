@@ -65,6 +65,17 @@ class VATROC_My {
         }
         return $str_pos;
     }
+
+
+    public static function get_vatroc_position( $uid = null ) {
+        $uid = $uid ?: get_current_user_id();
+        return get_user_meta( $uid, "vatroc_position", true ) ?: 0;
+    }
+
+
+    public static function set_vatroc_position( $uid, $new_position ) {
+        update_user_meta( $uid, "vatroc_position", $new_position );
+    }
 };
 
 VATROC_My::init();
