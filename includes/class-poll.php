@@ -4,7 +4,9 @@ if ( ! defined( 'ABSPATH' ) ) {
     exit;
 }
 
-
+/*
+ * Polls are essentially options that are composed of give pre-defined or appendable options for multiple users to opt-in their interests
+ */
 class VATROC_Poll {
     protected static $meta_prefix = "vatroc_";
     protected static $meta_key = "vatroc_vote";
@@ -216,6 +218,20 @@ class VATROC_Poll {
         $uid = get_current_user_id();
 
         $ret = [];
+        $today = VATROC::get_today();
+        $ret[ $today ] = [
+            "hidden" => false,
+            "description" => self::get_description( $post_id, $today ),
+            "user_accept" => array_key_exists( $uid, @( $votes[ $today ][ "accept" ] ?: [] ) ),
+            "user_tentative" => array_key_exists( $uid, @( $votes[ $today ][ "tentative" ] ?: [] ) ),
+            "user_reject" => array_key_exists( $uid, @( $votes[ $today ][ "reject" ] ?: [] ) ),
+            "accept" => self::get_vote_by_name( $uid, $votes, $today, "accept" ),
+            "tentative" => self::get_vote_by_name( $uid, $votes, $today, "tentative" ),
+            "reject" => self::get_vote_by_name( $uid, $votes, $today, "reject" ),
+            "unknown" => self::get_vote_by_name( $uid, $votes, $today, "unknown" ),
+            "read_only" => true,
+        ];
+
         $dates = array_merge(
             self::get_added_vote_date_option( $post_id ),
             self::get_dates( self::get_curr_month(), self::get_curr_year() ),

@@ -16,7 +16,7 @@ $is_admin = VATROC_Shortcode_Poll::is_admin();
 <?php endif; ?>
 
 <div class="vatroc-poll flexbox flexbox-column">
-  <?php foreach( VATROC_Shortcode_Poll::get_options() as $option => $result): ?>
+  <?php foreach( VATROC_Shortcode_Poll::get_options( "monthly_availability" ) as $option => $result): ?>
   <div class="flexbox-row flexbox-start <?php echo $result[ "description" ] == null ?: "flexbox-active"; ?>">
     <div>
       <?php echo isset( $result[ $option ][ "user_accept"] ) ? $result[ $option ][ "user_accept"] : null; ?>
