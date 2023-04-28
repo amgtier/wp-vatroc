@@ -67,6 +67,41 @@ class VATROC_My {
     }
 
 
+    public static function get_nickname(){
+        return get_userdata( get_current_user_id() )->nickname;
+    }
+
+
+    public static function set_nickname( $uid, $value ) {
+        update_user_meta( $uid, "nickname", $value );
+        return self::get_nickname();
+    }
+
+
+    public static function get_vatsim_uid( $uid = null ) {
+        $uid = $uid ?: get_current_user_id();
+        return get_user_meta( $uid, "vatroc_vatsim_uid", true ) ?: 0;
+    }
+
+
+    public static function get_first_name( $uid = null ) {
+        $uid = $uid ?: get_current_user_id();
+        return get_user_meta( $uid, "first_name", true ) ?: 0;
+    }
+
+
+    public static function get_last_name( $uid = null ) {
+        $uid = $uid ?: get_current_user_id();
+        return get_user_meta( $uid, "last_name", true ) ?: 0;
+    }
+
+
+    public static function set_vatsim_uid( $uid, $value ) {
+        update_user_meta( $uid, "vatroc_vatsim_uid", $value );
+        return self::get_vatsim_uid();
+    }
+
+
     public static function get_vatroc_position( $uid = null ) {
         $uid = $uid ?: get_current_user_id();
         return get_user_meta( $uid, "vatroc_position", true ) ?: 0;
@@ -75,6 +110,56 @@ class VATROC_My {
 
     public static function set_vatroc_position( $uid, $new_position ) {
         update_user_meta( $uid, "vatroc_position", $new_position );
+    }
+
+
+    public static function set_first_name( $uid, $value ) {
+        wp_update_user( [
+            'ID' => $uid,
+            'first_name' => $value,
+            'display_name' => $value . ' ' . ( get_user_meta( $uid, "last_name", true ) ?: '' )
+            ] );
+    }
+
+
+    public static function set_last_name( $uid, $value ) {
+        wp_update_user( [
+            'ID' => $uid,
+            'last_name' => $value,
+            'display_name' => ( get_user_meta( $uid, "last_name", true ) ?: '' ) . ' ' . $value
+            ] );
+    }
+
+
+    public static function field_value( $field_name, $uid = null ) {
+        switch ( $field_name ){
+            case "nickname": 
+                return VATROC_My::get_nickname( $uid );
+            case "vatroc_position":
+                return VATROC_My::get_vatroc_position( $uid );
+            case "vatsim_uid":
+                return VATROC_My::get_vatsim_uid( $uid );
+            case "first_name":
+                return VATROC_My::get_first_name( $uid );
+            case "last_name":
+                return VATROC_My::get_last_name( $uid );
+        }
+    }
+
+
+    public static function set_field_value( $uid, $field_name, $value ) {
+        switch ( $field_name ){
+            case "nickname": 
+                return VATROC_My::set_nickname( $uid, $value );
+            case "vatroc_position":
+                return VATROC_My::set_vatroc_position( $uid, $value );
+            case "vatsim_uid":
+                return VATROC_My::set_vatsim_uid( $uid, $value );
+            case "first_name":
+                return VATROC_My::set_first_name( $uid, $value );
+            case "last_name":
+                return VATROC_My::set_last_name( $uid, $value );
+        }
     }
 };
 

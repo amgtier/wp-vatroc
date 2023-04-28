@@ -11,9 +11,10 @@ class VATROC_Shortcode_My {
 
     public static function init() {
         add_shortcode( 'vatroc_my_vatroc', 'VATROC_Shortcode_My::output_my' );
-        add_shortcode( 'vatroc_my_editable_nickname', 'VATROC_Shortcode_My::editable_nickname' );
+        add_shortcode( 'vatroc_my_editable_field', 'VATROC_Shortcode_My::editable_my' );
         add_shortcode( 'vatroc_my_avatar', 'VATROC_Shortcode_My::my_avatar' );
-        add_action( "wp_ajax_vatroc_my_set_nickname", "VATROC_Shortcode_My::ajax_set_nickname" );
+        add_shortcode( 'vatroc_live', 'VATROC_Shortcode_My::vatroc_live_router' );
+        add_action( "wp_ajax_vatroc_my_editable_field", "VATROC_Shortcode_My::ajax_set_field" );
         add_action( "wp_ajax_vatroc_my_set_atc_date_from_sess", "VATROC_Shortcode_My::ajax_set_atc_date" );
         add_action( "wp_ajax_vatroc_set_self_applicant", "VATROC_Shortcode_My::ajax_set_self_applicant" );
         wp_enqueue_style( 'vatroc-poll', plugin_dir_url( VATROC_PLUGIN_FILE ) . 'includes/shortcodes/css/poll.css' );
@@ -21,17 +22,17 @@ class VATROC_Shortcode_My {
 
 
     public static function output_my() {
-
-        // $is_admin = self::is_admin();
-        // if(VATROC::debug_section()){
-        //     echo "<div>";
-        //     echo "is_admin:" . $is_admin . "<br/>";
-        //     echo "page_id:" . get_the_ID() . "<br/>";
-        //     echo "</div>";
-        // }
+        VATROC::dog(VATROC_My::get_vatroc_position());
+        if ( VATROC_My::get_vatroc_position() != -1 && ( !is_user_logged_in() || 
+            get_user_meta( get_current_user_id(), "vatroc_vatsim_uid", true ) == null ) 
+        ) {
+            return null;
+        }
 
         $ret = "";
-        $ret .= self::trainee();
+        if ( VATROC::debug_section( 503 ) ){
+            $ret .= self::trainee();
+        }
         $ret .= self::atc();
         return $ret;
     }
@@ -49,8 +50,13 @@ class VATROC_Shortcode_My {
 
 
     private static function atc() {
+        $uid = get_current_user_id();
         ob_start();
-        VATROC::get_template( "includes/shortcodes/templates/my/atc-section.php" );
+        VATROC::get_template( "includes/shortcodes/templates/my/atc-section.php", [ 
+            "vatsim_uid" => get_user_meta( $uid, "vatroc_vatsim_uid", true ),
+            "vatsim_rating" => get_user_meta( $uid, "vatroc_vatsim_rating", true ),
+            "vatroc_position" => get_user_meta( $uid, "vatroc_position", true ),
+            ] );
         return ob_get_clean();
     }
 
@@ -61,16 +67,33 @@ class VATROC_Shortcode_My {
         return ob_get_clean();
     }
 
-
-    public static function editable_nickname() {
+    /*
+    * Getter and setter mapping needs to be defined first.
+    */
+    public static function editable_my( $atts ) {
+        
+        $frontend_field_name = $atts[ "display_name" ];
+        $backend_field_name = $atts[ "name" ];
+        $is_autosave = in_array( "autosave", $atts );
+        $str_autosave = $is_autosave ? "autosave" : null;
+        $current_value = VATROC_My::field_value( $backend_field_name );
+        
         wp_enqueue_script( 'vatroc-my', plugin_dir_url( VATROC_PLUGIN_FILE ) . 'includes/shortcodes/js/my.js', array( 'jquery' ), null, true );
+        VATROC::enqueue_ajax_object( 'vatroc-my', null );
 
         ob_start();
 ?>
-    <form id="edit-nickname" method="get" action="#">
-        <label for="nickname">顯示名稱
-            <input type="text" id="nickname" name="nickname" value="<?php echo VATROC_Shortcode_My::get_nickname(); ?>" required />
-            <button id="submit-nickname" hidden>送出修改</button>
+    <form id="edit-<?php echo $backend_field_name; ?>" method="get" action="#">
+        <label for="<?php echo $backend_field_name; ?>"><?php echo $frontend_field_name; ?>
+            <input 
+                type="text" id="<?php echo $backend_field_name; ?>" 
+                class="editable-my <?php echo $str_autosave; ?>" name="<?php echo $backend_field_name; ?>" 
+                value="<?php echo $current_value; ?>" 
+                required 
+            />
+            <?php if ( !$is_autosave ): ?>
+                <button id="submit-<?php echo $backend_field_name; ?>" hidden>送出修改</button>
+            <?php endif; ?>
         </label>
     </form>
 <?php
@@ -79,15 +102,13 @@ class VATROC_Shortcode_My {
     }
 
 
-    public static function get_nickname(){
-        return get_userdata( get_current_user_id() )->nickname;
-    }
 
-
-    public static function ajax_set_nickname() {
+    public static function ajax_set_field() {
         $uid = get_current_user_id();
-        update_user_meta( $uid, "nickname", $_POST[ "nickname"] );
-        echo self::get_nickname();
+        $field_name = $_POST[ "field_name" ];
+        $value = $_POST[ "value" ];
+
+        echo VATROC_My::set_field_value( $uid, $field_name, $value );
         wp_die();
     }
 
