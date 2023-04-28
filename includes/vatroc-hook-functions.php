@@ -2,10 +2,23 @@
 // https://wp-mix.com/members-only-content-shortcode/
 add_shortcode( 'vatroc_login_required', 'member_check_shortcode' );
 function member_check_shortcode( $atts, $content = null ) {
+	$login_shortcodes = [
+		'[nextend_social_login provider="facebook"]',
+		'[magic_login]'
+	];
+
 	if ( is_user_logged_in() && !is_null($content) && !is_feed() ) {
 		return do_shortcode( $content );
 	}
-	return do_shortcode( '[nextend_social_login provider="facebook"]' );
+	return do_shortcode( implode( '<br /> Or <br />', $login_shortcodes ) );
+}
+
+
+add_action( 'wp_after_admin_bar_render', 'debug_tool' );
+function debug_tool() {
+	if ( VATROC::debug_section() ) {
+		echo VATROC::get_template( "includes/templates/hooks/debug-tool.php" );
+	}
 }
 
 
@@ -94,5 +107,4 @@ add_filter( 'wp_die_ajax_handler', function( $handler ) {
 
         $handler( $message );
     };
-
 });
