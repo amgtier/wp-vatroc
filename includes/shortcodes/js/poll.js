@@ -71,7 +71,7 @@ function ajax_toggle_hide_option( $ ){
 
 var option_desc_timeout;
 function ajax_update_option_description( $ ){
-  $( ".option-description" ).on( "keyup", (event) => {
+  $( ".option-description.autosave" ).on( "keyup", (event) => {
     const target = $($(event)[0].target);
     target.addClass( "ajax-danger" );
     clearTimeout( option_desc_timeout );
@@ -89,7 +89,7 @@ function ajax_update_option_description( $ ){
         }
       );
     }, 500);
-})
+  });
 }
 
 

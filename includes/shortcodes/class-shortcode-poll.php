@@ -27,15 +27,6 @@ class VATROC_Shortcode_Poll extends VATROC_Poll {
         $is_admin = self::is_admin();
 
         ob_start();
-        if( VATROC::debug_section() ){
-            echo "<div>";
-            echo "is_admin:" . $is_admin . "<br/>";
-            echo "page_id:" . get_the_ID() . "<br/>";
-            echo "</div>";
-        }
-        if ( VATROC::debug_section() ){
-            echo "<div>Poll WIP</div>";
-        }
         VATROC::get_template( "includes/shortcodes/templates/poll.php", [ 
             "type" => $atts[ "type" ], 
             "post_id" => $atts[ "post_id" ],

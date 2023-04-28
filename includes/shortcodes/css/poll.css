@@ -58,6 +58,27 @@
   background-color: #d9534f;
 }
 
+.res.disabled{
+  background-color: rgba(200, 200, 200, 0.3);
+}
+
+.res.disabled:hover{
+  box-shadow: inherit !important;
+  color: inherit !important;
+}
+
+.res[value='accept'].active.disabled {
+  background-color: #5cb85c;
+}
+
+.res[value='tentative'].active.disabled {
+  background-color: #7c8184;
+}
+
+.res[value='reject'].active.disabled {
+  background-color: #d9534f;
+}
+
 .vote-display-wrapper{
   display: inline-block;
 }
