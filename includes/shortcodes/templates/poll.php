@@ -24,16 +24,9 @@ $is_admin = VATROC_Shortcode_Poll::is_admin();
     <div class="flexbox-column flexbox-nogap">
       <?php VATROC::get_template( "includes/shortcodes/templates/poll/response-buttons.php", [ "result" => $result, "option" => $option ] ) ?>
 
-      <?php if (VATROC::debug_section()) : ?>
-      <div class="nowrap">
-        <button type="button" class="res btn-default <?php echo $result[ "user_accept"] ? "active" : ""; ?>" value="accept" name="<?php echo $option; ?>">v</button>
-        <button type="button" class="res btn-default <?php echo $result[ "user_tentative"] ? "active" : ""; ?>" value="tentative" name="<?php echo $option; ?>">?</button>
-        <button type="button" class="res btn-default <?php echo $result[ "user_reject"] ? "active" : ""; ?>" value="reject" name="<?php echo $option; ?>">x</button>
-      </div>
-      <?php endif ?>
       <div>
         <?php if (VATROC_Shortcode_Poll::is_admin()) : ?>
-          <textarea placeholder="註記" data-name=<?php echo $option; ?> class="option-description"><?php echo $result[ "description" ]; ?></textarea>
+          <textarea placeholder="註記" data-name=<?php echo $option; ?> class="option-description autosave"><?php echo $result[ "description" ]; ?></textarea>
         <?php else:?>
           <p class="text-center">
             <?php echo $result[ "description" ] ?>

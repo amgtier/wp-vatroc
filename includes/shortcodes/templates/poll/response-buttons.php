@@ -6,9 +6,36 @@
 
 <div class="nowrap">
     <?php echo $page_id; ?>
-    <button type="button" class="res btn-default <?php echo $result[ "user_accept"] ? "active" : ""; ?>" value="accept" name="<?php echo $option; ?>">v</button>
-    <button type="button" class="res btn-default <?php echo $result[ "user_tentative"] ? "active" : ""; ?>" value="tentative" name="<?php echo $option; ?>">?</button>
-    <button type="button" class="res btn-default <?php echo $result[ "user_reject"] ? "active" : ""; ?>" value="reject" name="<?php echo $option; ?>">x</button>
+    <button 
+        type="button" 
+        class="res btn-default 
+        <?php echo $result[ "user_accept" ] ? "active" : ""; ?>
+        <?php echo  $result[ "read_only" ] ? "disabled" : null; ?>
+        " 
+        value="accept" 
+        name="<?php echo $option; ?>"
+        <?php echo  $result[ "read_only" ] ? "disabled" : null; ?>
+    >v</button>
+    <button 
+        type="button" 
+        class="res btn-default 
+        <?php echo $result[ "user_tentative" ] ? "active" : ""; ?>
+        <?php echo  $result[ "read_only" ] ? "disabled" : null; ?>
+        " 
+        value="tentative" 
+        name="<?php echo $option; ?>"
+        <?php echo  $result[ "read_only" ] ? "disabled" : null; ?>
+    >?</button>
+    <button 
+        type="button" 
+        class="res btn-default 
+        <?php echo $result[ "user_reject" ] ? "active" : ""; ?>
+        <?php echo  $result[ "read_only" ] ? "disabled" : null; ?>
+        " 
+        value="reject" 
+        name="<?php echo $option; ?>"
+        <?php echo  $result[ "read_only" ] ? "disabled" : null; ?>
+    >x</button>
 </div>
 
 <?php
