@@ -23,11 +23,13 @@ class VATROC_Shortcode_Roster {
 
     public static function roster_atc_router() {
         if ( count( $_GET ) > 0 ) { 
-            if ( isset( $_GET[ "who" ] ) && is_numeric( $_GET[ "who" ] ) ) {
+            if ( isset( $_GET[ "who" ] ) ) {
+                $u = $_GET[ "u" ] ?: get_current_user_id();
+                $who = $_GET[ "who" ] ?: get_user_meta( $u, "vatroc_vatsim_uid", true );
                 if ( isset( $_GET[ "timeline" ] ) ) {
-                    return VATROC_ATC::atc_timeline( $_GET[ "who" ], $_GET[ "u" ] );
+                    return VATROC_ATC::atc_timeline( $who, $u );
                 }
-                return VATROC_ATC::atc_activity( $_GET[ "who" ], $_GET[ "u" ] );
+                return VATROC_ATC::atc_activity( $who, $u );
             }
             if ( isset( $_GET[ "timeline" ] ) ) {
                 return self::output_atc_timeline();

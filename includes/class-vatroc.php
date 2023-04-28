@@ -24,15 +24,15 @@ class VATROC extends VATROC_Constants {
 
     public function includes() {
         include_once( VATROC_ABSPATH . 'admin/class-admin.php' );
-        include_once( VATROC_ABSPATH . 'includes/class-my.php' );
-        include_once( VATROC_ABSPATH . 'includes/class-poll.php' );
         include_once( VATROC_ABSPATH . 'includes/class-atc.php' );
         include_once( VATROC_ABSPATH . 'includes/class-event.php' );
         include_once( VATROC_ABSPATH . 'includes/class-form.php' );
+        include_once( VATROC_ABSPATH . 'includes/class-my.php' );
+        include_once( VATROC_ABSPATH . 'includes/class-poll.php' );
+        include_once( VATROC_ABSPATH . 'includes/shortcodes/class-shortcode-event.php' );
         include_once( VATROC_ABSPATH . 'includes/shortcodes/class-shortcode-form.php' );
         include_once( VATROC_ABSPATH . 'includes/shortcodes/class-shortcode-roster.php' );
         include_once( VATROC_ABSPATH . 'includes/shortcodes/class-shortcode-homepage.php' );
-        include_once( VATROC_ABSPATH . 'includes/shortcodes/class-shortcode-event.php' );
         include_once( VATROC_ABSPATH . 'includes/shortcodes/class-shortcode-poll.php' );
         include_once( VATROC_ABSPATH . 'includes/shortcodes/class-shortcode-my.php' );
         include_once( VATROC_ABSPATH . 'includes/vatroc-hook-functions.php' );
@@ -91,13 +91,22 @@ class VATROC extends VATROC_Constants {
         $prefix = 'debug';
         $identifier = null;
         if ( !file_exists( $log_path ) ) { fopen( $log_path, 'w' ); }
+
+        error_log( sprintf( "[%s]%s%s: ", date("Y/m/d H:i:s", time()), $prefix, $identifier ), 3, $log_path);
+        $s = null;
         foreach (func_get_args() as $param) {
             if ( is_array( $param ) ){
-                error_log( sprintf( "[%s]%s%s: %s\n", date("Y/m/d H:i:s", time()), $prefix, $identifier, urldecode( http_build_query( $param ) ) ), 3, $log_path);
+                $s = sprintf( "(array)  %s ", urldecode( http_build_query( $param ) ) );
+            } else if ( is_bool( $param ) ) {
+                $s = sprintf( "(bool)   %s ", $param ? "true" : "false" );
+            } else if ( is_object( $param ) ) {
+                $s = sprintf( "(object) %s ", urldecode( http_build_query( $param ) ) );
             } else {
-                error_log( sprintf( "[%s]%s%s: %s\n", date("Y/m/d H:i:s", time()), $prefix, $identifier, $param ), 3, $log_path);
+                $s = sprintf( "%s ", $param );
             }
+            error_log( $s, 3, $log_path);
         }
+        error_log( "\n", 3, $log_path);
     }
 
 
@@ -113,6 +122,8 @@ class VATROC extends VATROC_Constants {
             if ( !file_exists( $log_path ) ) { fopen( $log_path, 'w' ); }
             if ( is_array( $message ) ){
                 error_log( sprintf( "[%s]%s%s: %s\n", date("Y/m/d H:i:s", time()), $prefix, $identifier, urldecode( http_build_query( $message ) ) ), 3, $log_path);
+            } else if ( is_bool( $message ) ) {
+                error_log( sprintf( "[%s]%s%s: %s\n", date("Y/m/d H:i:s", time()), $prefix, $identifier, $message ? "true" : "false" ), 3, $log_path);
             } else {
                 error_log( sprintf( "[%s]%s%s: %s\n", date("Y/m/d H:i:s", time()), $prefix, $identifier, $message ), 3, $log_path);
             }
@@ -139,14 +150,30 @@ class VATROC extends VATROC_Constants {
     }
 
     
-    public static function enqueue_ajax_object( $handler, $page_id = null ) {
+    public static function enqueue_ajax_object( $handler, $page_id = null, $variables = [] ) {
+        $arguments = [ 
+            'ajax_url' => admin_url( 'admin-ajax.php' ), 
+            'page_id' => $page_id ?: get_the_ID() 
+        ];
+
+        foreach( $variables as $key => $val ){
+            $arguments[ $key ] = $val;
+        }
+
         wp_localize_script( 
-            $handler, 
-            'ajax_object', 
-            [ 
-                'ajax_url' => admin_url( 'admin-ajax.php' ), 
-                'page_id' => $page_id ?: get_the_ID() 
-            ],
+            $handler,
+            'ajax_object',
+            $arguments,
         );
+    }
+
+
+    public static function get_today() {
+        return self::get_date( date( 'Y' ), date( 'm' ), date( 'd' ) );
+    }
+
+
+    public static function get_date( $y, $m, $d ) {
+        return sprintf( "%04d/%d/%02d", $y, $m % 12, $d );
     }
 }
