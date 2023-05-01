@@ -258,6 +258,7 @@ class VATROC_Poll {
                 "tentative" => self::get_vote_by_name( $uid, $votes, $date, "tentative" ),
                 "reject" => self::get_vote_by_name( $uid, $votes, $date, "reject" ),
                 "unknown" => self::get_vote_by_name( $uid, $votes, $date, "unknown" ),
+                "read_only" => VATROC_Shortcode_Poll::is_admin(),
             ];
         };
         return $ret;
