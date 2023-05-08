@@ -2,6 +2,8 @@
 // https://wordpress.stackexchange.com/questions/160422/add-custom-column-to-users-admin-panel
 function account_linked_user_table( $column ) {
     $column[ 'fb' ] = 'Facebook';
+    $column[ 'vatsim' ] = 'VATSIM';
+
     return $column;
 }
 add_filter( 'manage_users_columns', 'account_linked_user_table' );
@@ -18,12 +20,14 @@ function account_linked_user_table_row( $val, $column_name, $user_id ) {
             $nextend_provider = new NextendSocialProviderFacebook();
             $fblink = get_user_meta( $user_id, 'fblink', true );
             return $nextend_provider->isUserConnected( $user_id ) ? $fblink == NULL ? "Linked" : sprintf( "<a href='%s' target='_blank'>Linked*</a>", $fblink ) : "";
+        case 'vatsim':
+            return VATROC_My::get_vatsim_uid( $user_id ) ? VATROC_My::get_vatsim_uid( $user_id ) : null;
         default:  
     }
     return $val;
 }
-add_filter( 'manage_users_custom_column', 'account_linked_user_table_row', 10, 3 );
 
+add_filter( 'manage_users_custom_column', 'account_linked_user_table_row', 10, 3 );
 function account_linked_sort_column_query( $query ){
     $orderby = $query->get( 'orderby' );
     if ( 'Facebook' == $orderby ){
@@ -35,6 +39,17 @@ function account_linked_sort_column_query( $query ){
             ),
             array(
                 'key' => 'fb_user_access_token',
+            ),
+        );
+        $query->set( 'meta_query', $meta_query );
+        $query->set( 'orderby', 'meta_value' );
+    }
+    if ( 'VATSIM' == $orderby ){
+        $meta_query = array(
+            'relation' => 'OR',
+            array(
+                'key' => 'vatroc_vatsim_uid',
+                'type' => 'NUMERIC'
             ),
         );
         $query->set( 'meta_query', $meta_query );

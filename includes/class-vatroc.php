@@ -44,7 +44,7 @@ class VATROC extends VATROC_Constants {
         wp_enqueue_script( 'boot2','https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js', array( 'jquery' ),'',true );
         wp_enqueue_script( 'boot3','https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/js/bootstrap.min.js', array( 'jquery' ),'',true );
         
-        wp_enqueue_style( 'styles', plugin_dir_url( VATROC_PLUGIN_FILE ) . 'includes/css/styles.css' );
+        wp_enqueue_style( 'styles', plugin_dir_url( VATROC_PLUGIN_FILE ) . 'includes/css/styles.css?v2' );
         wp_enqueue_style( 'flex', plugin_dir_url( VATROC_PLUGIN_FILE ) . 'includes/css/flex.css' );
     }
 

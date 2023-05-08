@@ -9,3 +9,24 @@
 .ajax-danger {
     border: 3px solid #d9534f !important;
 }
+
+@media (max-width: 575px) {
+    .hide-sm {
+        display: none;
+    }
+
+    .sm-bordered-region {
+        border-radius: 5px;
+        border: 1px solid #dadce0;
+        padding: 5px;
+        padding-top: 15px;
+        padding-bottom: 15px;
+        overflow: scroll;
+    }
+}
+
+@media (min-width: 576px){
+    .display-sm {
+        display: none;
+    }
+}
