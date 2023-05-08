@@ -8,6 +8,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 class VATROC_Shortcode_Form extends VATROC_Form {
     public static function init() {
         add_shortcode( 'vatroc_form', 'VATROC_Shortcode_Form::output_form' );
+        add_shortcode( 'vatroc_form_embed', 'VATROC_Shortcode_Form::output_form_embed' );
+        add_shortcode( 'vatroc_form_submission_list', 'VATROC_Shortcode_Form::output_submission_list' );
         add_shortcode( 'vatroc_form_field', 'VATROC_Shortcode_Form::output_form_field' );
         add_shortcode( 'vatroc_form_field_card', 'VATROC_Shortcode_Form::output_form_field' );
         add_shortcode( 'vatroc_form_field_internal', 'VATROC_Shortcode_Form::output_form_field_internal' );
@@ -23,46 +25,59 @@ class VATROC_Shortcode_Form extends VATROC_Form {
         // wp_enqueue_style( 'vatroc-form', plugin_dir_url( VATROC_PLUGIN_FILE ) . 'includes/shortcodes/css/form.css' );
     }
 
+    public static function output_form_embed( $atts ){
+        global $post;
+        $caller_post = get_post( $post );
+        if( $atts["form"] != null){
+            $form_post = get_post( (int)$atts["form"] );
+            $post = get_post( $form_post );
+            $ret = do_shortcode( $form_post->post_content);
+            $post = get_post( $caller_post );
+            return $ret;
+        }
+    }
+
 
     public static function output_form( $atts, $content = null ) {
         $is_autosave = in_array( "autosave", $atts );
         $str_autosave = $is_autosave ? "autosave" : null;
         $form_name = "shortcode-form";
 
+        $count = count(VATROC_Form::get_all_submissions( get_the_ID(), get_current_user_ID() ));
+        $limit = $atts[ 'limit' ] ?: -1;
+
         $content = preg_replace( '@\[vatroc_form_field_card @', "[vatroc_form_field_card_internal ", $content );
         $content = preg_replace( '@\[/vatroc_form_field_card]@', "[/vatroc_form_field_card_internal]", $content );
-        if ( VATROC::debug_section() ) {
-            $ret = '';
-            if ( isset( $_GET[ "view_all" ] ) || isset( $_GET[ "view" ]) ){
-                // $ret .= self::output_submission_list();
-                if ( isset( $_GET[ "view" ] ) ){
-                    $read_only_version = isset( $_GET[ "v" ] ) ? intval( $_GET[ "v" ] ) : 1;
-                    $read_only_uid = isset( $_GET[ "u" ] ) && intval( $_GET[ "u" ] ) > 0 ? intval( $_GET[ "u" ]) : get_current_user_ID();
-                    $content = preg_replace( '@\[vatroc_form_field @', "[vatroc_form_field_internal read_version=$read_only_version read_uid=$read_only_uid form=$form_name $str_autosave ", $content );
-                    $form_data = VATROC_Form::get_submission( get_the_ID(), $read_only_uid, $read_only_version - 1 );
-                    $timestamp = date( "Y/m/d H:i:s T", $form_data[ "timestamp" ]);
-                    $read_only_uid_avatar = VATROC_My::html_my_avatar( $read_only_uid );
-                    $ret_view_form = "";
-                    if ( $form_data != null ) {
-                        $ret_view_form .= "<div class='view-form'>";
-                        $ret_view_form .= "<p>Submssion version: $read_only_version </p>";
-                        $ret_view_form .= "<p>Submitted <b>$timestamp</b> by$read_only_uid_avatar</p>";
-                        $ret_view_form .= do_shortcode( $content );
-                        $ret_view_form .= "</div>";
-                    }
+        $ret = '';
+        if ( isset( $_GET[ "view_all" ] ) || isset( $_GET[ "view" ]) ){
+            if ( isset( $_GET[ "view" ] ) ){
+                $read_only_version = isset( $_GET[ "v" ] ) ? intval( $_GET[ "v" ] ) : 1;
+                $read_only_uid = isset( $_GET[ "u" ] ) && intval( $_GET[ "u" ] ) > 0 ? intval( $_GET[ "u" ]) : get_current_user_ID();
+                $content = preg_replace( '@\[vatroc_form_field @', "[vatroc_form_field_internal read_version=$read_only_version read_uid=$read_only_uid form=$form_name $str_autosave ", $content );
+                $form_data = VATROC_Form::get_submission( get_the_ID(), $read_only_uid, $read_only_version - 1 );
+                $timestamp = date( "Y/m/d H:i:s T", $form_data[ "timestamp" ]);
+                $read_only_uid_avatar = VATROC_My::html_my_avatar( $read_only_uid );
+                $ret_view_form = "";
+                if ( $form_data != null ) {
+                    $ret_view_form .= "<div class='view-form'>";
+                    $ret_view_form .= "<p>Submssion version: $read_only_version </p>";
+                    $ret_view_form .= "<p>Submitted <b>$timestamp</b> by$read_only_uid_avatar</p>";
+                    $ret_view_form .= do_shortcode( $content );
+                    $ret_view_form .= "</div>";
                 }
-
-                $ret .= self::output_submission_list( $atts, $ret_view_form );
-
-                wp_enqueue_style( 'vatroc-form', plugin_dir_url( VATROC_PLUGIN_FILE ) . 'includes/shortcodes/css/form.css' );
-                wp_enqueue_script( 'vatroc-form', plugin_dir_url( VATROC_PLUGIN_FILE ) . 'includes/shortcodes/js/form.js', array( 'jquery' ), null, true );
-                VATROC::enqueue_ajax_object( 'vatroc-form' );
-                return $ret;
             }
-            // } else {
-            //     $content = preg_replace( '@\[vatroc_form_field@', "[vatroc_form_field_internal form=$form_name $str_autosave ", $content );
-            //     $ret .= do_shortcode( $content );
-            // }
+            $ret .= self::output_submission_list( $atts, $ret_view_form, true );
+
+            wp_enqueue_style( 'vatroc-form', plugin_dir_url( VATROC_PLUGIN_FILE ) . 'includes/shortcodes/css/form.css' );
+            wp_enqueue_script( 'vatroc-form', plugin_dir_url( VATROC_PLUGIN_FILE ) . 'includes/shortcodes/js/form.js', array( 'jquery' ), null, true );
+            VATROC::enqueue_ajax_object( 'vatroc-form' );
+            return $ret;
+        } else {
+            $ret .= do_shortcode(
+                "[vatroc_collapse wrapper='card' label='已送出表單 ($count)']
+                [vatroc_form_submission_list]
+                [/vatroc_collapse]"
+            );
         }
 
         $content = preg_replace( '@\[vatroc_form_field @', "[vatroc_form_field_internal form=$form_name $str_autosave ", $content );
@@ -72,13 +87,17 @@ class VATROC_Shortcode_Form extends VATROC_Form {
         <div class="form-submit-message hidden">
             <h2><?php echo $atts[ "submit_message" ] ?: "The form has been submitted." ?></h2>
         </div>
+        <?php if ($limit != -1 && $count >= $limit): ?>
+            <h2><?php echo $atts[ "limit_message" ] ?: "The form has been submitted." ?></h2>
+        <?php else: ?>
         <form name=<?php echo $form_name; ?> class="vatroc-form">
             <i>This form is autosaved.</i>
             <?php echo do_shortcode( $content ); ?>
             <button><?php echo $atts[ "submit_label" ] ?: "Submit"; ?></button>
         </form>
         <?php
-        $ret = ob_get_clean();
+        endif;
+        $ret .= ob_get_clean();
         wp_enqueue_style( 'vatroc-form', plugin_dir_url( VATROC_PLUGIN_FILE ) . 'includes/shortcodes/css/form.css' );
         wp_enqueue_script( 'vatroc-form', plugin_dir_url( VATROC_PLUGIN_FILE ) . 'includes/shortcodes/js/form.js', array( 'jquery' ), null, true );
         VATROC::enqueue_ajax_object( 'vatroc-form' );
@@ -86,9 +105,13 @@ class VATROC_Shortcode_Form extends VATROC_Form {
     }
 
 
-    public static function output_submission_list( $atts = null, $content = null ) {
-        $uid = isset( $_GET[ "u" ] ) && intval( $_GET[ "u" ]) > 0 ? intval( $_GET[ "u" ] ) : 0;
-        $all_submissions = VATROC_Form::get_all_submissions( get_the_ID(), $uid );
+    public static function output_submission_list( $atts = null, $content = null, $is_view_all = false ) {
+        $can_view_all_list = explode(",", $atts["can_view_all"] ?: []);
+        $current_uid = get_current_user_ID();
+        $can_view_all = VATROC::is_admin() || in_array( $current_uid, $can_view_all_list );
+        $uid = isset( $_GET[ "u" ] ) && intval( $_GET[ "u" ]) > 0 ? intval( $_GET[ "u" ] ) : ($is_view_all && $can_view_all ? 0 : $current_uid);
+        $post_id = $atts[ "form" ] ?: get_the_ID();
+        $all_submissions = VATROC_Form::get_all_submissions( $post_id, $uid );
         $keys = [];
         foreach( $all_submissions as $idx => $fields ) {
             foreach( array_keys( $fields ) as $dix => $key ) {
@@ -98,14 +121,16 @@ class VATROC_Shortcode_Form extends VATROC_Form {
         unset( $keys[ "timestamp" ] );
         unset( $keys[ "uid" ] );
 
-        return VATROC::get_template( "includes/shortcodes/templates/form/response-list.php", [
+        ob_start();
+        VATROC::get_template( "includes/shortcodes/templates/form/response-list.php", [
             "count" => count( $all_submissions ),
             "submissions" => $all_submissions,
             "field_names" => $keys,
-            "view_all" => $uid == 0,
+            "view_all" => $can_view_all && $uid == 0,
             "view_form" => $content,
             "version" => intval($_GET[ "v" ]) ?: -1
         ] );
+        return ob_get_clean();
     }
 
 

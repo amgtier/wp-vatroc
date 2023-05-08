@@ -2,8 +2,9 @@
     $permalink = get_permalink( get_the_ID() );
     $user_version = [];
 ?>
+<?php if ($view_all): ?>
 <a href="<?php echo $permalink; ?>?view_all" class="btn btn-success">All Submissions</a>
-<p>Submissions: <?php echo $count; ?></p>
+<?php endif; ?>
 <div>
     <table>
         <thead>
