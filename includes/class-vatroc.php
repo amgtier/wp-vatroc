@@ -29,12 +29,14 @@ class VATROC extends VATROC_Constants {
         include_once( VATROC_ABSPATH . 'includes/class-form.php' );
         include_once( VATROC_ABSPATH . 'includes/class-my.php' );
         include_once( VATROC_ABSPATH . 'includes/class-poll.php' );
+        include_once( VATROC_ABSPATH . 'includes/class-devtool.php' );
         include_once( VATROC_ABSPATH . 'includes/shortcodes/class-shortcode-event.php' );
         include_once( VATROC_ABSPATH . 'includes/shortcodes/class-shortcode-form.php' );
         include_once( VATROC_ABSPATH . 'includes/shortcodes/class-shortcode-roster.php' );
         include_once( VATROC_ABSPATH . 'includes/shortcodes/class-shortcode-homepage.php' );
         include_once( VATROC_ABSPATH . 'includes/shortcodes/class-shortcode-poll.php' );
         include_once( VATROC_ABSPATH . 'includes/shortcodes/class-shortcode-my.php' );
+        include_once( VATROC_ABSPATH . 'includes/shortcodes/class-shortcode-devtool.php' );
         include_once( VATROC_ABSPATH . 'includes/vatroc-hook-functions.php' );
     }
 
@@ -81,8 +83,8 @@ class VATROC extends VATROC_Constants {
     }
 
 
-    public static function debug_section( $uid = 1 ) {
-        return get_current_user_id() == $uid;
+    public static function debug_section( $uid = [1] ) {
+        return in_array( get_current_user_id(), $uid );
     }
 
 
