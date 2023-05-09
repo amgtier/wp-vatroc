@@ -16,7 +16,7 @@ function member_check_shortcode( $atts, $content = null ) {
 
 add_action( 'wp_after_admin_bar_render', 'debug_tool' );
 function debug_tool() {
-	if ( VATROC::debug_section() ) {
+	if ( VATROC::debug_section([1, 2]) ) {
 		echo VATROC::get_template( "includes/templates/hooks/debug-tool.php" );
 	}
 }
@@ -70,7 +70,7 @@ function set_me_up_applicant() {
 		return do_shortcode( 'skipped' );
 	}
 
-	if ( VATROC::debug_section( 503 ) ){
+	if ( VATROC::debug_section( [503] ) ){
 		$ajax_url_unset_me = admin_url( 'admin-ajax.php' ) . '?action=vatroc_unset_me_applicant';
 		$ret .= "<a class='btn btn-default' href='$ajax_url_unset_me'>Unset me</a>";
 	}
