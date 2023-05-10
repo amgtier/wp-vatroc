@@ -80,7 +80,16 @@ class VATROC_Form
             $submissions = get_post_meta($post_id, $meta_key);
             $ret = array_map(fn ($entry) => self::backend_to_arr($entry, $uid), $submissions);
         }
+        usort($ret, 'self::sort_timestamp' );
         return $ret;
+    }
+
+    public static function sort_timestamp( $a, $b ){
+        $result = intval( $a['timestamp'] ) > intval( $b['timestamp'] );
+        if(isset($_GET['desc'])){
+            return intval( $a['timestamp'] ) < intval( $b['timestamp'] );
+        }
+        return $result;
     }
 
     public static function get_submission($post_id, $uid, $version_number)
