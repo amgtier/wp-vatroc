@@ -16,7 +16,7 @@ function member_check_shortcode( $atts, $content = null ) {
 
 add_action( 'wp_after_admin_bar_render', 'debug_tool' );
 function debug_tool() {
-	if ( VATROC::debug_section([1, 2]) ) {
+	if ( VATROC::debug_section([1, 2, 503]) ) {
 		echo VATROC::get_template( "includes/templates/hooks/debug-tool.php" );
 	}
 }

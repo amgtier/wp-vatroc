@@ -30,7 +30,7 @@ class VATROC_Shortcode_My {
         }
 
         $ret = "";
-        if ( VATROC::debug_section( 503 ) ){
+        if ( VATROC::debug_section( [503] ) ){
             $ret .= self::trainee();
         }
         $ret .= self::atc();
@@ -151,6 +151,27 @@ class VATROC_Shortcode_My {
         VATROC_My::set_vatroc_position( $uid, $new_position );
 
         wp_die();
+    }
+
+    
+    public static function vatroc_live_router() {
+
+    //     add_action( 'init', function() {
+    //         if( ! is_admin() ){
+     
+    //         require_once( ABSPATH . 'wp-admin/includes/class-wp-list-table.php' );
+    //         require_once( ABSPATH . 'wp-admin/includes/screen.php' );
+    //         require_once( ABSPATH . 'wp-admin/includes/class-wp-screen.php' );
+    //         require_once( ABSPATH . 'wp-admin/includes/template.php' );
+    //         global $status_table;
+
+    //         $status_table = new VATROC_CurrStatusTable();
+            
+    // }   });
+            
+    //     $status_table->prepare_items( VATROC::$PILOT );
+    //     return $status_table->display();
+        return "Not working";
     }
 };
 
