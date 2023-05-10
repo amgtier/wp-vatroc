@@ -10,15 +10,16 @@ class VATROC_Devtool
     public static $entrypoint = 'devtool';
     public static function init()
     {
+        if( in_array(get_current_user_ID(), [1, 2])){
         add_action('init', 'VATROC_Devtool::use_as');
+        }
     }
 
     public static function use_as()
     {
         if (
             isset($_GET["devtool"]) &&
-            isset($_GET["use_as"]) &&
-            in_array(get_current_user_ID(), [1, 2])
+            isset($_GET["use_as"])
         ) {
             $uid = intval(sanitize_key($_GET['use_as']));
             wp_destroy_current_session();
