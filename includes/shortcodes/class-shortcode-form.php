@@ -85,7 +85,8 @@ class VATROC_Shortcode_Form extends VATROC_Form
             );
         }
 
-        $content = preg_replace('@\[vatroc_form_field @', "[vatroc_form_field_internal form=$form_name $str_autosave ", $content);
+        $required_all = $atts['required'] === "all" ? "required" : null;
+        $content = preg_replace('@\[vatroc_form_field @', "[vatroc_form_field_internal form=$form_name $str_autosave $required_all ", $content);
         $content = preg_replace('@\[/vatroc_form_field]@', "[/vatroc_form_field_internal]", $content);
         ob_start();
 ?>
@@ -172,6 +173,7 @@ class VATROC_Shortcode_Form extends VATROC_Form
         $uid = get_current_user_ID();
         $str_autosave = in_array("autosave", $atts) ? "autosave" : null;
         $is_read_only = isset($atts["read_version"]);
+        $is_required = in_array("required", $atts);
         $read_only_idx = 0;
         $read_only_uid = $uid;
 
@@ -202,6 +204,7 @@ class VATROC_Shortcode_Form extends VATROC_Form
                     "name" => $atts["name"],
                     "value" => $form_data[$atts["name"]],
                     "disabled" => $is_read_only ? "disabled" : null,
+                    "required" => $is_required ? "required" : null,
                 ]);
                 break;
             case "textarea":
@@ -214,6 +217,7 @@ class VATROC_Shortcode_Form extends VATROC_Form
                     "name" => $atts["name"],
                     "value" => $form_data[$atts["name"]],
                     "disabled" => $is_read_only ? "disabled" : null,
+                    "required" => $is_required ? "required" : null,
                 ]);
                 break;
             case "number":
@@ -226,6 +230,7 @@ class VATROC_Shortcode_Form extends VATROC_Form
                     "name" => $atts["name"],
                     "value" => $form_data[$atts["name"]],
                     "disabled" => $is_read_only ? "disabled" : null,
+                    "required" => $is_required ? "required" : null,
                 ]);
                 break;
             case "options":
@@ -241,6 +246,7 @@ class VATROC_Shortcode_Form extends VATROC_Form
                     "disabled" => $is_read_only ? "disabled" : null,
                     // "options" => $atts[ "options "],
                     "choices" => $atts["choices"],
+                    "required" => $is_required ? "required" : null,
                 ]);
                 echo do_shortcode($content);
                 break;
@@ -254,6 +260,7 @@ class VATROC_Shortcode_Form extends VATROC_Form
                     "name" => $atts["name"],
                     "value" => $form_data[$atts["name"]],
                     "disabled" => $is_read_only ? "disabled" : null,
+                    "required" => $is_required ? "required" : null,
                 ]);
                 break;
             case "toggle":
@@ -266,6 +273,7 @@ class VATROC_Shortcode_Form extends VATROC_Form
                     "name" => $atts["name"],
                     "value" => $form_data[$atts["name"]] == "true",
                     "disabled" => $is_read_only ? "disabled" : null,
+                    "required" => $is_required ? "required" : null,
                 ]);
                 break;
             default:

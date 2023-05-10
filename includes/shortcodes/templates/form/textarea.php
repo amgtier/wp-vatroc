@@ -7,6 +7,7 @@
             placeholder="<?php echo $placeholder; ?>"
             class="form <?php echo $autosave; ?>"
             name="<?php echo $name; ?>"
+            <?php echo $required; ?>
             <?php echo $disabled; ?>
         ><?php echo $value; ?></textarea>
     <?php endif; ?>

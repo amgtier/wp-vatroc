@@ -9,6 +9,7 @@
             class="form <?php echo $autosave; ?>"
             name="<?php echo $name; ?>"
             value="<?php echo $value; ?>"
+            <?php echo $required; ?>
             <?php echo $disabled; ?>
         />
     <?php endif; ?>
