@@ -35,6 +35,11 @@
                             <?php echo $obj[ $name ]; ?>
                         </td>
                     <?php endforeach; ?>
+                    <?php foreach( $options as $_ => $option ): ?>
+                    <td>
+                        <?php echo $option; ?>
+                    </td>
+                    <?php endforeach; ?>
                 </tr>
                 <?php if ($version === $user_version[ $obj[ "uid" ] ]){
                     echo "</tbody></table>";
