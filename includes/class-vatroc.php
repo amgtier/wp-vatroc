@@ -28,8 +28,11 @@ class VATROC extends VATROC_Constants {
         include_once( VATROC_ABSPATH . 'includes/class-event.php' );
         include_once( VATROC_ABSPATH . 'includes/class-form.php' );
         include_once( VATROC_ABSPATH . 'includes/class-my.php' );
+        include_once( VATROC_ABSPATH . 'includes/class-my-sso.php' );
         include_once( VATROC_ABSPATH . 'includes/class-poll.php' );
         include_once( VATROC_ABSPATH . 'includes/class-devtool.php' );
+        include_once( VATROC_ABSPATH . 'includes/class-sso.php' );
+        include_once( VATROC_ABSPATH . 'includes/class-sso-discord.php' );
         include_once( VATROC_ABSPATH . 'includes/shortcodes/class-shortcode-event.php' );
         include_once( VATROC_ABSPATH . 'includes/shortcodes/class-shortcode-form.php' );
         include_once( VATROC_ABSPATH . 'includes/shortcodes/class-shortcode-roster.php' );
@@ -37,6 +40,7 @@ class VATROC extends VATROC_Constants {
         include_once( VATROC_ABSPATH . 'includes/shortcodes/class-shortcode-poll.php' );
         include_once( VATROC_ABSPATH . 'includes/shortcodes/class-shortcode-my.php' );
         include_once( VATROC_ABSPATH . 'includes/shortcodes/class-shortcode-devtool.php' );
+        include_once( VATROC_ABSPATH . 'includes/shortcodes/class-shortcode-sso.php' );
         include_once( VATROC_ABSPATH . 'includes/vatroc-hook-functions.php' );
     }
 
@@ -177,5 +181,31 @@ class VATROC extends VATROC_Constants {
 
     public static function get_date( $y, $m, $d ) {
         return sprintf( "%04d/%d/%02d", $y, $m % 12, $d );
+    }
+
+    public static function return_redirect($url){
+        ob_start();
+        ?>
+        <script>window.location.replace("<?php echo $url; ?>")</script>
+        <?php
+        return ob_get_clean();
+    }
+
+    public static function valid_200_response($response){
+        return isset($response['response']) && $response['response']['code'] === 200 && isset($response['body']);
+    }
+
+    public static function valid_response_code($response, $code){
+        return isset($response['response']) && $response['response']['code'] === $code && isset($response['body']);
+    }
+
+    public static function use_as_enabled(){
+        $uid = get_current_user_ID();
+        if (VATROC::debug_section([1, 2])) {
+            if (isset($_REQUEST["uid"])) {
+                $uid = intval($_REQUEST["uid"]);
+            }
+        }
+        return $uid;
     }
 }

@@ -11,8 +11,8 @@ jQuery(document).ready( ($) => {
     toggle_value_handler( $ );
   }
 
-  if( $(".form-card.option").length ) {
-    form_card_option_handler( $ );
+  if( $( ".option" ).length ) {
+    option_handler( $ );
   }
 
   checkbox_set_boolean( $ );
@@ -52,8 +52,8 @@ function ajax_submit_form( $ ){
 
       $.post( ajax_object.ajax_url, data,
         () => {
-          // form.addClass( "hidden" );
-          // $( "div.form-submit-message" ).removeClass( "hidden" );
+          form.addClass( "hidden" );
+          $( "div.form-submit-message" ).removeClass( "hidden" );
         });
 
       // &.post
@@ -105,10 +105,24 @@ function toggle_value_handler( $ ) {
   });
 }
 
-function form_card_option_handler( $ ) {
-  $( '.form-card.option' ).on( "change", function() {
-    const name = $(this).data('name');
-    console.log('name:', name);
-    const submit_text = $( "input[type=hidden][name")
-  });
+function option_handler( $ ) {
+    $( '.option' ).each( (key, target) => {
+        $( target ).on( "click", ( event ) => {
+
+        const name = $(target).data( 'name' );
+        let optionValue = $( 'input[name=' + name + ']' ).val().split( "," );
+        const currKey = (key + 1 ).toString();
+        const value = $(target).val();
+
+            console.log(value);
+        if( value === 'on' || value === 'true' ){
+            if(!optionValue.includes( currKey )){
+                optionValue.push( currKey );
+            }
+        } else {
+            optionValue = optionValue.filter( item => item !== currKey );
+        }
+        console.log(optionValue)
+        });
+    } );
 }

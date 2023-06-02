@@ -7,9 +7,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 <div class='flexbox-row flexbox-start'>
   <div class='flexbox-column flexbox-nogap'>
-    N
-  </div>
-  <div class='flexbox-column flexbox-nogap'>
-    A
+    <p>Status: Queuing  </p>
+    <p>Next Step:</p>
   </div>
 </div>
