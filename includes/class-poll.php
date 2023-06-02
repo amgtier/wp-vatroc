@@ -212,10 +212,11 @@ class VATROC_Poll {
     }
 
     
-    public static function get_options_monthly_availability( $post_id, $params ) {
+    public static function get_options_monthly_availability( $post_id, $params, $uid = null ) {
         $show_all = $params[ "show_all" ];
         $votes = self::prepare_votes( $post_id );
-        $uid = get_current_user_id();
+        $uid = $uid ?: get_current_user_id();
+
 
         $ret = [];
         $today = VATROC::get_today();

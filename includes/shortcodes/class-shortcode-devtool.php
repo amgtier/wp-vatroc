@@ -4,7 +4,6 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-
 class VATROC_Shortcode_Devtool
 {
     private static $meta_prefix = "vatroc_";
