@@ -6,7 +6,7 @@
 ?>
 <div class="debug-tool">
     <p>Is Admin: <?php echo VATROC::is_admin() ? "yes" : "no"; ?></p>
-    <p>Page ID: <?php echo get_the_ID(); ?></p>
+    <p>Page ID: <a href="<?php echo get_permalink(); ?>"><?php echo get_the_ID(); ?></a></p>
     <a href="<?php echo $use1; ?>">Use as 1</a>
     <a href="<?php echo $use2; ?>">Use as 2</a>
 </div>

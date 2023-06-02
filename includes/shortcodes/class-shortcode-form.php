@@ -128,6 +128,15 @@ class VATROC_Shortcode_Form extends VATROC_Form
         unset($keys["timestamp"]);
         unset($keys["uid"]);
 
+        $options = explode(",", $atts["options"]);
+        $render_options = [];
+        if(in_array("archive", $options)){
+            array_push($render_options, self::archive_button());
+        }
+
+        global $post;
+        $caller_post = get_post($post);
+        $post = get_post($post_id);
         ob_start();
         VATROC::get_template("includes/shortcodes/templates/form/response-list.php", [
             "count" => count($all_submissions),
@@ -135,8 +144,10 @@ class VATROC_Shortcode_Form extends VATROC_Form
             "field_names" => $keys,
             "view_all" => $can_view_all && $uid == 0,
             "view_form" => $content,
-            "version" => intval($_GET["v"]) ?: -1
+            "version" => intval($_GET["v"]) ?: -1,
+            "options" => $render_options,
         ]);
+        $post = get_post($caller_post);
         return ob_get_clean();
     }
 
@@ -292,6 +303,18 @@ class VATROC_Shortcode_Form extends VATROC_Form
             "name" => $atts["name"],
             "value" => null,
         ]);
+    }
+
+    public static function archive_button() {
+        ob_start();
+        ?>
+        <a 
+            href="#" 
+            class="btn btn-default"
+            disabled
+        >Archive</a>
+        <?php
+        return ob_get_clean();
     }
 };
 

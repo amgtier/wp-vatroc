@@ -59,11 +59,13 @@ class VATROC_Shortcode_Poll extends VATROC_Poll {
     }
 
 
-    public static function get_options( $type = null, $post_id, $params = [] ) {
+    public static function get_options( $type = null, $post_id, $params = [], $uid = null ) {
         $post_id = $post_id ?: get_the_ID();
+        $uid = $uid ?: get_current_user_ID();
+
         switch ( $type ) {
             case "monthly_availability":
-                return VATROC_Poll::get_options_monthly_availability( $post_id, $params );
+                return VATROC_Poll::get_options_monthly_availability( $post_id, $params, $uid );
         }
         return [];
     }

@@ -6,6 +6,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 
 class VATROC_My {
+    const PAGE_ID = 3889;
+
     public static function init() {
         self::enqueue_scripts();
         wp_enqueue_style( 'my', plugin_dir_url( VATROC_PLUGIN_FILE ) . 'includes/css/my.css' );
