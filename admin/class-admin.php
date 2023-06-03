@@ -68,6 +68,14 @@ class VATROC_Admin
         );
         add_submenu_page(
             'vatroc',
+            __('Discord', 'vatroc'),
+            __('Discord', 'vatroc'),
+            $privilege,
+            'vatroc-discord',
+            array($this, 'discord')
+        );
+        add_submenu_page(
+            'vatroc',
             __('Settings', 'vatroc'),
             __('Settings', 'vatroc'),
             $privilege,
@@ -117,6 +125,11 @@ class VATROC_Admin
         ]);
     }
 
+    public function discord()
+    {
+        return VATROC::get_template("admin/templates/discord-users.php", []);
+    }
+
 
     public function magic_charts()
     {
@@ -124,6 +137,7 @@ class VATROC_Admin
         // $am = new VATROC_AdminMagicCharts;
         // $am->output();
     }
-};
+}
+;
 
 return new VATROC_Admin();
