@@ -142,3 +142,11 @@ function add_vatroctool_barmenu ( $admin_bar ) {
         )
     ) );
 }
+
+add_filter( 'magic_login_mail_create_link_button', 'create_login_link', 10, 1);
+function create_login_link( $html ) {
+    if(VATROC::debug_section()){
+        return $html;
+    }
+    return null;
+}
