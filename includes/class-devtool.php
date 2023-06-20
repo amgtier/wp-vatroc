@@ -10,8 +10,19 @@ class VATROC_Devtool
     public static $entrypoint = 'devtool';
     public static function init()
     {
-        if( in_array(get_current_user_ID(), [1, 2])){
-        add_action('init', 'VATROC_Devtool::use_as');
+        if (in_array(get_current_user_ID(), [1, 2])) {
+            add_action('init', 'VATROC_Devtool::use_as');
+        }
+        add_action('wp_after_admin_bar_render', 'VATROC_Devtool::debug_tool');
+    }
+
+    public function debug_tool()
+    {
+        if (isset($_GET["nodevtool"])) {
+            return null;
+        }
+        if (VATROC::debug_section([1, 2, 503])) {
+            echo VATROC::get_template("includes/templates/hooks/debug-tool.php");
         }
     }
 
