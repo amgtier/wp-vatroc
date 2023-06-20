@@ -108,8 +108,14 @@ class VATROC_Poll {
     }
 
 
-    protected static function get_added_vote_date_option( $post_id ){
+    protected static function get_added_vote_date_option( $post_id, $later_than = null ){
         $meta_key = self::$meta_key . '-added-options';
+        if($later_than != null){
+            $arr = array_filter(function($str_date) use (&$later_than) {
+                return strtotime($str_date) >= strtotime($later_than);
+            }, get_post_meta( $post_id, $meta_key, true) ?: []) ?: [];
+            return $arr;
+        }
         return get_post_meta( $post_id, $meta_key, true) ?: [];
     }
 
@@ -233,7 +239,7 @@ class VATROC_Poll {
         ];
 
         $dates = array_merge(
-            self::get_added_vote_date_option( $post_id ),
+            self::get_added_vote_date_option( $post_id, $show_all ? null : $today ),
             self::get_dates( self::get_curr_month(), self::get_curr_year() ),
             self::get_dates( self::get_next_month(), self::get_next_year() ),
         );
