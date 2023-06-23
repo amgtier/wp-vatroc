@@ -258,8 +258,19 @@ class VATROC_SSO_Discord extends VATROC_SSO
         return self::INVALID_RESPONSE;
     }
 
-    public static function fetch_channel_list($guild_id)
+    public static function fetch_guild($guild_id = null)
     {
+        $guild_id = $guild_id ?: self::get_guild_id();
+        $response = VATROC_SSO_Discord::bot_remote_get("https://discord.com/api/guilds/$guild_id?with_count=true");
+        if (VATROC::valid_200_response($response)) {
+            return json_decode($response['body'], true);
+        }
+        return self::INVALID_RESPONSE;
+    }
+
+    public static function fetch_channel_list($guild_id = null)
+    {
+        $guild_id = $guild_id ?: self::get_guild_id();
         $response = VATROC_SSO_Discord::bot_remote_get("https://discord.com/api/guilds/$guild_id/channels");
         if (VATROC::valid_200_response($response)) {
             return json_decode($response['body'], true);

@@ -31,8 +31,8 @@ class VATROC extends VATROC_Constants {
         include_once( VATROC_ABSPATH . 'includes/class-my-sso.php' );
         include_once( VATROC_ABSPATH . 'includes/class-poll.php' );
         include_once( VATROC_ABSPATH . 'includes/class-devtool.php' );
-        include_once( VATROC_ABSPATH . 'includes/class-sso.php' );
-        include_once( VATROC_ABSPATH . 'includes/class-sso-discord.php' );
+        include_once( VATROC_ABSPATH . 'includes/sso/class-sso.php' );
+        include_once( VATROC_ABSPATH . 'includes/sso/class-sso-discord.php' );
         include_once( VATROC_ABSPATH . 'includes/shortcodes/class-shortcode-event.php' );
         include_once( VATROC_ABSPATH . 'includes/shortcodes/class-shortcode-form.php' );
         include_once( VATROC_ABSPATH . 'includes/shortcodes/class-shortcode-roster.php' );
