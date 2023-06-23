@@ -41,11 +41,11 @@ class VATROC_Shortcode_SSO
             // $res = VATROC_SSO_Discord::bot_remote_get("https://discord.com/api/guilds/1113138347121057832/members/561538672776708096"); // Test VATROC
             // $res = VATROC_SSO_Discord::bot_remote_get("https://discord.com/api/guilds/1113138347121057832/members"); // Test VATROC
             $ret .= VATROC_SSO_Discord::get_user_token_from_meta();
-            $ret .= json_encode(VATROC_SSO_Discord::fetch_user_data());
+            $ret .= json_encode(VATROC_SSO_Discord_API::fetch_user_data());
             $ret .= VATROC_SSO_Discord::render_channel_list('1113138347121057832');
             // $ret .= VATROC_SSO_Discord::delete_guild_member('1113138347121057832', 1);
             // $ret .= VATROC_SSO_Discord::add_guild_member('1113138347121057832', 1);
-            $ret .= json_encode(VATROC_SSO_Discord::fetch_guild_user_data('1113138347121057832', 1));
+            $ret .= json_encode(VATROC_SSO_Discord_API::fetch_guild_user_data('1113138347121057832', 1));
         }
         return $ret;
     }
@@ -54,7 +54,7 @@ class VATROC_Shortcode_SSO
     {
         $users = get_users(['fields' => ['ID']]);
 
-        $role_names = VATROC_SSO_Discord::fetch_role_names();
+        $role_names = VATROC_SSO_Discord_API::fetch_role_names();
         $role_name_map = [];
         foreach ($role_names as $idx => $role) {
             $role_name_map[$role->id] = $role->name;
