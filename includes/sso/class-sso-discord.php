@@ -26,30 +26,39 @@ class VATROC_SSO_Discord extends VATROC_SSO
         add_filter("vatroc_sso_settings", "VATROC_SSO_Discord::settings");
     }
 
-    public static function register(){
+    public static function register()
+    {
         return VATROC_SSO_DISCORD_API::register();
     }
 
-    public static function refresh(){
+    public static function refresh()
+    {
         return VATROC_SSO_DISCORD_API::refresh();
     }
 
-    public static function connect_button()
+    public static function connect_button( $uid = null )
     {
-        ob_start();
-?>
-        <p>
-            <a href=<?php echo self::get_oauth_url(); ?> class="btn btn-primay">Connect Discord</a>
-            <?php
-            if (VATROC::debug_section([1, 2])) {
+        $uid = $uid ?: get_current_user_ID();
+        $redirect_url = VATROC::get_current_url();
+
+        switch (self::check_user($uid)){
+            case self::NOT_CONNECTED:
+            case self::INVALID_RESPONSE:
+                self::revoke($uid);
+                // TODO: should use more proper approach for sso next
+                update_user_meta( $uid, "vatroc_sso_next", VATROC::get_current_url());
                 ob_start();
+?>
+            <a href=<?php echo self::get_oauth_url(); ?> class="btn btn-primay">Connect Discord</a>
+<?php
+            break;
+        default:
+            ob_start();
             ?>
-                <a href="<?php echo get_permalink(); ?>?source=discord&action=revoke" class="btn btn-primay">Clean Discord</a>
-            <?php
-            }
-            ?>
-        </p>
-    <?php
+            <a href="<?php echo get_permalink(VATROC_Shortcode_SSO::PAGE_ID) . "?next=$redirect_url"; ?>&source=discord&action=revoke" class="btn btn-primay">Clean Discord</a>
+        <?php
+            break;
+        }
         return ob_get_clean();
     }
 
@@ -96,17 +105,27 @@ class VATROC_SSO_Discord extends VATROC_SSO
         return ob_get_clean();
     }
 
-    public static function render_avatar($uid = null)
+    public static function render_status_with_avatar($uid = null){
+        $uid = $uid ?: get_current_user_ID();
+
+        return self::render_avatar($uid) . self::connect_button( $uid );
+    }
+
+    public static function render_avatar($uid = null, $show_message = false)
     {
         $uid = $uid ?: get_current_user_ID();
 
         switch (self::check_user($uid)) {
             case self::NOT_CONNECTED:
-                return self::connect_button();
+                return VATROC::show_message_at_render($show_message, self::NOT_CONNECTED);
             case self::INVALID_RESPONSE:
-                return self::INVALID_RESPONSE;
+                return VATROC::show_message_at_render($show_message, self::INVALID_RESPONSE);
         }
         $discord_userdata = VATROC_SSO_Discord_API::fetch_user_data($uid);
+        if ($discord_userdata == VATROC_SSO_Discord_API::INVALID_RESPONSE) {
+            self::revoke($uid);
+            return VATROC::show_message_at_render($show_message, VATROC_SSO_Discord_API::INVALID_RESPONSE);
+        }
         $guild_userdata = VATROC_SSO_Discord_API::fetch_guild_user_data(self::get_guild_id(), $uid);
         $avatar = $discord_userdata['avatar'];
         $user_id = $discord_userdata['id'];
