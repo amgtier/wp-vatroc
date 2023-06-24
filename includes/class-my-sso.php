@@ -16,7 +16,7 @@ class VATROC_My_SSO
         $ret = "";
         ob_start();
 ?>
-        <p>Discord <?php echo VATROC_SSO_Discord::render_avatar($uid); ?></p>
+        <p>Discord <?php echo VATROC_SSO_Discord::render_status_with_avatar($uid) ?></p>
 <?php
         $ret .= ob_get_clean();
         return $ret;

@@ -7,26 +7,36 @@ if (!defined('ABSPATH')) {
 
 class VATROC_Shortcode_SSO
 {
+    const PAGE_ID = 4223;
     public static function init()
     {
         add_shortcode('vatroc_sso', 'VATROC_Shortcode_SSO::router');
+        add_shortcode('vatroc_sso_status', 'VATROC_Shortcode_SSO::render_status');
+        add_shortcode('vatroc_sso_avatar', 'VATROC_Shortcode_SSO::render_avatar');
         add_shortcode('vatroc_sso_connection_list', 'VATROC_Shortcode_SSO::connection_list');
     }
 
-    public static function router()
+    public static function router($atts)
     {
-        $ret = VATROC_SSO_Discord::connect_button();
-
-        $redirect = $_REQUEST['next'];
+        $uid = get_current_user_ID();
 
         if (isset($_REQUEST['source'])) {
             switch ($_REQUEST['source']) {
                 case 'discord':
                     if (isset($_REQUEST['action']) && $_REQUEST['action'] === "revoke") {
                         VATROC_SSO_Discord::revoke();
+                        if(isset($_REQUEST['next'])){
+                            return VATROC::return_redirect($_REQUEST['next']);
+                        }
                         return VATROC::return_redirect(get_permalink(VATROC_My::PAGE_ID));
                     }
                     if (VATROC_SSO_Discord::register()) {
+                        // TODO: should use more proper approach for sso next
+                        $next = get_user_meta( $uid, "vatroc_sso_next", true);
+                        if($next){
+                            delete_user_meta( $uid, "vatroc_sso_next" );
+                            return VATROC::return_redirect($next);
+                        }
                         return VATROC::return_redirect(get_permalink(VATROC_My::PAGE_ID));
                     }
                     break;
@@ -35,6 +45,7 @@ class VATROC_Shortcode_SSO
             }
         }
 
+        $ret = VATROC_SSO_Discord::connect_button();
         if (VATROC::debug_section([1, 2])) {
             // $res = VATROC_SSO_Discord::remote_get("https://discord.com/api/guilds/1113138347121057832"); // VATROC
             // $res = VATROC_SSO_Discord::bot_remote_get("https://discord.com/api/guilds/1113138347121057832"); // Test VATROC
@@ -48,6 +59,29 @@ class VATROC_Shortcode_SSO
             $ret .= json_encode(VATROC_SSO_Discord_API::fetch_guild_user_data('1113138347121057832', 1));
         }
         return $ret;
+    }
+
+    public static function render_avatar($atts){
+        $uid = isset($atts["uid"]) ? $atts["uid"] : get_current_user_ID();
+        if (isset($atts["provider"])){
+            switch ($atts["provider"]){
+                case 'discord':
+                    return VATROC_SSO_Discord::render_avatar($uid);
+                default:
+            }
+        }
+    }
+
+    public static function render_status($atts)
+    {
+        $uid = isset($atts["uid"]) ? $atts["uid"] : get_current_user_ID();
+        if (isset($atts["provider"])){
+            switch ($atts["provider"]){
+                case 'discord':
+                    return VATROC_SSO_Discord::render_status_with_avatar($uid);
+                default:
+            }
+        }
     }
 
     public static function connection_list($atts)

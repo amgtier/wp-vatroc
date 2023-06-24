@@ -132,6 +132,7 @@ class VATROC_SSO_Discord_API
         if (VATROC::valid_200_response($response)) {
             return json_decode($response['body'], true);
         }
+        // TODO: Return and handle self::401_UNAUTHORIZED
         return self::INVALID_RESPONSE;
     }
 
