@@ -2,6 +2,7 @@
     /*
     * Usage example: <?php VATROC::get_template( "includes/shortcodes/templates/poll/response-buttons.php", [ "result" => $result, "option" => "2023/2/2" ] ) ?>
     */
+    $is_superuser = get_current_user_ID() == 1;
 ?>
 
 <div class="nowrap">
@@ -10,31 +11,31 @@
         type="button" 
         class="res btn-default 
         <?php echo $result[ "user_accept" ] ? "active" : ""; ?>
-        <?php echo  $result[ "read_only" ] ? "disabled" : null; ?>
+        <?php echo ($is_superuser || $result[ "read_only" ]) ? "disabled" : null; ?>
         " 
         value="accept" 
         name="<?php echo $option; ?>"
-        <?php echo  $result[ "read_only" ] ? "disabled" : null; ?>
+        <?php echo ($is_superuser || $result[ "read_only" ]) ? "disabled" : null; ?>
     >v</button>
     <button 
         type="button" 
         class="res btn-default 
         <?php echo $result[ "user_tentative" ] ? "active" : ""; ?>
-        <?php echo  $result[ "read_only" ] ? "disabled" : null; ?>
+        <?php echo  ($is_superuser || $result[ "read_only" ]) ? "disabled" : null; ?>
         " 
         value="tentative" 
         name="<?php echo $option; ?>"
-        <?php echo  $result[ "read_only" ] ? "disabled" : null; ?>
+        <?php echo ($is_superuser || $result[ "read_only" ]) ? "disabled" : null; ?>
     >?</button>
     <button 
         type="button" 
         class="res btn-default 
         <?php echo $result[ "user_reject" ] ? "active" : ""; ?>
-        <?php echo  $result[ "read_only" ] ? "disabled" : null; ?>
+        <?php echo ($is_superuser || $result[ "read_only" ]) ? "disabled" : null; ?>
         " 
         value="reject" 
         name="<?php echo $option; ?>"
-        <?php echo  $result[ "read_only" ] ? "disabled" : null; ?>
+        <?php echo ($is_superuser || $result[ "read_only" ]) ? "disabled" : null; ?>
     >x</button>
 </div>
 

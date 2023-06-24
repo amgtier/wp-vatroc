@@ -26,10 +26,15 @@ function collapse_section($atts, $content)
 			break;
 	}
 
+	$variant = "primary";
+	if (isset($atts["variant"])){
+		$variant = $atts["variant"];
+	}
+
 	ob_start()
 		?>
 	<p>
-		<button class="btn btn-primary"
+		<button class="btn btn-<?php echo $variant; ?>"
 						data-toggle="collapse"
 						data-target="#collapseSection"
 						aria-expanded="false"
