@@ -209,4 +209,16 @@ class VATROC extends VATROC_Constants {
         }
         return $uid;
     }
+
+    public static function show_message_at_render($show_message, $message){
+        if($show_message){
+            return $message;
+        } else {
+            return null;
+        }
+    }
+
+    public static function get_current_url(){
+        return "https://" . $_SERVER[HTTP_HOST] . $_SERVER[REQUEST_URI];
+    }
 }
