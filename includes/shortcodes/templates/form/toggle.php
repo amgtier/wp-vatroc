@@ -1,5 +1,5 @@
 <label>
-    <p class="input-label"><?php echo $label; ?></p>
+    <p class="input-label"><?php echo $label . ($required ? "<span class=required>*</span>" : null); ?></p>
     <label class="form toggle-switch <?php echo $autosave; ?>">
     <?php if ( $read_only ): ?>
         <span class="toggle-slider round read-only <?php echo $value ? "checked" : null; ?>"></span>

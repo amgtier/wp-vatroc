@@ -72,6 +72,11 @@
     page-break-inside: avoid;
     word-wrap: break-word;
     background-color: #fff;
+    margin-top: 15px;
+  }
+
+  .required {
+    color: red;
   }
 
   .input-label {
