@@ -124,3 +124,16 @@ function who_am_i()
 	echo get_current_user_ID();
 	wp_die();
 }
+
+add_filter("login_url", "vatroc_login_url", 10, 3);
+function vatroc_login_url($login_url, $redirect, $force_reauth){
+	$login_url = get_permalink( VATROC::LOGIN_PAGE_ID );
+	if ( ! empty( $redirect ) ) {
+		$login_url = add_query_arg( 'redirect_to', urlencode( $redirect ), $login_url );
+	}
+
+	if ( $force_reauth ) {
+		$login_url = add_query_arg( 'reauth', '1', $login_url );
+	}
+	return $login_url;
+}

@@ -4,6 +4,7 @@ class VATROC extends VATROC_Constants {
     public static $log = false;
     public static $log_enabled = false;
     protected static $_instance = null;
+	const LOGIN_PAGE_ID = 484;
 
 
     public static function instance() {
@@ -31,6 +32,7 @@ class VATROC extends VATROC_Constants {
         include_once( VATROC_ABSPATH . 'includes/class-my-sso.php' );
         include_once( VATROC_ABSPATH . 'includes/class-poll.php' );
         include_once( VATROC_ABSPATH . 'includes/class-devtool.php' );
+        include_once( VATROC_ABSPATH . 'includes/rest-api/class-rest-api.php' );
         include_once( VATROC_ABSPATH . 'includes/sso/class-sso.php' );
         include_once( VATROC_ABSPATH . 'includes/sso/class-sso-discord-api.php' );
         include_once( VATROC_ABSPATH . 'includes/sso/class-sso-discord.php' );
@@ -42,6 +44,7 @@ class VATROC extends VATROC_Constants {
         include_once( VATROC_ABSPATH . 'includes/shortcodes/class-shortcode-my.php' );
         include_once( VATROC_ABSPATH . 'includes/shortcodes/class-shortcode-devtool.php' );
         include_once( VATROC_ABSPATH . 'includes/shortcodes/class-shortcode-sso.php' );
+        include_once( VATROC_ABSPATH . 'includes/shortcodes/class-shortcode-redirect.php' );
         include_once( VATROC_ABSPATH . 'includes/vatroc-hook-functions.php' );
     }
 
