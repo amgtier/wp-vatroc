@@ -50,7 +50,9 @@ class VATROC_Shortcode_Form extends VATROC_Form
 
         $count = count(VATROC_Form::get_all_submissions(get_the_ID(), get_current_user_ID()));
         $limit = $atts['limit'] ?: -1;
+        $is_over_limit = $limit != -1 && $count >= $limit;
 
+        // TODO: investigate if this can be put along side the vatroc_form_field below
         $content = preg_replace('@\[vatroc_form_field_card @', "[vatroc_form_field_card_internal ", $content);
         $content = preg_replace('@\[/vatroc_form_field_card]@', "[/vatroc_form_field_card_internal]", $content);
         $ret = '';
@@ -59,6 +61,7 @@ class VATROC_Shortcode_Form extends VATROC_Form
                 $read_only_version = isset($_GET["v"]) ? intval($_GET["v"]) : 1;
                 $read_only_uid = isset($_GET["u"]) && intval($_GET["u"]) > 0 ? intval($_GET["u"]) : get_current_user_ID();
                 $content = preg_replace('@\[vatroc_form_field @', "[vatroc_form_field_internal read_version=$read_only_version read_uid=$read_only_uid form=$form_name $str_autosave ", $content);
+                $content = preg_replace('@\[vatroc_form_field_card_internal @', "[vatroc_form_field_card_internal read_version=$read_only_version read_uid=$read_only_uid form=$form_name $str_autosave ", $content);
                 $form_data = VATROC_Form::get_submission(get_the_ID(), $read_only_uid, $read_only_version - 1);
                 $timestamp = date("Y/m/d H:i:s T", $form_data["timestamp"]);
                 $read_only_uid_avatar = VATROC_My::html_my_avatar($read_only_uid);
@@ -77,9 +80,13 @@ class VATROC_Shortcode_Form extends VATROC_Form
             wp_enqueue_script('vatroc-form', plugin_dir_url(VATROC_PLUGIN_FILE) . 'includes/shortcodes/js/form.js', array('jquery'), null, true);
             VATROC::enqueue_ajax_object('vatroc-form');
             return $ret;
-        } else {
+        } else if ($count > 0) {
+            $variant = 'secondary';
+            if($is_over_limit){
+                $variant = 'primary';
+            }
             $ret .= do_shortcode(
-                "[vatroc_collapse wrapper='card' label='已送出表單 ($count)']
+                "[vatroc_collapse wrapper='card' label='已送出表單 ($count)' variant='$variant']
                 [vatroc_form_submission_list]
                 [/vatroc_collapse]"
             );
@@ -88,18 +95,19 @@ class VATROC_Shortcode_Form extends VATROC_Form
         $required_all = $atts['required'] === "all" ? "required" : null;
         $content = preg_replace('@\[vatroc_form_field @', "[vatroc_form_field_internal form=$form_name $str_autosave $required_all ", $content);
         $content = preg_replace('@\[/vatroc_form_field]@', "[/vatroc_form_field_internal]", $content);
+        $submit_label = $atts["submit_label"] ?: "Submit";
         ob_start();
 ?>
         <div class="form-submit-message hidden">
             <h2><?php echo $atts["submit_message"] ?: "The form has been submitted." ?></h2>
         </div>
-        <?php if ($limit != -1 && $count >= $limit) : ?>
+        <?php if ($is_over_limit) : ?>
             <h2><?php echo $atts["limit_message"] ?: "The form has been submitted." ?></h2>
         <?php else : ?>
             <form name=<?php echo $form_name; ?> class="vatroc-form">
-                <i>This form is autosaved.</i>
+                <i>This form is autosaved. Your response will only be submitted after "<?php echo $submit_label; ?>".</i>
                 <?php echo do_shortcode($content); ?>
-                <button><?php echo $atts["submit_label"] ?: "Submit"; ?></button>
+                <button><?php echo $submit_label; ?></button>
             </form>
 <?php
         endif;
@@ -128,6 +136,15 @@ class VATROC_Shortcode_Form extends VATROC_Form
         unset($keys["timestamp"]);
         unset($keys["uid"]);
 
+        $options = explode(",", $atts["options"]);
+        $render_options = [];
+        if(in_array("archive", $options)){
+            array_push($render_options, self::archive_button());
+        }
+
+        global $post;
+        $caller_post = get_post($post);
+        $post = get_post($post_id);
         ob_start();
         VATROC::get_template("includes/shortcodes/templates/form/response-list.php", [
             "count" => count($all_submissions),
@@ -135,8 +152,10 @@ class VATROC_Shortcode_Form extends VATROC_Form
             "field_names" => $keys,
             "view_all" => $can_view_all && $uid == 0,
             "view_form" => $content,
-            "version" => intval($_GET["v"]) ?: -1
+            "version" => intval($_GET["v"]) ?: -1,
+            "options" => $render_options,
         ]);
+        $post = get_post($caller_post);
         return ob_get_clean();
     }
 
@@ -169,6 +188,10 @@ class VATROC_Shortcode_Form extends VATROC_Form
 
     public static function output_form_field_internal($atts, $content = null)
     {
+        VATROC::dog($atts);
+        if(in_array("hide_on_read", $atts)){
+            return;
+        }
         $page_id = get_the_ID();
         $uid = get_current_user_ID();
         $str_autosave = in_array("autosave", $atts) ? "autosave" : null;
@@ -183,6 +206,13 @@ class VATROC_Shortcode_Form extends VATROC_Form
             $read_only_uid = isset($atts["read_uid"]) &&
                 intval($atts["read_uid"]) > 0 ? intval($atts["read_uid"]) : $uid;
             $form_data = VATROC_Form::get_submission($page_id, $read_only_uid, $read_only_idx);
+        }
+
+        if(!isset($atts["name"])){
+            if(VATROC::debug_section([1, 2, 503])){
+                return "<div class='input-box'>Name is missing from a form field.</div>";
+            }
+            return;
         }
 
         $name = $atts["name"];
@@ -277,7 +307,17 @@ class VATROC_Shortcode_Form extends VATROC_Form
                 ]);
                 break;
             default:
-                VATROC::dog($atts);
+                if(isset($atts["label"])){
+                    $_label = $atts["label"] . ($is_required ? "<span class=required>*</span>" : null);
+                    echo "<label><p class='input-label'>$_label</p></label>";
+                    
+                }
+                if($is_read_only){
+                    $content = do_shortcode($content);
+                    $content = preg_replace('@\<button @', "<button disabled ", $content);
+                    $content = preg_replace('@\<a @', "<a disabled ", $content);
+                }
+                echo $content;
                 break;
         }
         echo "</div>";
@@ -292,6 +332,18 @@ class VATROC_Shortcode_Form extends VATROC_Form
             "name" => $atts["name"],
             "value" => null,
         ]);
+    }
+
+    public static function archive_button() {
+        ob_start();
+        ?>
+        <a 
+            href="#" 
+            class="btn btn-default"
+            disabled
+        >Archive</a>
+        <?php
+        return ob_get_clean();
     }
 };
 

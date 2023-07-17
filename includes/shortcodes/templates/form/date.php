@@ -1,5 +1,5 @@
 <label>
-    <?php echo $label; ?>
+    <?php echo $label . ($required ? "<span class=required>*</span>" : null); ?>
     <?php if ( $read_only ): ?>
         <p class="view-form-value"><?php echo $value; ?></p>
     <?php else: ?>
