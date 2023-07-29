@@ -11,7 +11,7 @@ class VATROC_SSO_Discord_API
 
     private const URL_TOKEN = "https://discord.com/api/oauth2/token";
     public const META_KEY_TOKEN = "vatroc_sso_discord_token";
-    public const META_KEY_USERDATA = "vatroc_sso_discord_userdata";
+    public const META_KEY_DATA = "vatroc_sso_discord_data";
     private const URL_API = "https://discord.com/api";
     const CONNECTED = 'CONNECTED';
     const NOT_CONNECTED = 'NOT_CONNECTED';
@@ -20,37 +20,13 @@ class VATROC_SSO_Discord_API
     public static function init()
     {}
 
-    public static function register()
+    public static function register_token($token, $uid = null)
     {
-        $code = $_REQUEST['code'];
-        $redirect_uri = get_permalink() . '?' . http_build_query([
-            'source' => 'discord',
-        ]);
-
-        $response = wp_remote_post(
-            self::URL_TOKEN,
-            [
-                'headers' => [
-                    'Content-Type' => 'application/x-www-form-urlencoded'
-                ],
-                'body' => [
-                    'client_id' => VATROC_SSO_Discord::get_client_key(),
-                    'client_secret' => VATROC_SSO_Discord::get_client_secret(),
-                    'grant_type' => 'authorization_code',
-                    'code' => $code,
-                    'redirect_uri' => $redirect_uri,
-                ]
-            ]
-        );
-        if (isset($response['response'])) {
-            if ($response['response']['code'] === 200) {
-                update_user_meta(get_current_user_ID(), VATROC_SSO_Discord::META_KEY_TOKEN, $response['body']);
-                return true;
-            } else {
-                VATROC::dog('[VATROC_SSO_Discord]');
-                VATROC::dog($response['response']);
-                VATROC::dog($response['body']);
-            }
+        // TODO4: migrate to make $uid required.
+        $uid = $uid == null ? get_current_user_ID() : $uid;
+        if($token){
+            update_user_meta($uid, VATROC_SSO_Discord::META_KEY_TOKEN, $token);
+            return true;
         }
         return false;
     }
@@ -96,9 +72,12 @@ class VATROC_SSO_Discord_API
         if ($tokens == null) {
             return false;
         }
+        return self::remote_get_from_token($uri, $tokens);
+    }
 
-        $token_type = $tokens["token_type"];
-        $access_token = $tokens["access_token"];
+    public static function remote_get_from_token($uri, $token){
+        $token_type = $token["token_type"];
+        $access_token = $token["access_token"];
         $response = wp_remote_get(
             $uri,
             [
@@ -124,11 +103,63 @@ class VATROC_SSO_Discord_API
         return $response;
     }
 
+    public static function fetch_user_token($code){
+        $redirect_uri = get_permalink() . '?' . http_build_query([
+            'source' => 'discord',
+        ]);
+        $response = wp_remote_post(
+            self::URL_TOKEN,
+            [
+                'headers' => [
+                    'Content-Type' => 'application/x-www-form-urlencoded'
+                ],
+                'body' => [
+                    'client_id' => VATROC_SSO_Discord::get_client_key(),
+                    'client_secret' => VATROC_SSO_Discord::get_client_secret(),
+                    'grant_type' => 'authorization_code',
+                    'code' => $code,
+                    'redirect_uri' => $redirect_uri,
+                ]
+            ]
+        );
+        if (isset($response['response'])) {
+            if ($response['response']['code'] === 200) {
+                return $response['body'];
+            } else {
+                VATROC::dog('[VATROC_SSO_Discord]');
+                VATROC::dog($response['response']);
+                VATROC::dog($response['body']);
+                return false;
+            }
+        }
+    }
+
+    public static function get_user_data($uid = null){
+        $uid = $uid ?: get_current_user_ID();
+        $data = get_user_meta($uid, self::META_KEY_DATA, true);
+        if($data == null){
+            $ret = self::fetch_user_data($uid);
+            update_user_meta($uid, self::META_KEY_DATA, $ret);
+        }
+        return $data;
+    }
+
     public static function fetch_user_data($uid = null)
     {
+        // TODO5: migrate to `get_uesr_data` and $uid becomes required.
         $uid = $uid ?: get_current_user_ID();
         $response = self::remote_get(self::URL_API . "/users/@me", $uid);
 
+        if (VATROC::valid_200_response($response)) {
+            return json_decode($response['body'], true);
+        }
+        // TODO: Return and handle self::401_UNAUTHORIZED
+        return self::INVALID_RESPONSE;
+    }
+    
+    public static function fetch_user_data_from_token($token)
+    {
+        $response = self::remote_get_from_token(self::URL_API . "/users/@me", $token);
         if (VATROC::valid_200_response($response)) {
             return json_decode($response['body'], true);
         }

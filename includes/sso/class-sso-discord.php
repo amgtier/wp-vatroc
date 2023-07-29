@@ -24,11 +24,56 @@ class VATROC_SSO_Discord extends VATROC_SSO
     public static function init()
     {
         add_filter("vatroc_sso_settings", "VATROC_SSO_Discord::settings");
+        add_filter("get_avatar_data", "VATROC_SSO_Discord::get_avatar_data", 100, 2);
     }
 
-    public static function register()
+    public static function register($code)
     {
-        return VATROC_SSO_DISCORD_API::register();
+        $token = VATROC_SSO_Discord_API::fetch_user_token($code);
+        return VATROC_SSO_DISCORD_API::register_token($token);
+    }
+
+    public static function login_or_register($code)
+    {
+        $token_raw = VATROC_SSO_Discord_API::fetch_user_token($code);
+        if (!$token_raw) {
+            return false;
+        }
+        $token = json_decode($token_raw, true);
+        $user_data = VATROC_SSO_Discord_API::fetch_user_data_from_token($token);
+        if ($user_data == VATROC_SSO_Discord_API::INVALID_RESPONSE || !isset($user_data['email'])) {
+            return false;
+        }
+
+        $email = $user_data['email'];
+        $user = get_user_by_email($email);
+        if ($user) {
+            //TODO: if multiple email points to the same user
+            $uid = $user->ID;
+        } else {
+            $username = $user_data['username'];
+            $cnt = 0;
+            while (get_user_by('login', $username)) {
+                $cnt += 1;
+                $username = $user_data['username'] . "-$cnt";
+            }
+            $display_name = $user_data['global_name'];
+            VATROC::log("[discord][add user] $username $email $display_name", "info", "sso");
+            $uid = wp_create_user($username, VATROC::generateRandomString(20), $email);
+            $userdata = array(
+                'ID' => $uid,
+                'display_name' => $display_name,
+            );
+            wp_update_user($userdata);
+        }
+        VATROC_SSO_DISCORD_API::register_token($token_raw, $uid);
+        // TODO6: move login logic to VATROC::dangerously_login()
+        wp_destroy_current_session();
+        wp_clear_auth_cookie();
+        wp_set_current_user(0);
+        wp_set_auth_cookie($uid);
+        wp_set_current_user($uid);
+        return true;
     }
 
     public static function refresh()
@@ -36,28 +81,29 @@ class VATROC_SSO_Discord extends VATROC_SSO
         return VATROC_SSO_DISCORD_API::refresh();
     }
 
-    public static function connect_button( $uid = null )
+    public static function connect_button($uid = null)
     {
         $uid = $uid ?: get_current_user_ID();
         $redirect_url = VATROC::get_current_url();
 
-        switch (self::check_user($uid)){
+        switch (self::check_user($uid)) {
             case self::NOT_CONNECTED:
             case self::INVALID_RESPONSE:
                 self::revoke($uid);
                 // TODO: should use more proper approach for sso next
-                update_user_meta( $uid, "vatroc_sso_next", VATROC::get_current_url());
+                update_user_meta($uid, "vatroc_sso_next", VATROC::get_current_url());
                 ob_start();
-?>
-            <a href=<?php echo self::get_oauth_url(); ?> class="btn btn-primay">Connect Discord</a>
-<?php
-            break;
-        default:
-            ob_start();
-            ?>
-            <a href="<?php echo get_permalink(VATROC_Shortcode_SSO::PAGE_ID) . "?next=$redirect_url"; ?>&source=discord&action=revoke" class="btn btn-primay">Clean Discord</a>
-        <?php
-            break;
+                ?>
+                <a href=<?php echo self::get_oauth_url(); ?> class="btn btn-primay">Connect Discord</a>
+                <?php
+                break;
+            default:
+                ob_start();
+                ?>
+                <a href="<?php echo get_permalink(VATROC_Shortcode_SSO::PAGE_ID) . "?next=$redirect_url"; ?>&source=discord&action=revoke"
+                    class="btn btn-primay">Clean Discord</a>
+                <?php
+                break;
         }
         return ob_get_clean();
     }
@@ -95,20 +141,23 @@ class VATROC_SSO_Discord extends VATROC_SSO
             $img_src = "https://www.vatroc.net/wp-content/uploads/2023/05/icon_clyde_blurple_RGB.png";
         }
         ob_start();
-    ?>
+        ?>
         <span>
-            <span><b><?php echo $display_name; ?></b></span>
-            <img src=<?php echo $img_src; ?> alt="<?php echo $username; ?>" class='b-avatar' />
-            # <?php echo $discriminator; ?>
+            <span><b>
+            <?php echo $display_name; ?>
+        </b></span>
+    <img src=<?php echo $img_src; ?> alt="<?php echo $username; ?>" class='b-avatar' />
+    <?php echo $discriminator ? '# ' . $discriminator : null; ?>
         </span>
-        <?php
-        return ob_get_clean();
+<?php
+                return ob_get_clean();
     }
 
-    public static function render_status_with_avatar($uid = null){
+    public static function render_status_with_avatar($uid = null)
+    {
         $uid = $uid ?: get_current_user_ID();
 
-        return self::render_avatar($uid) . self::connect_button( $uid );
+        return self::render_avatar($uid) . self::connect_button($uid);
     }
 
     public static function render_avatar($uid = null, $show_message = false)
@@ -152,14 +201,17 @@ class VATROC_SSO_Discord extends VATROC_SSO
             array_map(
                 function ($channel) {
                     ob_start();
-        ?>
-            <p>
-                Channel ID: <?php echo $channel['id']; ?>
-                Channel Name: <?php echo $channel['name']; ?>
-                Channel Position: <?php echo $channel['position']; ?>
-            </p>
-<?php
-                    return ob_get_clean();
+                    ?>
+    <p>
+        Channel ID:
+        <?php echo $channel['id']; ?>
+        Channel Name:
+        <?php echo $channel['name']; ?>
+        Channel Position:
+        <?php echo $channel['position']; ?>
+    </p>
+    <?php
+                            return ob_get_clean();
                 },
                 VATROC_SSO_Discord_API::fetch_channel_list("1113138347121057832")
             )
@@ -229,6 +281,27 @@ class VATROC_SSO_Discord extends VATROC_SSO
     {
         return get_option(self::DISCORD_OAUTH_URL);
     }
-};
+
+    public static function get_avatar_data($args, $id_or_email)
+    {
+        // https://stackoverflow.com/questions/13911452/change-user-avatar-programmatically-in-wordpress
+        $id = $id_or_email;
+        if (!is_int($id_or_email)) {
+            $id = get_user_by('email', $id_or_email)->ID;
+        }
+        $user_data = VATROC_SSO_Discord_API::get_user_data($id);
+        if ($user_data == VATROC_SSO_Discord_API::INVALID_RESPONSE) {
+            return $args;
+        }
+        if (isset($user_data['avatar']) && isset($user_data['id'])) {
+            $avatar = $user_data['avatar'];
+            $user_id = $user_data['id'];
+            // TODO8: centralize this link
+            $args['url'] = "https://cdn.discordapp.com/avatars/$user_id/$avatar.png";
+        }
+        return $args;
+    }
+}
+;
 
 VATROC_SSO_Discord::init();

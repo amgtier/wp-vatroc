@@ -14,35 +14,49 @@ class VATROC_Shortcode_SSO
         add_shortcode('vatroc_sso_status', 'VATROC_Shortcode_SSO::render_status');
         add_shortcode('vatroc_sso_avatar', 'VATROC_Shortcode_SSO::render_avatar');
         add_shortcode('vatroc_sso_connection_list', 'VATROC_Shortcode_SSO::connection_list');
+        add_shortcode('vatroc_sso_login', 'VATROC_Shortcode_SSO::render_login');
     }
 
     public static function router($atts)
     {
         $uid = get_current_user_ID();
+        $redirect_path = null;
 
         if (isset($_REQUEST['source'])) {
             switch ($_REQUEST['source']) {
                 case 'discord':
-                    if (isset($_REQUEST['action']) && $_REQUEST['action'] === "revoke") {
-                        VATROC_SSO_Discord::revoke();
-                        if(isset($_REQUEST['next'])){
-                            return VATROC::return_redirect($_REQUEST['next']);
+                    // TODO2: modularize logged in flow and non-logged in flow
+                    if (is_user_logged_in()) {
+                        if (isset($_REQUEST['action']) && $_REQUEST['action'] === "revoke") {
+                            VATROC_SSO_Discord::revoke();
+                            $redirect_path = isset($_REQUEST['next']) ? $_REQUEST['next'] : get_permalink(VATROC_My::PAGE_ID);
+                            break;
                         }
-                        return VATROC::return_redirect(get_permalink(VATROC_My::PAGE_ID));
-                    }
-                    if (VATROC_SSO_Discord::register()) {
-                        // TODO: should use more proper approach for sso next
-                        $next = get_user_meta( $uid, "vatroc_sso_next", true);
-                        if($next){
-                            delete_user_meta( $uid, "vatroc_sso_next" );
-                            return VATROC::return_redirect($next);
+                        if (isset($_REQUEST['code']) && VATROC_SSO_Discord::register($_REQUEST['code'])) {
+                            // TODO: should use more proper approach for sso next
+                            $next = get_user_meta($uid, "vatroc_sso_next", true);
+                            if ($next) {
+                                delete_user_meta($uid, "vatroc_sso_next");
+                                $redirect_path = $next;
+                                break;
+                            }
+                            $redirect_path = get_permalink(VATROC_My::PAGE_ID);
+                            break;
                         }
-                        return VATROC::return_redirect(get_permalink(VATROC_My::PAGE_ID));
+                    } else {
+                        if (isset($_REQUEST['code']) && VATROC_SSO_Discord::login_or_register($_REQUEST['code'])) {
+                            $redirect_path = isset($_REQUEST['next']) ? $_REQUEST['next'] : get_permalink(VATROC_My::PAGE_ID);
+                            break;
+                        }
                     }
                     break;
                 default:
                     break;
             }
+        }
+        if ($atts == null && $redirect_path != null) {
+            wp_redirect($redirect_path);
+            exit();
         }
 
         $ret = VATROC_SSO_Discord::connect_button();
@@ -61,10 +75,11 @@ class VATROC_Shortcode_SSO
         return $ret;
     }
 
-    public static function render_avatar($atts){
+    public static function render_avatar($atts)
+    {
         $uid = isset($atts["uid"]) ? $atts["uid"] : get_current_user_ID();
-        if (isset($atts["provider"])){
-            switch ($atts["provider"]){
+        if (isset($atts["provider"])) {
+            switch ($atts["provider"]) {
                 case 'discord':
                     return VATROC_SSO_Discord::render_avatar($uid);
                 default:
@@ -75,8 +90,8 @@ class VATROC_Shortcode_SSO
     public static function render_status($atts)
     {
         $uid = isset($atts["uid"]) ? $atts["uid"] : get_current_user_ID();
-        if (isset($atts["provider"])){
-            switch ($atts["provider"]){
+        if (isset($atts["provider"])) {
+            switch ($atts["provider"]) {
                 case 'discord':
                     return VATROC_SSO_Discord::render_status_with_avatar($uid);
                 default:
@@ -107,7 +122,7 @@ class VATROC_Shortcode_SSO
                             $ret .= implode(
                                 ", ",
                                 array_map(
-                                    fn ($role_id) => $role_name_map[$role_id],
+                                    fn($role_id) => $role_name_map[$role_id],
                                     VATROC_SSO_Discord::render_guild_user_data($uid, 'roles')
                                 )
                             );
@@ -115,9 +130,24 @@ class VATROC_Shortcode_SSO
                         }
                     }
                     break;
-            };
+            }
+            ;
         }
         return $ret;
+    }
+
+    public static function render_login($atts)
+    {
+        $logo = plugin_dir_url(VATROC_PLUGIN_FILE) . 'assets/images/discord-white.png';
+        $oauth_url = VATROC_SSO_Discord::get_oauth_url();
+        if (is_user_logged_in()) {
+            // TODO3: centralize / generalize logged in render (or flow).
+            return null;
+        }
+        return VATROC::get_template("includes/shortcodes/templates/sso/login-button.php", [
+            "logo" => $logo,
+            "oauth_url" => $oauth_url,
+        ]);
     }
 }
 
