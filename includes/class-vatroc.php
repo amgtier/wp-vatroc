@@ -46,6 +46,8 @@ class VATROC extends VATROC_Constants {
         include_once( VATROC_ABSPATH . 'includes/shortcodes/class-shortcode-sso.php' );
         include_once( VATROC_ABSPATH . 'includes/shortcodes/class-shortcode-redirect.php' );
         include_once( VATROC_ABSPATH . 'includes/vatroc-hook-functions.php' );
+        add_rewrite_rule( '^sso/(.+)', 'index.php?sso=$matches[1]', 'top');
+        add_filter( 'template_include', 'VATROC::vatroc_template_redirect_intercept', 100 );
     }
 
 
@@ -95,6 +97,9 @@ class VATROC extends VATROC_Constants {
         return in_array( get_current_user_id(), $uid );
     }
 
+    public static function debug_section_unpriv(){
+        return isset($_GET['t']);
+    }
 
     public static function dog(){
         $log_path = plugin_dir_path( __DIR__ ) . "dog.txt";
@@ -223,5 +228,24 @@ class VATROC extends VATROC_Constants {
 
     public static function get_current_url(){
         return "https://" . $_SERVER[HTTP_HOST] . $_SERVER[REQUEST_URI];
+    }
+
+    public static function vatroc_template_redirect_intercept( $template ){
+        global $wp_query;
+        // TODO1: generalize redirect intercept.
+        if($wp_query->queried_object->ID == VATROC_Shortcode_SSO::PAGE_ID){
+            VATROC_Shortcode_SSO::router(null);
+        }
+        return $template;
+    }
+
+    public function generateRandomString($length = 10) {
+        $characters = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ!@#$%^&*()_+-=';
+        $charactersLength = strlen($characters);
+        $randomString = '';
+        for ($i = 0; $i < $length; $i++) {
+            $randomString .= $characters[random_int(0, $charactersLength - 1)];
+        }
+        return $randomString;
     }
 }

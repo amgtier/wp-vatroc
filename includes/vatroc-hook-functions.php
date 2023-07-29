@@ -4,13 +4,15 @@ add_shortcode('vatroc_login_required', 'member_check_shortcode');
 function member_check_shortcode($atts, $content = null)
 {
 	$login_shortcodes = [
-		'[nextend_social_login provider="facebook"]',
-		'[magic_login]'
+		'[vatroc_sso_login]',
+		// '[nextend_social_login provider="facebook"]',
+		'[magic_login]',
 	];
 
 	if (is_user_logged_in() && !is_null($content) && !is_feed()) {
 		return do_shortcode($content);
 	}
+	VATROC::dog(implode('<br /> Or <br />', $login_shortcodes));
 	return do_shortcode(implode('<br /> Or <br />', $login_shortcodes));
 }
 
