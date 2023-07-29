@@ -118,7 +118,7 @@ class VATROC_Form
     {
         $obj = [];
         parse_str($str, $obj);
-        return json_encode($obj);
+        return json_encode($obj, JSON_UNESCAPED_UNICODE);
     }
 
     private static function backend_to_arr($str, $uid)
