@@ -61,9 +61,12 @@ class VATROC_Shortcode_My
     }
 
 
-    private static function atc($uid=null)
+    private static function atc($uid = null)
     {
         $uid = VATROC::use_as_enabled();
+        if (VATROC_My::get_vatsim_uid($uid) == null) {
+            return null;
+        }
         ob_start();
         VATROC::get_template("includes/shortcodes/templates/my/atc-section.php", [
             "uid" => $uid,
@@ -83,8 +86,8 @@ class VATROC_Shortcode_My
     }
 
     /*
-    * Getter and setter mapping needs to be defined first.
-    */
+     * Getter and setter mapping needs to be defined first.
+     */
     public static function editable_my($atts)
     {
 
@@ -98,16 +101,17 @@ class VATROC_Shortcode_My
         VATROC::enqueue_ajax_object('vatroc-my', null);
 
         ob_start();
-?>
+        ?>
         <form id="edit-<?php echo $backend_field_name; ?>" method="get" action="#">
             <label for="<?php echo $backend_field_name; ?>"><?php echo $frontend_field_name; ?>
-                <input type="text" id="<?php echo $backend_field_name; ?>" class="editable-my <?php echo $str_autosave; ?>" name="<?php echo $backend_field_name; ?>" value="<?php echo $current_value; ?>" required />
-                <?php if (!$is_autosave) : ?>
+                <input type="text" id="<?php echo $backend_field_name; ?>" class="editable-my <?php echo $str_autosave; ?>"
+                    name="<?php echo $backend_field_name; ?>" value="<?php echo $current_value; ?>" required />
+                <?php if (!$is_autosave): ?>
                     <button id="submit-<?php echo $backend_field_name; ?>" hidden>送出修改</button>
                 <?php endif; ?>
             </label>
         </form>
-<?php
+        <?php
         $ret = ob_get_clean();
         return $ret;
     }
@@ -193,6 +197,7 @@ class VATROC_Shortcode_My
         //     return $status_table->display();
         return "Not working";
     }
-};
+}
+;
 
 VATROC_Shortcode_My::init();
