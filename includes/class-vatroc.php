@@ -24,30 +24,29 @@ class VATROC extends VATROC_Constants {
     
 
     public function includes() {
-        include_once( VATROC_ABSPATH . 'admin/class-admin.php' );
-        include_once( VATROC_ABSPATH . 'includes/class-atc.php' );
-        include_once( VATROC_ABSPATH . 'includes/class-event.php' );
-        include_once( VATROC_ABSPATH . 'includes/class-form.php' );
-        include_once( VATROC_ABSPATH . 'includes/class-my.php' );
-        include_once( VATROC_ABSPATH . 'includes/class-my-sso.php' );
-        include_once( VATROC_ABSPATH . 'includes/class-poll.php' );
-        include_once( VATROC_ABSPATH . 'includes/class-devtool.php' );
-        include_once( VATROC_ABSPATH . 'includes/rest-api/class-rest-api.php' );
         include_once( VATROC_ABSPATH . 'includes/sso/class-sso.php' );
         include_once( VATROC_ABSPATH . 'includes/sso/class-sso-discord-api.php' );
         include_once( VATROC_ABSPATH . 'includes/sso/class-sso-discord.php' );
+        include_once( VATROC_ABSPATH . 'admin/class-admin.php' );
+        include_once( VATROC_ABSPATH . 'includes/class-atc.php' );
+        include_once( VATROC_ABSPATH . 'includes/class-devtool.php' );
+        include_once( VATROC_ABSPATH . 'includes/class-event.php' );
+        include_once( VATROC_ABSPATH . 'includes/class-form.php' );
+        include_once( VATROC_ABSPATH . 'includes/class-my-sso.php' );
+        include_once( VATROC_ABSPATH . 'includes/class-my.php' );
+        include_once( VATROC_ABSPATH . 'includes/class-poll.php' );
+        include_once( VATROC_ABSPATH . 'includes/class-router.php' );
+        include_once( VATROC_ABSPATH . 'includes/rest-api/class-rest-api.php' );
+        include_once( VATROC_ABSPATH . 'includes/shortcodes/class-shortcode-devtool.php' );
         include_once( VATROC_ABSPATH . 'includes/shortcodes/class-shortcode-event.php' );
         include_once( VATROC_ABSPATH . 'includes/shortcodes/class-shortcode-form.php' );
-        include_once( VATROC_ABSPATH . 'includes/shortcodes/class-shortcode-roster.php' );
         include_once( VATROC_ABSPATH . 'includes/shortcodes/class-shortcode-homepage.php' );
-        include_once( VATROC_ABSPATH . 'includes/shortcodes/class-shortcode-poll.php' );
         include_once( VATROC_ABSPATH . 'includes/shortcodes/class-shortcode-my.php' );
-        include_once( VATROC_ABSPATH . 'includes/shortcodes/class-shortcode-devtool.php' );
-        include_once( VATROC_ABSPATH . 'includes/shortcodes/class-shortcode-sso.php' );
+        include_once( VATROC_ABSPATH . 'includes/shortcodes/class-shortcode-poll.php' );
         include_once( VATROC_ABSPATH . 'includes/shortcodes/class-shortcode-redirect.php' );
+        include_once( VATROC_ABSPATH . 'includes/shortcodes/class-shortcode-roster.php' );
+        include_once( VATROC_ABSPATH . 'includes/shortcodes/class-shortcode-sso.php' );
         include_once( VATROC_ABSPATH . 'includes/vatroc-hook-functions.php' );
-        add_rewrite_rule( '^sso/(.+)', 'index.php?sso=$matches[1]', 'top');
-        add_filter( 'template_include', 'VATROC::vatroc_template_redirect_intercept', 100 );
     }
 
 
@@ -228,15 +227,6 @@ class VATROC extends VATROC_Constants {
 
     public static function get_current_url(){
         return "https://" . $_SERVER[HTTP_HOST] . $_SERVER[REQUEST_URI];
-    }
-
-    public static function vatroc_template_redirect_intercept( $template ){
-        global $wp_query;
-        // TODO1: generalize redirect intercept.
-        if($wp_query->queried_object->ID == VATROC_Shortcode_SSO::PAGE_ID){
-            VATROC_Shortcode_SSO::router(null);
-        }
-        return $template;
     }
 
     public function generateRandomString($length = 10) {
