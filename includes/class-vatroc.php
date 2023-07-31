@@ -32,6 +32,7 @@ class VATROC extends VATROC_Constants {
         include_once( VATROC_ABSPATH . 'includes/class-devtool.php' );
         include_once( VATROC_ABSPATH . 'includes/class-event.php' );
         include_once( VATROC_ABSPATH . 'includes/class-form.php' );
+        include_once( VATROC_ABSPATH . 'includes/class-login.php' );
         include_once( VATROC_ABSPATH . 'includes/class-my-sso.php' );
         include_once( VATROC_ABSPATH . 'includes/class-my.php' );
         include_once( VATROC_ABSPATH . 'includes/class-poll.php' );

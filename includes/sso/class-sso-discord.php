@@ -23,17 +23,17 @@ class VATROC_SSO_Discord extends VATROC_SSO
 
     public static function init()
     {
-        add_filter("vatroc_sso_settings", "VATROC_SSO_Discord::settings");
         add_filter("get_avatar_data", "VATROC_SSO_Discord::get_avatar_data", 100, 2);
+        add_filter("vatroc_sso_settings", "VATROC_SSO_Discord::settings");
     }
 
-    public static function register($code)
+    public static function register_connection($code)
     {
         $token = VATROC_SSO_Discord_API::fetch_user_token($code);
         return VATROC_SSO_DISCORD_API::register_token($token);
     }
 
-    public static function login_or_register($code)
+    public static function login($code)
     {
         $token_raw = VATROC_SSO_Discord_API::fetch_user_token($code);
         if (!$token_raw) {
@@ -150,7 +150,7 @@ class VATROC_SSO_Discord extends VATROC_SSO
     <?php echo $discriminator ? '# ' . $discriminator : null; ?>
         </span>
 <?php
-                return ob_get_clean();
+        return ob_get_clean();
     }
 
     public static function render_status_with_avatar($uid = null)
@@ -277,11 +277,6 @@ class VATROC_SSO_Discord extends VATROC_SSO
         return !self::get_test_mode() ? get_option(self::DISCORD_JOINER_ROLE_ID) : get_option(self::DISCORD_TEST_JOINER_ROLE_ID);
     }
 
-    public static function get_oauth_url()
-    {
-        return get_option(self::DISCORD_OAUTH_URL);
-    }
-
     public static function get_avatar_data($args, $id_or_email)
     {
         // https://stackoverflow.com/questions/13911452/change-user-avatar-programmatically-in-wordpress
@@ -301,7 +296,33 @@ class VATROC_SSO_Discord extends VATROC_SSO
         }
         return $args;
     }
+
+    public static function api_test(){
+        $ret = "";
+        if (VATROC::debug_section([1, 2])) {
+            $ret .= VATROC_SSO_Discord::connect_button();
+            // $res = VATROC_SSO_Discord::remote_get("https://discord.com/api/guilds/1113138347121057832"); // VATROC
+            // $res = VATROC_SSO_Discord::bot_remote_get("https://discord.com/api/guilds/1113138347121057832"); // Test VATROC
+            // $res = VATROC_SSO_Discord::bot_remote_get("https://discord.com/api/guilds/1113138347121057832/members/561538672776708096"); // Test VATROC
+            // $res = VATROC_SSO_Discord::bot_remote_get("https://discord.com/api/guilds/1113138347121057832/members"); // Test VATROC
+            $ret .= VATROC_SSO_Discord::get_user_token_from_meta();
+            $ret .= json_encode(VATROC_SSO_Discord_API::fetch_user_data());
+            $ret .= VATROC_SSO_Discord::render_channel_list('1113138347121057832');
+            // $ret .= VATROC_SSO_Discord::delete_guild_member('1113138347121057832', 1);
+            // $ret .= VATROC_SSO_Discord::add_guild_member('1113138347121057832', 1);
+            $ret .= json_encode(VATROC_SSO_Discord_API::fetch_guild_user_data('1113138347121057832', 1));
+        }
+        return $ret;
+    }
+
+    public static function get_oauth_url()
+    {
+        return get_option(self::DISCORD_OAUTH_URL);
+    }
+
+    public static function get_logo_url(){
+        return plugin_dir_url(VATROC_PLUGIN_FILE) . 'assets/images/discord-white.png';
+    }
 }
-;
 
 VATROC_SSO_Discord::init();
