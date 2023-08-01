@@ -66,13 +66,8 @@ class VATROC_SSO_Discord extends VATROC_SSO
             );
             wp_update_user($userdata);
         }
-        VATROC_SSO_DISCORD_API::register_token($token_raw, $uid);
-        // TODO6: move login logic to VATROC::dangerously_login()
-        wp_destroy_current_session();
-        wp_clear_auth_cookie();
-        wp_set_current_user(0);
-        wp_set_auth_cookie($uid);
-        wp_set_current_user($uid);
+        VATROC::dangerously_login($uid);
+        VATROC_SSO_DISCORD_API::register_token($token_raw);
         return true;
     }
 
@@ -170,7 +165,7 @@ class VATROC_SSO_Discord extends VATROC_SSO
             case self::INVALID_RESPONSE:
                 return VATROC::show_message_at_render($show_message, self::INVALID_RESPONSE);
         }
-        $discord_userdata = VATROC_SSO_Discord_API::fetch_user_data($uid);
+        $discord_userdata = VATROC_SSO_Discord_API::get_user_data($uid);
         if ($discord_userdata == VATROC_SSO_Discord_API::INVALID_RESPONSE) {
             self::revoke($uid);
             return VATROC::show_message_at_render($show_message, VATROC_SSO_Discord_API::INVALID_RESPONSE);
@@ -306,7 +301,7 @@ class VATROC_SSO_Discord extends VATROC_SSO
             // $res = VATROC_SSO_Discord::bot_remote_get("https://discord.com/api/guilds/1113138347121057832/members/561538672776708096"); // Test VATROC
             // $res = VATROC_SSO_Discord::bot_remote_get("https://discord.com/api/guilds/1113138347121057832/members"); // Test VATROC
             $ret .= VATROC_SSO_Discord::get_user_token_from_meta();
-            $ret .= json_encode(VATROC_SSO_Discord_API::fetch_user_data());
+            $ret .= json_encode(VATROC_SSO_Discord_API::get_user_data(get_current_user_ID()));
             $ret .= VATROC_SSO_Discord::render_channel_list('1113138347121057832');
             // $ret .= VATROC_SSO_Discord::delete_guild_member('1113138347121057832', 1);
             // $ret .= VATROC_SSO_Discord::add_guild_member('1113138347121057832', 1);

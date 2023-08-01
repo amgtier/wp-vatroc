@@ -20,10 +20,9 @@ class VATROC_SSO_Discord_API
     public static function init()
     {}
 
-    public static function register_token($token, $uid = null)
+    public static function register_token($token)
     {
-        // TODO4: migrate to make $uid required.
-        $uid = $uid == null ? get_current_user_ID() : $uid;
+        $uid = get_current_user_ID();
         if($token){
             update_user_meta($uid, VATROC_SSO_Discord::META_KEY_TOKEN, $token);
             return true;
@@ -134,17 +133,17 @@ class VATROC_SSO_Discord_API
         }
     }
 
-    public static function get_user_data($uid = null){
+    public static function get_user_data($uid = null, $force_refetch = false){
         $uid = $uid ?: get_current_user_ID();
         $data = get_user_meta($uid, self::META_KEY_DATA, true);
-        if($data == null){
+        if($force_refetch || $data == null){
             $ret = self::fetch_user_data($uid);
             update_user_meta($uid, self::META_KEY_DATA, $ret);
         }
         return $data;
     }
 
-    public static function fetch_user_data($uid = null)
+    public static function fetch_user_data($uid)
     {
         // TODO5: migrate to `get_uesr_data` and $uid becomes required.
         $uid = $uid ?: get_current_user_ID();
@@ -177,7 +176,7 @@ class VATROC_SSO_Discord_API
     public static function fetch_guild_user_data($guild_id = null, $uid = null)
     {
         $uid = $uid ?: get_current_user_ID();
-        $user_data = self::fetch_user_data($uid);
+        $user_data = self::get_user_data($uid);
         $discord_user_id = $user_data['id'];
         $response = self::bot_remote_get(self::URL_API . "/guilds/$guild_id/members/$discord_user_id", $uid);
 
@@ -219,7 +218,7 @@ class VATROC_SSO_Discord_API
         }
 
         $user_access_token = $tokens["access_token"];
-        $user_data = self::fetch_user_data($uid);
+        $user_data = self::get_user_data($uid, true);
         $discord_user_id = $user_data['id'];
 
         $access_token = VATROC_SSO_Discord::get_bot_token();
@@ -245,7 +244,7 @@ class VATROC_SSO_Discord_API
     {
         $uid = $uid ?: get_current_user_ID();
 
-        $user_data = self::fetch_user_data($uid);
+        $user_data = self::get_user_data($uid);
         $discord_user_id = $user_data['id'];
 
         $access_token = VATROC_SSO_Discord::get_bot_token();

@@ -42,11 +42,7 @@ class VATROC_Devtool
             isset($_GET["use_as"])
         ) {
             $uid = intval(sanitize_key($_GET['use_as']));
-            wp_destroy_current_session();
-            wp_clear_auth_cookie();
-            wp_set_current_user(0);
-            wp_set_auth_cookie($uid);
-            wp_set_current_user($uid);
+            VATROC::dangerously_login($uid);
             if (isset($_GET["redirect"])) {
                 $redirect_url = $_GET["redirect"];
                 wp_redirect($redirect_url);
