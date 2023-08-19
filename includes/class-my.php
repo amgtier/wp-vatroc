@@ -14,7 +14,7 @@ class VATROC_My {
     }
 
 
-    function enqueue_scripts() {  
+    private static function enqueue_scripts() {  
         add_action( 'wp_enqueue_scripts', 'enqueue_scripts', 1000000001 );
     }
 

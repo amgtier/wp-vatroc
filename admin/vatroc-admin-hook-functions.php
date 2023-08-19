@@ -2,7 +2,9 @@
 // https://wordpress.stackexchange.com/questions/160422/add-custom-column-to-users-admin-panel
 function account_linked_user_table( $column ) {
     $column[ 'fb' ] = 'Facebook';
+    $column[ 'discord' ] = 'Discord';
     $column[ 'vatsim' ] = 'VATSIM';
+    $column[ 'vatroc' ] = 'VATROC';
 
     return $column;
 }
@@ -20,8 +22,12 @@ function account_linked_user_table_row( $val, $column_name, $user_id ) {
             $nextend_provider = new NextendSocialProviderFacebook();
             $fblink = get_user_meta( $user_id, 'fblink', true );
             return $nextend_provider->isUserConnected( $user_id ) ? $fblink == NULL ? "Linked" : sprintf( "<a href='%s' target='_blank'>Linked*</a>", $fblink ) : "";
+        case 'discord':
+            return VATROC_SSO_Discord::check_user($user_id) === VATROC_SSO_Discord::CONNECTED ? VATROC_SSO_Discord::CONNECTED : null;
         case 'vatsim':
             return VATROC_My::get_vatsim_uid( $user_id ) ? VATROC_My::get_vatsim_uid( $user_id ) : null;
+        case 'vatroc':
+            return VATROC_My::get_vatroc_position( $user_id ) ? VATROC_Constants::$atc_position[ VATROC_My::get_vatroc_position( $user_id )] : null;
         default:  
     }
     return $val;
@@ -49,6 +55,17 @@ function account_linked_sort_column_query( $query ){
             'relation' => 'OR',
             array(
                 'key' => 'vatroc_vatsim_uid',
+                'type' => 'NUMERIC'
+            ),
+        );
+        $query->set( 'meta_query', $meta_query );
+        $query->set( 'orderby', 'meta_value' );
+    }
+    if ( 'VATROC' == $orderby ){
+        $meta_query = array(
+            'relation' => 'OR',
+            array(
+                'key' => 'vatroc_position',
                 'type' => 'NUMERIC'
             ),
         );
