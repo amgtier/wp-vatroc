@@ -1,7 +1,7 @@
 <?php
 
-if ( ! defined( 'ABSPATH' ) ) {
-    exit;
+if (!defined('ABSPATH')) {
+  exit;
 }
 
 class VATROC_Rest_API
@@ -12,7 +12,8 @@ class VATROC_Rest_API
   {
     add_action('rest_api_init', 'VATROC_Rest_API::add_api_routes');
   }
-  public static function add_api_routes(){
+  public static function add_api_routes()
+  {
     register_rest_route(self::$namespace, 'who_am_i', [
       'methods' => 'GET',
       'callback' => "VATROC_Rest_API::who_am_i",
@@ -22,8 +23,8 @@ class VATROC_Rest_API
 
   public static function who_am_i()
   {
-    return ["user" => wp_get_current_user()];
+    return ["user" => wp_get_current_user(), "user_profile_src" => get_avatar_url(get_current_user_ID())];
   }
-};
+}
 
 VATROC_Rest_API::init();

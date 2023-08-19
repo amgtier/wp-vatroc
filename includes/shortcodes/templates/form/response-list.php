@@ -6,6 +6,7 @@
 <a href="<?php echo $permalink; ?>?view_all" class="btn btn-success">All Submissions</a>
 <?php endif; ?>
 <div>
+    <div style="overflow-x: scroll">
     <table>
         <thead>
             <th></th>
@@ -43,7 +44,9 @@
                 </tr>
                 <?php if ($version === $user_version[ $obj[ "uid" ] ]){
                     echo "</tbody></table>";
+                    echo "</div>";
                     echo $view_form;
+                    echo "<div>";
                     echo "<table><tbody>";
                 }?>
             <?php endforeach; ?>
