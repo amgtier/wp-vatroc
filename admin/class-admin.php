@@ -112,7 +112,6 @@ class VATROC_Admin
                 $content = apply_filters("vatroc_sso_settings", null);
                 break;
         }
-        VATROC::dog($content);
 
         return VATROC::get_template("admin/templates/settings/tabs.php", [
             "page" => "vatroc-settings",
@@ -127,7 +126,10 @@ class VATROC_Admin
 
     public function discord()
     {
-        return VATROC::get_template("admin/templates/discord-users.php", []);
+        return VATROC::get_template("admin/templates/discord-users.php", [
+            "guild" => VATROC_SSO_Discord::fetch_guild(),
+            "channels" => VATROC_SSO_Discord::fetch_channel_list(),
+        ]);
     }
 
 
