@@ -72,11 +72,14 @@ class VATROC extends VATROC_Constants
     public static function actionLog($user_id, $actionKey, $actionValue)
     {
         global $wpdb;
-        $result = $wpdb->insert("{$wpdb->prefix}vatroc_log", array(
-            'user' => $user_id,
-            'key' => $actionKey,
-            'value' => $actionValue
-        ));
+        $result = $wpdb->insert(
+            "{$wpdb->prefix}vatroc_log",
+            array(
+                'user' => $user_id,
+                'key' => $actionKey,
+                'value' => $actionValue
+            )
+        );
         return $result;
     }
 
@@ -286,7 +289,7 @@ class VATROC extends VATROC_Constants
 
     public static function generate_uudiv4()
     {
-        mt_srand(crc32(serialize(array(microtime(true), 'USER_IP', 'ETC'))));
+        mt_srand(crc32(serialize(array(microtime(true), 'USER_IP', 'ETC', get_current_user_ID()))));
         return wp_generate_uuid4();
     }
 }

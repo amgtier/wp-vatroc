@@ -18,7 +18,23 @@ class VATROC_Form_DAO
     }
 
     public static function create_submission($post_id, $uid, $data){
-        return add_post_meta($post_id, self::submission_meta_key($post_id, $uid), self::form_to_backend($data));
+        $meta_key = self::make_submission_meta_key(VATROC::generate_uudiv4());
+        self::add_uuid_index($post_id, $uid, $meta_key);
+        return add_post_meta(
+            $post_id, 
+            $meta_key,
+            self::form_to_backend($data)
+        );
+    }
+
+    private static function add_uuid_index($post_id, $uid, $entry){
+        $meta_key = self::make_uuid_index_meta_key($uid);
+        $data = get_post_meta($post_id, $meta_key, true); // returns an array when properly set
+        if($data == null){
+            $data = [];
+        }
+        array_push($data, $entry);
+        update_post_meta($post_id, $meta_key, $data);
     }
 
     public static function delete_draft($post_id, $uid){
@@ -88,8 +104,17 @@ class VATROC_Form_DAO
         return self::backend_to_arr($str_curr_meta, $uid);
     }
 
+    private static function make_submission_meta_key($uuid){
+        return self::$meta_key . "-$uuid";
+    }
+
+    private static function make_uuid_index_meta_key($uid){
+        return self::$meta_key . "-$uid";       
+    }
+
     public static function submission_meta_key($post_id, $uid)
     {
+        //TODO: get last submission uuid for this user
         return self::$meta_key . '-submission-' . $uid;
     }
 

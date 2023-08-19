@@ -19,8 +19,8 @@ class VATROC_Form
     {
         $post_id = $_POST["id"];
         $time = time();
-        $data = $_POST["data"] . "&timestamp=$time";
         $uid = get_current_user_ID();
+        $data = $_POST["data"] . "&timestamp=$time&uid=$uid";
         if (!VATROC_Form_DAO::create_submission($post_id, $uid, $data)) {
             VATROC::log($data, "fatal", "form");
         }
