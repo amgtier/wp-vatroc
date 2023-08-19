@@ -121,20 +121,7 @@ class VATROC_Shortcode_Form extends VATROC_Form
 
     public static function output_submission_list($atts = null, $content = null, $is_view_all = false)
     {
-        $can_view_all_list = explode(",", $atts["can_view_all"] ?: []);
-        $current_uid = get_current_user_ID();
-        $can_view_all = VATROC::is_admin() || in_array($current_uid, $can_view_all_list);
-        $uid = isset($_GET["u"]) && intval($_GET["u"]) > 0 ? intval($_GET["u"]) : ($is_view_all && $can_view_all ? 0 : $current_uid);
-        $post_id = $atts["form"] ?: get_the_ID();
-        $all_submissions = VATROC_Form::get_all_submissions($post_id, $uid);
-        $keys = [];
-        foreach ($all_submissions as $idx => $fields) {
-            foreach (array_keys($fields) as $dix => $key) {
-                $keys[$key] = true;
-            }
-        }
-        unset($keys["timestamp"]);
-        unset($keys["uid"]);
+        $form = VATROC_Form::submission_list($atts, $content, $is_view_all);
 
         $options = explode(",", $atts["options"]);
         $render_options = [];
@@ -144,13 +131,13 @@ class VATROC_Shortcode_Form extends VATROC_Form
 
         global $post;
         $caller_post = get_post($post);
-        $post = get_post($post_id);
+        $post = get_post($form["post_id"]);
         ob_start();
         VATROC::get_template("includes/shortcodes/templates/form/response-list.php", [
-            "count" => count($all_submissions),
-            "submissions" => $all_submissions,
-            "field_names" => $keys,
-            "view_all" => $can_view_all && $uid == 0,
+            "count" => count($form["all_submissions"]),
+            "submissions" => $form["all_submissions"],
+            "field_names" => $form["keys"],
+            "view_all" => $form["can_view_all"] && $form["uid"] == 0,
             "view_form" => $content,
             "version" => intval($_GET["v"]) ?: -1,
             "options" => $render_options,
@@ -188,7 +175,6 @@ class VATROC_Shortcode_Form extends VATROC_Form
 
     public static function output_form_field_internal($atts, $content = null)
     {
-        VATROC::dog($atts);
         if(in_array("hide_on_read", $atts)){
             return;
         }

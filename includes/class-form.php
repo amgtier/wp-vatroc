@@ -9,10 +9,6 @@ if (!defined('ABSPATH')) {
  */
 class VATROC_Form
 {
-    protected static $meta_prefix = "vatroc_";
-    protected static $meta_key = "vatroc_form";
-
-
     public static function init()
     {
         add_action("wp_ajax_vatroc_form_save_draft", "VATROC_Form::ajax_save_draft");
@@ -25,10 +21,13 @@ class VATROC_Form
         $time = time();
         $data = $_POST["data"] . "&timestamp=$time";
         $uid = get_current_user_ID();
-        $meta_key = self::submission_meta_key($post_id, $uid);
-        add_post_meta($post_id, $meta_key, self::form_to_backend($data));
+        if (!VATROC_Form_DAO::create_submission($post_id, $uid, $data)) {
+            VATROC::log($data, "fatal", "form");
+        }
         if (!isset($_GET["no_delete"])) {
-            delete_post_meta($post_id, self::draft_meta_key($post_id, $uid));
+            if (!VATROC_Form_DAO::delete_draft($post_id, $uid)) {
+                VATROC::log("$post_id $uid draft delete faile.", "fatal", "form-draft");
+            }
         }
         wp_die();
     }
@@ -38,56 +37,35 @@ class VATROC_Form
         $post_id = $_POST["id"];
         $data = $_POST["data"];
         $uid = get_current_user_ID();
-        $meta_key = self::draft_meta_key($post_id, $uid);
-
-        // $obj_curr_meta = self::get_draft( $post_id, $uid );
-        // foreach( $obj_data as $key => $val ) {
-        //     $obj_curr_meta[ $key ] = $val;
-        // }
-
-        update_post_meta($post_id, $meta_key, self::form_to_backend($data));
+        if (!VATROC_Form_DAO::upsert_draft($post_id, $uid, $data)) {
+            VATROC::log($data, "fatal", "form-draft");
+        }
         wp_die();
     }
 
     public static function get_last_submissions($post_id, $uid)
     {
-        $meta_key = self::submission_meta_key($post_id, $uid);
-        return self::backend_to_arr(
-            get_post_meta($post_id, $meta_key, true),
-            $uid
-        );
+        return VATROC_Form_DAO::get_last_submissions($post_id, $uid);
+    }
+
+    public static function get_submission_from_uid($post_id, $uid)
+    {
+        return VATROC_Form_DAO::get_submission_from_uid($post_id, $uid);
     }
 
     public static function get_all_submissions($post_id, $uid)
     {
-        $ret = [];
-        if ($uid < 1) {
-            $post_meta = get_post_meta($post_id);
-            $prefix = "vatroc_form-submission-";
-            $keys = array_filter(
-                array_keys($post_meta),
-                fn ($val) => substr($val, 0, strlen($prefix)) === $prefix,
-            );
-            foreach ($keys as $idx => $k) {
-                $_uid = intval(substr($k, strlen($prefix)));
-                foreach ($post_meta[$k] as $_idx => $_submission) {
-                    $_arr_submission = self::backend_to_arr($_submission, $_uid);
-                    array_push($ret, $_arr_submission);
-                }
-            }
-        } else {
-            $meta_key = self::submission_meta_key($post_id, $uid);
-            $submissions = get_post_meta($post_id, $meta_key);
-            $ret = array_map(fn ($entry) => self::backend_to_arr($entry, $uid), $submissions);
-        }
-        usort($ret, 'self::sort_timestamp' );
-        return $ret;
+        $ret = VATROC_Form_DAO::get_all_submissions($post_id, $uid);
+        usort($ret, 'self::sort_timestamp');
+
+        return apply_filters("vatroc_form_get_all_submissions_after", $ret);
     }
 
-    public static function sort_timestamp( $a, $b ){
-        $result = intval( $a['timestamp'] ) > intval( $b['timestamp'] );
-        if(isset($_GET['desc'])){
-            return intval( $a['timestamp'] ) < intval( $b['timestamp'] );
+    public static function sort_timestamp($a, $b)
+    {
+        $result = intval($a['timestamp']) > intval($b['timestamp']);
+        if (isset($_GET['desc'])) {
+            return intval($a['timestamp']) < intval($b['timestamp']);
         }
         return $result;
     }
@@ -99,34 +77,34 @@ class VATROC_Form
 
     public static function get_draft($post_id, $uid)
     {
-        $meta_key = self::draft_meta_key($post_id, $uid);
-        $str_curr_meta = get_post_meta($post_id, $meta_key, true);
-        return self::backend_to_arr($str_curr_meta, $uid);
+        return VATROC_Form_DAO::get_draft($post_id, $uid);
     }
 
-    public static function submission_meta_key($post_id, $uid)
+    public static function submission_list($atts = null, $content = null, $is_view_all = false)
     {
-        return self::$meta_key . '-submission-' . $uid;
+        $can_view_all_list = explode(",", $atts["can_view_all"] ?: []);
+        $current_uid = get_current_user_ID();
+        $can_view_all = VATROC::is_admin() || in_array($current_uid, $can_view_all_list);
+        $uid = isset($_GET["u"]) && intval($_GET["u"]) > 0 ? intval($_GET["u"]) : ($is_view_all && $can_view_all ? 0 : $current_uid);
+        $post_id = $atts["form"] ?: get_the_ID();
+        $all_submissions = VATROC_Form::get_all_submissions($post_id, $uid);
+        $keys = [];
+        foreach ($all_submissions as $idx => $fields) {
+            foreach (array_keys($fields) as $dix => $key) {
+                $keys[$key] = true;
+            }
+        }
+        unset($keys["timestamp"]);
+        unset($keys["uid"]);
+        return [
+            "all_submissions" => $all_submissions,
+            "keys" => $keys,
+            "can_view_all" => $can_view_all,
+            "uid" => $uid,
+            "post_id" => $post_id,
+        ];
     }
-
-    public static function draft_meta_key($post_id, $uid)
-    {
-        return self::$meta_key . '-draft-' . $uid;
-    }
-
-    private static function form_to_backend($str)
-    {
-        $obj = [];
-        parse_str($str, $obj);
-        return json_encode($obj, JSON_UNESCAPED_UNICODE);
-    }
-
-    private static function backend_to_arr($str, $uid)
-    {
-        $arr = json_decode($str, true);
-        $arr["uid"] = $uid;
-        return $arr;
-    }
-};
+}
+;
 
 VATROC_Form::init();
