@@ -35,7 +35,7 @@ class VATROC_Form_DAO
         update_post_meta($post_id, self::make_uuid_index_meta_key($uid), $data);
     }
 
-    private static function get_uid_uuids($post_id, $uid)
+    public static function get_uid_uuids($post_id, $uid)
     {
         $data = get_post_meta($post_id, self::make_uuid_index_meta_key($uid), true);
         // $data returns an array when properly set

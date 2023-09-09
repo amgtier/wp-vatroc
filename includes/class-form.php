@@ -104,6 +104,10 @@ class VATROC_Form
             "post_id" => $post_id,
         ];
     }
+
+    public static function count_user_submission($post_id, $uid){
+        return count(VATROC_Form_DAO::get_uid_uuids($post_id, $uid));
+    }
 }
 ;
 
