@@ -13,12 +13,14 @@ class VATROC_Rest_Mission_Control
     }
     public static function add_api_routes()
     {
+        $uuidv4 = VATROC::uuidv4_regex();
         register_rest_route(VATROC_Rest_API::$namespace, 'application_submissions', [
             'methods' => 'GET',
             'callback' => "VATROC_Rest_Mission_Control::application_submissions",
             'permission_callback' => '__return_true',
         ]);
-        register_rest_route(VATROC_Rest_API::$namespace, 'application_submissions/(?P<uid>\d+)/status/(?P<next_status>\d+)', [
+
+        register_rest_route(VATROC_Rest_API::$namespace, "application_submissions/(?P<uuid>$uuidv4)/status/(?P<next_status>\d+)", [
             'methods' => 'POST',
             'callback' => "VATROC_Rest_Mission_Control::archive_application",
             'permission_callback' => '__return_true',
@@ -33,10 +35,11 @@ class VATROC_Rest_Mission_Control
 
     public static function archive_application($data)
     {
-        // VATROC_Form::get_submission_from_uid(self::FORM_PAGE_ID, )
-        VATROC::dog($_REQUEST);
-        VATROC::dog(VATROC::generate_uudiv4());
-        return null;
+        $uuid = $data["uuid"];
+        $next_status = $data["next_status"];
+        if (VATROC_Form::update_submission_status(self::FORM_PAGE_ID, $uuid, $next_status)) {
+            return "ok";
+        }
     }
 
     public static function filter_new_applications($arr)

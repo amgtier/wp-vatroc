@@ -19,8 +19,9 @@ class VATROC_Form_DAO
 
     public static function create_submission($post_id, $uid, $data)
     {
-        $meta_key = self::make_submission_meta_key(VATROC::generate_uudiv4());
+        $meta_key = self::make_submission_meta_key(VATROC::generate_uuidv4());
         self::add_uuid_index($post_id, $uid, $meta_key);
+        // TODO:: save as object?
         return add_post_meta(
             $post_id,
             $meta_key,
@@ -58,16 +59,13 @@ class VATROC_Form_DAO
     public static function get_last_submissions($post_id, $uid)
     {
         $meta_key = self::last_submission_meta_key($post_id, $uid);
-        return self::backend_to_arr(
-            get_post_meta($post_id, $meta_key, true),
-            $uid
-        );
+        return self::backend_to_arr(get_post_meta($post_id, $meta_key, true));
     }
 
-    public static function get_submission_from_uid($post_id, $uid)
+    public static function get_submission_from_uuid($post_id, $uuid)
     {
-        $prefix = "vatroc_form-submission-" . $uid;
-        $post_meta = get_post_meta($post_id, $prefix);
+        $prefix = "vatroc_form-submission-" . $uuid;
+        return self::backend_to_arr(get_post_meta($post_id, $prefix, true));
     }
 
     public static function get_all_submissions($post_id, $uid)
@@ -78,12 +76,12 @@ class VATROC_Form_DAO
             $prefix = "vatroc_form-submission-";
             $keys = array_filter(
                 array_keys($post_meta),
-                fn($val) => substr($val, 0, strlen($prefix)) === $prefix,
+                fn($val) => str_starts_with($val, $prefix),
             );
             foreach ($keys as $idx => $k) {
-                $_uid = intval(substr($k, strlen($prefix)));
                 foreach ($post_meta[$k] as $_idx => $_submission) {
-                    $_arr_submission = self::backend_to_arr($_submission, $_uid);
+                    $_arr_submission = self::backend_to_arr($_submission);
+                    $_arr_submission["uuid"] = substr($k, strlen($prefix));
                     array_push($ret, $_arr_submission);
                 }
             }
@@ -123,19 +121,19 @@ class VATROC_Form_DAO
         return self::$meta_key . "-$uid";
     }
 
+    public static function draft_meta_key($post_id, $uid)
+    {
+        return self::$meta_key . '-draft-' . $uid;
+    }
+
     public static function last_submission_meta_key($post_id, $uid)
     {
         $uuids = self::get_uid_uuids($post_id, $uid);
-        if(count($uuids) == 0){
+        if (count($uuids) == 0) {
             VATROC::dog("User $uid has no UUIDs");
             // throw new Exception("User $uid has no UUIDs");
         }
         return end($uuids);
-    }
-
-    public static function draft_meta_key($post_id, $uid)
-    {
-        return self::$meta_key . '-draft-' . $uid;
     }
 
     private static function form_to_backend($str)
@@ -150,6 +148,11 @@ class VATROC_Form_DAO
         // [Must fix] unable to parse \'
         $arr = json_decode($str, true);
         return $arr;
+    }
+
+    public static function update_submission($post_id, $uuid, $data)
+    {
+        update_post_meta($post_id, self::make_submission_meta_key($uuid), json_encode($data, JSON_UNESCAPED_UNICODE));
     }
 }
 ;

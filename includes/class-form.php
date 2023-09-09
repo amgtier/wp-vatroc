@@ -48,9 +48,9 @@ class VATROC_Form
         return VATROC_Form_DAO::get_last_submissions($post_id, $uid);
     }
 
-    public static function get_submission_from_uid($post_id, $uid)
+    public static function get_submission_from_uuid($post_id, $uuid)
     {
-        return VATROC_Form_DAO::get_submission_from_uid($post_id, $uid);
+        return VATROC_Form_DAO::get_submission_from_uuid($post_id, $uuid);
     }
 
     public static function get_all_submissions($post_id, $uid)
@@ -87,15 +87,20 @@ class VATROC_Form
         $can_view_all = VATROC::is_admin() || in_array($current_uid, $can_view_all_list);
         $uid = isset($_GET["u"]) && intval($_GET["u"]) > 0 ? intval($_GET["u"]) : ($is_view_all && $can_view_all ? 0 : $current_uid);
         $post_id = $atts["form"] ?: get_the_ID();
-        $all_submissions = VATROC_Form::get_all_submissions($post_id, $uid);
-        $keys = [];
-        foreach ($all_submissions as $idx => $fields) {
+        $all_submissions = self::get_all_submissions($post_id, $uid);
+        $keys = ["status" => true];
+        // TODO: add controller here if the shape is not fixed
+        // foreach ($all_submissions as $idx => $fields) {
+        if (count($all_submissions) > 0) {
+            $fields = $all_submissions[0];
             foreach (array_keys($fields) as $dix => $key) {
                 $keys[$key] = true;
             }
         }
+        // }
         unset($keys["timestamp"]);
         unset($keys["uid"]);
+        unset($keys["uuid"]);
         return [
             "all_submissions" => $all_submissions,
             "keys" => $keys,
@@ -105,8 +110,16 @@ class VATROC_Form
         ];
     }
 
-    public static function count_user_submission($post_id, $uid){
+    public static function count_user_submission($post_id, $uid)
+    {
         return count(VATROC_Form_DAO::get_uid_uuids($post_id, $uid));
+    }
+
+    public static function update_submission_status($post_id, $uuid, $next_status)
+    {
+        $submission = VATROC_Form_DAO::get_submission_from_uuid($post_id, $uuid);
+        $submission["status"] = $next_status;
+        VATROC_Form_DAO::update_submission($post_id, $uuid, $submission);
     }
 }
 ;

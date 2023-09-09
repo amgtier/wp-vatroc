@@ -287,9 +287,14 @@ class VATROC extends VATROC_Constants
         return;
     }
 
-    public static function generate_uudiv4()
+    public static function generate_uuidv4()
     {
         mt_srand(crc32(serialize(array(microtime(true), 'USER_IP', 'ETC', get_current_user_ID()))));
         return wp_generate_uuid4();
+    }
+
+    public static function uuidv4_regex()
+    {
+        return '[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-4[0-9A-Fa-f]{3}-[89ABab][0-9A-Fa-f]{3}-[0-9A-Fa-f]{12}';
     }
 }
