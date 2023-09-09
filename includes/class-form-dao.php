@@ -57,7 +57,7 @@ class VATROC_Form_DAO
 
     public static function get_last_submissions($post_id, $uid)
     {
-        $meta_key = self::submission_meta_key($post_id, $uid);
+        $meta_key = self::last_submission_meta_key($post_id, $uid);
         return self::backend_to_arr(
             get_post_meta($post_id, $meta_key, true),
             $uid
@@ -88,7 +88,7 @@ class VATROC_Form_DAO
                 }
             }
         } else {
-            $meta_key = self::submission_meta_key($post_id, $uid);
+            $meta_key = self::last_submission_meta_key($post_id, $uid);
             $submissions = get_post_meta($post_id, $meta_key);
             $ret = array_map(fn($entry) => self::backend_to_arr($entry, $uid), $submissions);
         }
@@ -123,7 +123,7 @@ class VATROC_Form_DAO
         return self::$meta_key . "-$uid";
     }
 
-    public static function submission_meta_key($post_id, $uid)
+    public static function last_submission_meta_key($post_id, $uid)
     {
         $uuids = self::get_uid_uuids($post_id, $uid);
         if(count($uuids) == 0){
