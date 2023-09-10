@@ -28,7 +28,9 @@ class VATROC_Rest_Mission_Control
     }
     public static function application_submissions()
     {
-        add_filter("vatroc_form_get_all_submissions_after", 'VATROC_Rest_Mission_Control::filter_new_applications', 10, 1);
+        if(!isset($_GET['all'])){
+            add_filter("vatroc_form_get_all_submissions_after", 'VATROC_Rest_Mission_Control::filter_new_applications', 10, 1);
+        }
         add_filter("vatroc_form_get_all_submissions_after", 'VATROC_Rest_Utils::hydrate_user_info', 10, 1);
         return VATROC_Form::submission_list(["form" => self::FORM_PAGE_ID], null, true);
     }
