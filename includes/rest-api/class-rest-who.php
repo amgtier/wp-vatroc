@@ -21,12 +21,18 @@ class VATROC_Rest_Who
     public static function whoisV1($request)
     {
         $uid = $request["uid"];
+        
+        $vatsim_uid = VATROC_My::get_vatsim_uid($uid);
+        $sessions = VATROC_ATC::get_sessions( $vatsim_uid, VATROC_ATC::atc_activity_should_load_from_cache($vatsim_uid) );
+        $hours_at = VATROC_ATC::get_hours_at($sessions); 
+        
         return [
             "user" => get_user_by("id", $uid),
             "user_profile_src" => get_avatar_url($uid),
             "rating" => VATROC_My::get_vatsim_rating_string($uid),
             "position" => VATROC_My::get_vatroc_position_string($uid),
-            "hour_stats" => null, // ["S1" => VATROC_My::get] class-atc.php:38
+            "hours_at" => $hours_at,
+            "timeline" => VATROC_ATC::get_timeline($uid),
         ];
     }
 }

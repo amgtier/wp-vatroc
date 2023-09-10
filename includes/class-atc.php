@@ -34,20 +34,7 @@ class VATROC_ATC {
         return "?who=$vatsim_id&u=$uid";
     }
 
-
-    public static function atc_activity( $uid, $u = null ){
-        $load_from_db = true;
-        $last_save_t = get_post_meta( get_the_ID(), VATROC::$session_t_meta_prefix . $uid, true );
-        if ( isset( $_GET[ "refresh" ] ) && $_GET[ "refresh" ] == true || strlen( $last_save_t ) == 0 || intval( $last_save_t ) + 3600 * 12 * 30 < time() ) {
-            $load_from_db = false;
-        }
-
-        $events_show_all = false;
-        if ( isset( $_GET[ "event" ] ) && $_GET[ "event" ] == "all" ) {
-            $events_show_all = true;
-        }
-
-        $sessions = self::get_sessions( $uid, $load_from_db );
+    public static function get_hours_at($sessions){
         $hours_at = [];
         foreach ( $sessions as $idx=>$sess ) {
             if ( $sess->minutes_on_callsign < 10 ) { continue; }
@@ -57,16 +44,42 @@ class VATROC_ATC {
                 $hours_at[ $sess->rating ][ "OJT" ] += $sess->minutes_on_callsign;
             }
         }
+        foreach($hours_at as $idx=>$_){
+            $hours_at[$idx]["total"] = intval($hours_at[$idx]["total"] / 60);
+            $hours_at[$idx]["OJT"] = intval($hours_at[$idx]["OJT"] / 60);
+        }
+        return $hours_at;
+    }
+
+    public static function atc_activity_should_load_from_cache($vatsim_uid){
+        $load_from_db = true;
+        $last_save_t = get_post_meta( get_the_ID(), VATROC::$session_t_meta_prefix . $vatsim_uid, true );
+        if ( isset( $_GET[ "refresh" ] ) && $_GET[ "refresh" ] == true || strlen( $last_save_t ) == 0 || intval( $last_save_t ) + 3600 * 12 * 30 < time() ) {
+            $load_from_db = false;
+        }
+        return $load_from_db;
+    }
+
+    public static function atc_activity( $vatsim_uid, $u = null ){
+
+        $events_show_all = false;
+        if ( isset( $_GET[ "event" ] ) && $_GET[ "event" ] == "all" ) {
+            $events_show_all = true;
+        }
+
+        $sessions = self::get_sessions( $vatsim_uid, self::atc_activity_should_load_from_cache($vatsim_uid) );
+        $hours_at = self::get_hours_at($sessions);
+        
         ob_start();
 ?>
-        <h1> <?php echo $uid; ?> - <?php echo get_user_by( 'ID', $u )->display_name; ?> </h1>
+        <h1> <?php echo $vatsim_uid; ?> - <?php echo get_user_by( 'ID', $u )->display_name; ?> </h1>
         <a href='/atc/' class='btn btn-success'>ATC List</a>
-        <a href='?who=<?php echo $uid; ?>&refresh=true' class='btn btn-success'>Refresh</a>
+        <a href='?who=<?php echo $vatsim_uid; ?>&refresh=true' class='btn btn-success'>Refresh</a>
         <a href='<?php echo self::get_timeline_link(); ?>' class='btn btn-success'>Timeline</a>
         <?php if ( $events_show_all ): ?>
-            <a href='?who=<?php echo $uid; ?>' class='btn btn-success'>Show Active Events</a>
+            <a href='?who=<?php echo $vatsim_uid; ?>' class='btn btn-success'>Show Active Events</a>
         <?php else: ?>
-            <a href='?who=<?php echo $uid; ?>&event=all' class='btn btn-success'>Show All Events</a>
+            <a href='?who=<?php echo $vatsim_uid; ?>&event=all' class='btn btn-success'>Show All Events</a>
 <?php 
         endif;
         echo self::print_hours_at( $hours_at );
@@ -229,13 +242,13 @@ class VATROC_ATC {
         <tr>
         <th>Total</th>
         <?php foreach( $hours_at as $rating=>$data ): ?>
-            <td><?php echo intval( $data[ "total" ] / 60 ); ?> (hr)</td>
+            <td><?php echo $data[ "total" ]; ?> (hr)</td>
         <?php endforeach; ?>
         </tr>
         <tr>
         <th>OJT</th>
         <?php foreach( $hours_at as $rating=>$data ): ?>
-            <td><?php echo intval( $data[ "OJT" ] / 60 ); ?> (hr)</td>
+            <td><?php echo $data[ "OJT" ]; ?> (hr)</td>
         <?php endforeach; ?>
         </tr>
         </table>
@@ -348,10 +361,37 @@ class VATROC_ATC {
         return ob_get_clean() . "</table>";
     }
 
+    public static function get_timeline($uid){
+        $timeline = [];
+        foreach ( VATROC::$atc_dates_in_sess as $key => $value ){
+            $date = get_user_meta( $uid, "vatroc_date_" . $key , true );
+            $date_timestamp = strtotime( $date );
+            $delta = 0;
+            if ( $date != null ){
+                if( $last_dates[ $uid ] > 0 ){
+                    $delta = ( $date_timestamp - $last_dates[ $uid ] ) / 86400;
+                }
+                $last_dates[ $uid ] = $date_timestamp;
+            } else {
+                $last_dates[ $uid ] = 0;
+            }
+            $timeline[$value] = ["date" => $date, "delta" => $delta];
+        }
+        return $timeline;
+    }
+
+    public static function get_timelines($uids){
+        $timelines = [];
+        foreach($uids as $_=>$uid){
+            $timelines[$uid] = self::get_timeline($uid);
+        }
+        return $timelines;
+    }
 
     private static function get_timeline_from_metadata( $uids ) {
         $arr_uids = explode( ",", $uids );
         $uid = $arr_uids[0];
+        $timelines = self::get_timelines($arr_uids);
 
         ob_start();
         $last_dates = [];
@@ -369,24 +409,14 @@ class VATROC_ATC {
                 <td><?php echo $value; ?></td>
 <?php
                 foreach ( $arr_uids as $_ => $uid ):
-                    $date = get_user_meta( $uid, "vatroc_date_" . $key , true );
-                    $date_timestamp = strtotime( $date );
-                    $delta = 0;
-                    if ( $date != null ){
-                        if( $last_dates[ $uid ] > 0 ){
-                            $delta = ( $date_timestamp - $last_dates[ $uid ] ) / 86400;
-                        }
-                        $last_dates[ $uid ] = $date_timestamp;
-                    } else {
-                        $last_dates[ $uid ] = 0;
-                    }
+                    $date = $timelines[$uid][$value]["date"];
+                    $delta = $timelines[$uid][$value]["delta"];
 ?>
                     <td><?php echo $date; ?> <?php echo $delta > 0 ? "(" . $delta . " days )" : ""; ?></td>
                 <?php endforeach; ?>
             </tr>
         <?php endforeach;
         return ob_get_clean() . "</table>";
-
     }
 
 
@@ -416,7 +446,7 @@ class VATROC_ATC {
     }
 
 
-    private static function get_sessions( $uid, $load_from_db=false ){
+    public static function get_sessions( $uid, $load_from_db=false ){
         $raw_data = self::load_data( $uid, $load_from_db );
         $try_cnt = 0;
         while ( !is_string( $raw_data ) && $try_cnt < 10 ){
