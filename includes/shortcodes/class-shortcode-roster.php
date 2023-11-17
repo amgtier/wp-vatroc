@@ -176,7 +176,8 @@ class VATROC_Shortcode_Roster
     {
         global $wpdb;
         $meta_prefix = self::$meta_prefix;
-        $sql = "SELECT ID,display_name FROM {$wpdb->prefix}users";
+        // TODO: Remove ID field
+        $sql = "SELECT ID,ID as uid,display_name FROM {$wpdb->prefix}users";
 
         $sql_usermeta = "SELECT user_id,meta_key,meta_value FROM {$wpdb->prefix}usermeta WHERE meta_key LIKE '{$meta_prefix}%'";
 
@@ -250,7 +251,7 @@ class VATROC_Shortcode_Roster
     }
 
 
-    private static function sort_atc($a, $b)
+    public static function sort_atc($a, $b)
     {
         $meta_prefix = self::$meta_prefix;
         if ($a["${meta_prefix}vatsim_rating"] == $b["${meta_prefix}vatsim_rating"]) {
