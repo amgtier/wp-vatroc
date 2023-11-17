@@ -20,7 +20,7 @@ class VATROC_Form
         $post_id = $_POST["id"];
         $time = time();
         $uid = get_current_user_ID();
-        $data = $_POST["data"] . "&timestamp=$time&uid=$uid";
+        $data = wp_unslash($_POST["data"] . "&timestamp=$time&uid=$uid");
         if (!VATROC_Form_DAO::create_submission($post_id, $uid, $data)) {
             VATROC::log($data, "fatal", "form");
         }
@@ -35,7 +35,7 @@ class VATROC_Form
     public static function ajax_save_draft()
     {
         $post_id = $_POST["id"];
-        $data = $_POST["data"];
+        $data = wp_unslash($_REQUEST["data"]);
         $uid = get_current_user_ID();
         if (!VATROC_Form_DAO::upsert_draft($post_id, $uid, $data)) {
             VATROC::log($data, "fatal", "form-draft");

@@ -79,11 +79,10 @@ class VATROC_Form_DAO
                 fn($val) => str_starts_with($val, $prefix),
             );
             foreach ($keys as $idx => $k) {
-                foreach ($post_meta[$k] as $_idx => $_submission) {
-                    $_arr_submission = self::backend_to_arr($_submission);
-                    $_arr_submission["uuid"] = substr($k, strlen($prefix));
-                    array_push($ret, $_arr_submission);
-                }
+                $_submission = $post_meta[$k][0];
+                $_arr_submission = self::backend_to_arr($_submission);
+                $_arr_submission["uuid"] = substr($k, strlen($prefix));
+                array_push($ret, $_arr_submission);
             }
         } else {
             $meta_key = self::last_submission_meta_key($post_id, $uid);
@@ -147,6 +146,7 @@ class VATROC_Form_DAO
     {
         // [Must fix] unable to parse \'
         $arr = json_decode($str, true);
+        // $arr = htmlspecialchars($arr, ENT_QUOTES, 'UTF-8');
         return $arr;
     }
 
