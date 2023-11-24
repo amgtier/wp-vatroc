@@ -1,4 +1,5 @@
 <?php
+
 /**
  * VATROC Admin Dashboard
  *
@@ -6,11 +7,12 @@
  * @author tzchao
  */
 
-if ( ! defined( 'ABSPATH' ) ) {
+if (!defined('ABSPATH')) {
     exit;
 }
 
-class VATROC_Constants {
+class VATROC_Constants
+{
     public static $ATC = "atc";
     public static $ATC_LOCAL = "atc_local";
     public static $ATC_VISITING = "atc_visiting";
@@ -75,5 +77,12 @@ class VATROC_Constants {
         "app_cpt" => "APP CPT",
         "ctr_ojt" => "CTR OJT",
         "ctr_cpt" => "CTR CPT",
+    );
+
+    public static $application_status = array(
+        0 => "封存",
+        1 => "排隊中",
+        2 => "處理中",
+        3 => "已經丟下去",
     );
 };

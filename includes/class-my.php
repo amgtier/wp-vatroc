@@ -25,10 +25,9 @@ class VATROC_My
     public static function html_my_avatar($uid)
     {
         ob_start();
-        ?>
-        <img title='<?php echo get_userdata($uid)->nickname; ?>'
-            src='<?php echo get_avatar_url($uid); ?>' class='b-avatar' />
-        <?php
+?>
+        <img title='<?php echo get_userdata($uid)->nickname; ?>' src='<?php echo get_avatar_url($uid); ?>' class='b-avatar' />
+    <?php
         return ob_get_clean();
     }
 
@@ -36,8 +35,8 @@ class VATROC_My
     {
         $str_pos = VATROC_My::get_pos_str($uid, "short");
         ob_start();
-        ?>
-        <?php if ($is_avatar_clickable): ?>
+    ?>
+        <?php if ($is_avatar_clickable) : ?>
             <a href="<?php echo get_edit_user_link($uid, null); ?>" target="_blank">
             <?php endif; ?>
             <div class='position-display-wrapper'>
@@ -46,10 +45,10 @@ class VATROC_My
                 </div>
                 <?php echo VATROC_My::html_my_avatar($uid); ?>
             </div>
-            <?php if ($is_avatar_clickable): ?>
+            <?php if ($is_avatar_clickable) : ?>
             </a>
         <?php endif; ?>
-        <?php
+<?php
         return ob_get_clean();
     }
 
@@ -105,11 +104,16 @@ class VATROC_My
         return get_user_meta($uid, "last_name", true) ?: 0;
     }
 
-
     public static function set_vatsim_uid($uid, $value)
     {
         update_user_meta($uid, "vatroc_vatsim_uid", $value);
         return self::get_vatsim_uid();
+    }
+
+    public static function set_vatsim_rating($uid, $value)
+    {
+        update_user_meta($uid, "vatroc_vatsim_rating", $value);
+        return self::get_vatsim_rating();
     }
 
     public static function get_vatsim_rating($uid = null)
@@ -193,7 +197,59 @@ class VATROC_My
                 return VATROC_My::set_last_name($uid, $value);
         }
     }
-}
-;
+
+    public static function set_del_ojt($uid, $vatsim_id)
+    {
+        $old_position = self::get_vatroc_position($uid);
+        if ($old_position < 1) {
+            $new_position = self::set_vatroc_position($uid, 1);
+            VATROC::log(
+                "$uid vatroc position changed from $old_position to $new_position",
+            );
+        } else {
+            VATROC::dog("$uid vatroc position $old_position");
+        }
+        $old_vatsim_uid = self::get_vatsim_uid($uid);
+        if ($old_vatsim_uid !== 0) {
+            $new_vatsim_uid = self::set_vatsim_uid($uid, $vatsim_id);
+            VATROC::log(
+                "$uid vatsim uid changed from $old_vatsim_uid to $new_vatsim_uid",
+            );
+        } else {
+            VATROC::dog("$uid vatsim uid $old_vatsim_uid");
+        }
+        $old_vatsim_rating = self::get_vatsim_rating($uid);
+        if ($old_vatsim_rating < 2) {
+            $new_vatsim_rating = self::set_vatsim_rating($uid, 2);
+            VATROC::log(
+                "$uid vatsim uid changed from $old_vatsim_rating to $new_vatsim_rating",
+            );
+        } else {
+            VATROC::dog("$uid vatsim rating $old_vatsim_rating");
+        }
+    }
+
+    public static function set_revert_del_ojt($uid, $vatsim_id)
+    {
+        $old_position = self::get_vatroc_position($uid);
+        if ($old_position === 1) {
+            $new_position = self::set_vatroc_position($uid, 0);
+            VATROC::log(
+                "$uid vatroc position changed from $old_position to $new_position",
+            );
+        } else {
+            VATROC::dog("$uid vatroc position $old_position");
+        }
+        $old_vatsim_rating = self::get_vatsim_rating($uid);
+        if ($old_vatsim_rating === 2) {
+            $new_vatsim_rating = self::set_vatsim_rating($uid, null);
+            VATROC::log(
+                "$uid vatsim uid changed from $old_vatsim_rating to $new_vatsim_rating",
+            );
+        } else {
+            VATROC::dog("$uid vatsim rating $old_vatsim_rating");
+        }
+    }
+};
 
 VATROC_My::init();

@@ -17,8 +17,8 @@ class VATROC_Rest_Utils
         $arr[$idx]["user_profile_src"] = get_avatar_url($_uid);
 
         // TODO: Can I select field?
-        $user = get_user_by("ID", $_uid);
-        $arr[$idx]["display_name"] = $user->display_name ?: $user->nice_name;
+        $user = get_userdata($_uid);
+        $arr[$idx]["display_name"] = $user->nickname;
       }
       if (isset($entry[$map["vatroc_position"] ?: "vatroc_position"])) {
         $arr[$idx]["vatroc_position_text"] = VATROC_Constants::$atc_position[$entry["vatroc_position"]];
