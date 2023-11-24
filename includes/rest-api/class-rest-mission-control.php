@@ -24,6 +24,11 @@ class VATROC_Rest_Mission_Control
             'callback' => "VATROC_Rest_Mission_Control::archive_application",
             'permission_callback' => '__return_true',
         ]);
+        register_rest_route(VATROC_Rest_API::$namespace, "application_submissions/(?P<uuid>$uuidv4)/comment", [
+            'methods' => 'POST',
+            'callback' => "VATROC_Rest_Mission_Control::submit_comment",
+            'permission_callback' => '__return_true',
+        ]);
         register_rest_route(VATROC_Rest_API::$namespace, 'roster', [
             'methods' => 'GET',
             'callback' => "VATROC_Rest_Mission_Control::roster",
@@ -86,6 +91,19 @@ class VATROC_Rest_Mission_Control
             "atc" => $atc
         ];
         return $data;
+    }
+
+    public static function submit_comment($data)
+    {
+        $json_params = $data->get_json_params();
+        if(!is_null($json_params)){
+            $comment = $json_params["comment"];
+            $uuid = $data["uuid"];
+            $uid = get_current_user_ID();
+            VATROC_Form::create_comment(self::APPLICATION_FORM_PAGE_ID, $uuid, $uid, $comment);
+            return "ok";
+        }
+        return null;
     }
 }
 

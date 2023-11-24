@@ -123,9 +123,14 @@ class VATROC_Form
         VATROC_Form_DAO::update_submission($post_id, $uuid, $submission);
     }
 
-    public static function create_comment($post_id, $uuid, $uid, $content){
-        VATROC_Form_DAO::create_comment($post_id, $uuid, $uid, $content);
-        return true;
+    public static function create_comment($post_id, $uuid, $uid, $content)
+    {
+        $submission = VATROC_Form_DAO::get_submission_from_uuid($post_id, $uuid);
+        if (!is_null($submission)) {
+            VATROC_Form_DAO::create_comment($post_id, $uuid, $uid, $content);
+            return true;
+        }
+        return false;
     }
 };
 
