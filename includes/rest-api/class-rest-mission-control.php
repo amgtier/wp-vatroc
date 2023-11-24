@@ -101,6 +101,9 @@ class VATROC_Rest_Mission_Control
         $json_params = $request->get_json_params();
         if (!is_null($json_params)) {
             $comment = $json_params["comment"];
+            if(empty($comment)){
+                return null;
+            }
             $uuid = $request["uuid"];
             $uid = get_current_user_ID();
             VATROC_Form::create_comment(self::APPLICATION_FORM_PAGE_ID, $uuid, $uid, $comment);
