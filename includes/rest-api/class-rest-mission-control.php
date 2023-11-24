@@ -27,7 +27,10 @@ class VATROC_Rest_Mission_Control
         register_rest_route(VATROC_Rest_API::$namespace, "application_submissions/(?P<uuid>$uuidv4)/comment", [
             'methods' => 'POST',
             'callback' => "VATROC_Rest_Mission_Control::submit_comment",
-            'permission_callback' => '__return_true',
+        ]);
+        register_rest_route(VATROC_Rest_API::$namespace, "application_submissions/(?P<uuid>$uuidv4)/comments", [
+            'methods' => 'GET',
+            'callback' => "VATROC_Rest_Mission_Control::get_comments",
         ]);
         register_rest_route(VATROC_Rest_API::$namespace, 'roster', [
             'methods' => 'GET',
@@ -93,17 +96,25 @@ class VATROC_Rest_Mission_Control
         return $data;
     }
 
-    public static function submit_comment($data)
+    public static function submit_comment($request)
     {
-        $json_params = $data->get_json_params();
-        if(!is_null($json_params)){
+        $json_params = $request->get_json_params();
+        if (!is_null($json_params)) {
             $comment = $json_params["comment"];
-            $uuid = $data["uuid"];
+            $uuid = $request["uuid"];
             $uid = get_current_user_ID();
             VATROC_Form::create_comment(self::APPLICATION_FORM_PAGE_ID, $uuid, $uid, $comment);
             return "ok";
         }
         return null;
+    }
+
+    public static function get_comments($request)
+    {
+        $uuid = $request["uuid"];
+        $arr = VATROC_Form::get_comments(self::APPLICATION_FORM_PAGE_ID, $uuid);
+        $arr = VATROC_Rest_Utils::hydrate_user_info($arr, ["uid" => "author"]);
+        return $arr;
     }
 }
 

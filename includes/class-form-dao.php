@@ -180,6 +180,15 @@ class VATROC_Form_DAO
             ]
         );
     }
+
+    public static function get_comments($post_id, $uuid)
+    {
+        $meta_key = self::make_comment_meta_key($uuid);
+        return get_post_meta(
+            $post_id,
+            $meta_key,
+        );
+    }
 };
 
 VATROC_Form_DAO::init();

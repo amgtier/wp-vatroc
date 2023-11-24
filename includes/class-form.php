@@ -132,6 +132,11 @@ class VATROC_Form
         }
         return false;
     }
+
+    public static function get_comments($post_id, $uuid)
+    {
+        return VATROC_Form_DAO::get_comments($post_id, $uuid);
+    }
 };
 
 VATROC_Form::init();
