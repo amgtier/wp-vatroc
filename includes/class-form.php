@@ -122,7 +122,11 @@ class VATROC_Form
         $submission["status"] = $next_status;
         VATROC_Form_DAO::update_submission($post_id, $uuid, $submission);
     }
-}
-;
+
+    public static function create_comment($post_id, $uuid, $uid, $content){
+        VATROC_Form_DAO::create_comment($post_id, $uuid, $uid, $content);
+        return true;
+    }
+};
 
 VATROC_Form::init();

@@ -118,6 +118,11 @@ class VATROC_Form_DAO
         return self::$meta_key . "-submission-$uuid";
     }
 
+    private static function make_comment_meta_key($uuid)
+    {
+        return self::$meta_key . "-comment-$uuid";
+    }
+
     private static function make_uuid_index_meta_key($uid)
     {
         return self::$meta_key . "-$uid";
@@ -158,7 +163,23 @@ class VATROC_Form_DAO
     {
         update_post_meta($post_id, self::make_submission_meta_key($uuid), json_encode($data, JSON_UNESCAPED_UNICODE));
     }
-}
-;
+
+    public static function create_comment($post_id, $uuid, $uid, $content)
+    {
+        $meta_key = self::make_comment_meta_key($uuid);
+        $now = time();
+        return add_post_meta(
+            $post_id,
+            $meta_key,
+            [
+                "author" => $uid,
+                "create_time" => $now,
+                "update_time" => $now,
+                "content" => $content,
+                "uuid" => VATROC::generate_uuidv4(),
+            ]
+        );
+    }
+};
 
 VATROC_Form_DAO::init();

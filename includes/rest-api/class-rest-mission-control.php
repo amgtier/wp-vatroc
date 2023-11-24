@@ -77,7 +77,7 @@ class VATROC_Rest_Mission_Control
         usort($rosters, "VATROC_Shortcode_Roster::sort_atc");
         // $visiting = VATROC_Shortcode_Roster::table_data(VATROC::$ATC_VISITING);
         // $solo = VATROC_Shortcode_Roster::table_data(VATROC::$ATC_SOLO);
-        $atc = $rosters;
+        $atc = array_reverse($rosters);
 
         $data = [
             "archive" => $archive,
