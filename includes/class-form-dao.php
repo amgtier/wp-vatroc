@@ -76,7 +76,7 @@ class VATROC_Form_DAO
             $prefix = "vatroc_form-submission-";
             $keys = array_filter(
                 array_keys($post_meta),
-                fn($val) => str_starts_with($val, $prefix),
+                fn ($val) => str_starts_with($val, $prefix),
             );
             foreach ($keys as $idx => $k) {
                 $_submission = $post_meta[$k][0];
@@ -86,8 +86,11 @@ class VATROC_Form_DAO
             }
         } else {
             $meta_key = self::last_submission_meta_key($post_id, $uid);
+            if ($meta_key == null) {
+                return $ret;
+            }
             $submissions = get_post_meta($post_id, $meta_key);
-            $ret = array_map(fn($entry) => self::backend_to_arr($entry, $uid), $submissions);
+            $ret = array_map(fn ($entry) => self::backend_to_arr($entry, $uid), $submissions);
         }
         usort($ret, 'self::sort_timestamp');
 
@@ -129,8 +132,9 @@ class VATROC_Form_DAO
     {
         $uuids = self::get_uid_uuids($post_id, $uid);
         if (count($uuids) == 0) {
-            VATROC::dog("User $uid has no UUIDs");
+            // VATROC::dog("User $uid has no UUIDs");
             // throw new Exception("User $uid has no UUIDs");
+            return null;
         }
         return end($uuids);
     }

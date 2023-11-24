@@ -83,6 +83,7 @@ class VATROC_Form
     public static function submission_list($atts = null, $content = null, $is_view_all = false)
     {
         $current_uid = get_current_user_ID();
+        // TODO: refactor privacy setting for rest to use
         $can_view_all_list = explode(",", $atts["can_view_all"] ?: []);
         $can_view_all = VATROC::is_admin() || in_array($current_uid, $can_view_all_list);
         $uid = isset($_GET["u"]) && intval($_GET["u"]) > 0 ? intval($_GET["u"]) : ($is_view_all && $can_view_all ? 0 : $current_uid);
