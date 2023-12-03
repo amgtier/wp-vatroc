@@ -278,7 +278,8 @@ class VATROC_Poll {
 
 
     private static function get_curr_month() {
-        return date( 'm' ) % 12;
+        $m = date( 'm' ) % 12;
+        return $m === 0 ? 12 : $m;
     }
 
 
