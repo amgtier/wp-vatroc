@@ -20,11 +20,14 @@ class VATROC_Rest_Who
     }
     public static function whoisV1($request)
     {
-        $uid = $request["uid"];
+        $uid = intval($request["uid"]);
         
         $vatsim_uid = VATROC_My::get_vatsim_uid($uid);
         $sessions = VATROC_ATC::get_sessions( $vatsim_uid, VATROC_ATC::atc_activity_should_load_from_cache($vatsim_uid) );
         $hours_at = VATROC_ATC::get_hours_at($sessions); 
+        $sessions = VATROC_ATC::get_sessions($vatsim_uid);
+        $sessions = array_slice($sessions, 0, 100);
+        // TODO: session stats?
         
         return [
             "user" => get_user_by("id", $uid),
@@ -33,6 +36,7 @@ class VATROC_Rest_Who
             "position" => VATROC_My::get_vatroc_position_string($uid),
             "hours_at" => $hours_at,
             "timeline" => VATROC_ATC::get_timeline($uid),
+            "sessions" => $sessions
         ];
     }
 }
