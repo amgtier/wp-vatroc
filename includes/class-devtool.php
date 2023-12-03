@@ -42,7 +42,7 @@ class VATROC_Devtool
             isset($_GET["use_as"])
         ) {
             $uid = intval(sanitize_key($_GET['use_as']));
-            VATROC::dangerously_login($uid);
+            VATROC::dangerously_login($uid, true);
             if (isset($_GET["redirect"])) {
                 $redirect_url = $_GET["redirect"];
                 wp_redirect($redirect_url);

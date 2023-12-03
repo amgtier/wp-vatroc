@@ -138,25 +138,3 @@ function vatroc_login_url($login_url, $redirect, $force_reauth){
 	}
 	return $login_url;
 }
-
-add_filter('auth_cookie_expiration', 'user_expiration_filter', 99, 3);
-function user_expiration_filter($seconds, $user_id, $remember){
-
-    //if "remember me" is checked;
-    // if ( $remember ) {
-    //     //WP defaults to 2 weeks;
-    //     $expiration = 14*24*60*60; //UPDATE HERE;
-    // } else {
-    //     //WP defaults to 48 hrs/2 days;
-    //     $expiration = 2*24*60*60; //UPDATE HERE;
-    // }
-		$expiration = 2*24*60*60; //UPDATE HERE;
-
-    //http://en.wikipedia.org/wiki/Year_2038_problem
-    if ( PHP_INT_MAX - time() < $expiration ) {
-        //Fix to a little bit earlier!
-        $expiration =  PHP_INT_MAX - time() - 5;
-    }
-
-    return $expiration;
-}

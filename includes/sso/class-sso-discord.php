@@ -66,7 +66,8 @@ class VATROC_SSO_Discord extends VATROC_SSO
             );
             wp_update_user($userdata);
         }
-        VATROC::dangerously_login($uid);
+        // TODO: set is_remembered in sso option
+        VATROC::dangerously_login($uid, true);
         VATROC_SSO_DISCORD_API::register_token($token_raw);
         return true;
     }

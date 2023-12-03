@@ -283,13 +283,13 @@ class VATROC extends VATROC_Constants
         return $randomString;
     }
 
-    public static function dangerously_login($uid)
+    public static function dangerously_login($uid, $remembered = false)
     {
         if ($uid != null) {
             wp_destroy_current_session();
             wp_clear_auth_cookie();
             wp_set_current_user(0);
-            wp_set_auth_cookie($uid);
+            wp_set_auth_cookie($uid, $remembered);
             wp_set_current_user($uid);
         }
         return;
