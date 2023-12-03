@@ -229,9 +229,11 @@ class VATROC extends VATROC_Constants
     public static function return_redirect($url)
     {
         ob_start();
-        ?>
-        <script>window.location.replace("<?php echo $url; ?>")</script>
-        <?php
+?>
+        <script>
+            window.location.replace("<?php echo $url; ?>")
+        </script>
+<?php
         return ob_get_clean();
     }
 
@@ -302,5 +304,16 @@ class VATROC extends VATROC_Constants
     public static function uuidv4_regex()
     {
         return '[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-4[0-9A-Fa-f]{3}-[89ABab][0-9A-Fa-f]{3}-[0-9A-Fa-f]{12}';
+    }
+
+    public static function url_add_param($url, $key, $value)
+    {
+        $query = parse_url($url, PHP_URL_QUERY);
+        if ($query) {
+            $url .= "&{$key}={$value}";
+        } else {
+            $url .= "?{$key}={$value}";
+        }
+        return $url;
     }
 }

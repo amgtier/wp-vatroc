@@ -40,7 +40,8 @@ class VATROC_Shortcode_SSO
                         $classname::login($_REQUEST['code']);
                     }
                 }
-                $redirect_path = isset($_REQUEST['next']) ? $_REQUEST['next'] : get_permalink(VATROC_SSO::default_redirect_page());
+                $redirect_uri_key = "state";
+                $redirect_path = isset($_REQUEST[$redirect_uri_key]) ? $_REQUEST[$redirect_uri_key] : get_permalink(VATROC_SSO::default_redirect_page());
             }
 
             // catch: log error and render fallback page

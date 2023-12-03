@@ -88,16 +88,15 @@ class VATROC_SSO_Discord extends VATROC_SSO
                 // TODO: should use more proper approach for sso next
                 update_user_meta($uid, "vatroc_sso_next", VATROC::get_current_url());
                 ob_start();
-                ?>
+?>
                 <a href=<?php echo self::get_oauth_url(); ?> class="btn btn-primay">Connect Discord</a>
-                <?php
+            <?php
                 break;
             default:
                 ob_start();
-                ?>
-                <a href="<?php echo get_permalink(VATROC_Shortcode_SSO::PAGE_ID) . "?next=$redirect_url"; ?>&source=discord&action=revoke"
-                    class="btn btn-primay">Clean Discord</a>
-                <?php
+            ?>
+                <a href="<?php echo get_permalink(VATROC_Shortcode_SSO::PAGE_ID) . "?next=$redirect_url"; ?>&source=discord&action=revoke" class="btn btn-primay">Clean Discord</a>
+        <?php
                 break;
         }
         return ob_get_clean();
@@ -139,12 +138,12 @@ class VATROC_SSO_Discord extends VATROC_SSO
         ?>
         <span>
             <span><b>
-            <?php echo $display_name; ?>
-        </b></span>
-    <img src=<?php echo $img_src; ?> alt="<?php echo $username; ?>" class='b-avatar' />
-    <?php echo $discriminator ? '# ' . $discriminator : null; ?>
+                    <?php echo $display_name; ?>
+                </b></span>
+            <img src=<?php echo $img_src; ?> alt="<?php echo $username; ?>" class='b-avatar' />
+            <?php echo $discriminator ? '# ' . $discriminator : null; ?>
         </span>
-<?php
+        <?php
         return ob_get_clean();
     }
 
@@ -196,17 +195,17 @@ class VATROC_SSO_Discord extends VATROC_SSO
             array_map(
                 function ($channel) {
                     ob_start();
-                    ?>
-    <p>
-        Channel ID:
-        <?php echo $channel['id']; ?>
-        Channel Name:
-        <?php echo $channel['name']; ?>
-        Channel Position:
-        <?php echo $channel['position']; ?>
-    </p>
-    <?php
-                            return ob_get_clean();
+        ?>
+            <p>
+                Channel ID:
+                <?php echo $channel['id']; ?>
+                Channel Name:
+                <?php echo $channel['name']; ?>
+                Channel Position:
+                <?php echo $channel['position']; ?>
+            </p>
+<?php
+                    return ob_get_clean();
                 },
                 VATROC_SSO_Discord_API::fetch_channel_list("1113138347121057832")
             )
@@ -292,7 +291,8 @@ class VATROC_SSO_Discord extends VATROC_SSO
         return $args;
     }
 
-    public static function api_test(){
+    public static function api_test()
+    {
         $ret = "";
         if (VATROC::debug_section([1, 2])) {
             $ret .= VATROC_SSO_Discord::connect_button();
@@ -312,10 +312,15 @@ class VATROC_SSO_Discord extends VATROC_SSO
 
     public static function get_oauth_url()
     {
-        return get_option(self::DISCORD_OAUTH_URL);
+        global $wp;
+        $url = home_url($wp->request);
+        // TODO: json-fy state
+        $oauth_url = VATROC::url_add_param(get_option(self::DISCORD_OAUTH_URL), "state", $url);
+        return $oauth_url;
     }
 
-    public static function get_logo_url(){
+    public static function get_logo_url()
+    {
         return plugin_dir_url(VATROC_PLUGIN_FILE) . 'assets/images/discord-white.png';
     }
 }
