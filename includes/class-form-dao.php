@@ -148,6 +148,9 @@ class VATROC_Form_DAO
     {
         $obj = [];
         parse_str($str, $obj);
+        if(is_string($obj) && strpos($obj, '"') !== false) {
+            $objv = str_replace('"', '\"', $obj);
+          }
         return json_encode($obj, JSON_UNESCAPED_UNICODE);
     }
 
