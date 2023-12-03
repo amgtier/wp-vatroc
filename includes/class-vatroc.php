@@ -212,13 +212,18 @@ class VATROC extends VATROC_Constants
 
     public static function get_today()
     {
+        $m = date('m');
+        $m = $m === 0 ? 12 : $m;
         return self::get_date(date('Y'), date('m'), date('d'));
     }
 
 
     public static function get_date($y, $m, $d)
     {
-        return sprintf("%04d/%d/%02d", $y, $m % 12, $d);
+        // TODO: fix all this tedious month thing
+        $_m = $m % 12;
+        $_m = $_m === 0 ? 12 : $_m;
+        return sprintf("%04d/%d/%02d", $y, $_m, $d);
     }
 
     public static function return_redirect($url)
