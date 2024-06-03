@@ -19,9 +19,10 @@ function account_linked_user_table_row( $val, $column_name, $user_id ) {
 
     switch ( $column_name ) {
         case 'fb':
-            $nextend_provider = new NextendSocialProviderFacebook();
-            $fblink = get_user_meta( $user_id, 'fblink', true );
-            return $nextend_provider->isUserConnected( $user_id ) ? $fblink == NULL ? "Linked" : sprintf( "<a href='%s' target='_blank'>Linked*</a>", $fblink ) : "";
+            return null;
+            // $nextend_provider = new NextendSocialProviderFacebook();
+            // $fblink = get_user_meta( $user_id, 'fblink', true );
+            // return $nextend_provider->isUserConnected( $user_id ) ? $fblink == NULL ? "Linked" : sprintf( "<a href='%s' target='_blank'>Linked*</a>", $fblink ) : "";
         case 'discord':
             return VATROC_SSO_Discord::check_user($user_id) === VATROC_SSO_Discord::CONNECTED ? VATROC_SSO_Discord::CONNECTED : null;
         case 'vatsim':
