@@ -40,5 +40,3 @@ class VATROC_Rest_Who
         ];
     }
 }
-
-VATROC_Rest_Who::init();

@@ -43,9 +43,6 @@ class VATROC extends VATROC_Constants
         include_once(VATROC_ABSPATH . 'includes/class-poll.php');
         include_once(VATROC_ABSPATH . 'includes/class-router.php');
         include_once(VATROC_ABSPATH . 'includes/rest-api/class-rest-api.php');
-        include_once(VATROC_ABSPATH . 'includes/rest-api/class-rest-mission-control.php');
-        include_once(VATROC_ABSPATH . 'includes/rest-api/class-rest-who.php');
-        include_once(VATROC_ABSPATH . 'includes/rest-api/class-rest-utils.php');
         include_once(VATROC_ABSPATH . 'includes/shortcodes/class-shortcode-devtool.php');
         include_once(VATROC_ABSPATH . 'includes/shortcodes/class-shortcode-event.php');
         include_once(VATROC_ABSPATH . 'includes/shortcodes/class-shortcode-form.php');
@@ -56,6 +53,8 @@ class VATROC extends VATROC_Constants
         include_once(VATROC_ABSPATH . 'includes/shortcodes/class-shortcode-roster.php');
         include_once(VATROC_ABSPATH . 'includes/shortcodes/class-shortcode-sso.php');
         include_once(VATROC_ABSPATH . 'includes/vatroc-hook-functions.php');
+
+        VATROC_Rest_API::init();
     }
 
 

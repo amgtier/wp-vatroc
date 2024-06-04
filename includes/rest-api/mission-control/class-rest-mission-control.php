@@ -139,5 +139,3 @@ class VATROC_Rest_Mission_Control
         return $arr;
     }
 }
-
-VATROC_Rest_Mission_Control::init();
