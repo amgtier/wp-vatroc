@@ -83,6 +83,8 @@ class VATROC_Rest_Mission_Control
     public static function roster()
     {
         add_filter("vatroc_form_get_all_submissions_after", 'VATROC_Rest_Utils::hydrate_user_info', 10, 1);
+        add_filter("vatroc_form_get_all_submissions_after", 'VATROC_Rest_Mission_Control::hydrate_comment_counts', 11, 1);
+
         $all_submissions = VATROC_Form::get_all_submissions(self::APPLICATION_FORM_PAGE_ID, 0);
         $archive = array_values(array_filter($all_submissions, function ($ele) {
             return isset($ele["status"]) && intval($ele["status"]) === 0;
@@ -137,5 +139,10 @@ class VATROC_Rest_Mission_Control
         $arr = VATROC_Form::get_comments(self::APPLICATION_FORM_PAGE_ID, $uuid);
         $arr = VATROC_Rest_Utils::hydrate_user_info($arr, ["uid" => "author"]);
         return $arr;
+    }
+
+    public static function hydrate_comment_counts($arr, $map = [])
+    {
+        return VATROC_Rest_Utils::hydrate_comment_counts($arr, $map, VATROC_Rest_Mission_Control::APPLICATION_FORM_PAGE_ID);
     }
 }

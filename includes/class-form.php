@@ -137,6 +137,11 @@ class VATROC_Form
     {
         return VATROC_Form_DAO::get_comments($post_id, $uuid);
     }
+
+    public static function get_comment_count($post_id, $uuid)
+    {
+        return count(VATROC_Form_DAO::get_comments($post_id, $uuid));
+    }
 };
 
 VATROC_Form::init();

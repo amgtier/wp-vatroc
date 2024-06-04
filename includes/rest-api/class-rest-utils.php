@@ -8,7 +8,6 @@ class VATROC_Rest_Utils
 {
   public static function hydrate_user_info($arr, $map = [])
   {
-
     foreach ($arr as $idx => $entry) {
       // TODO: merge $entry["uid"], what would happend when intval(null or not set)?
       if (isset($entry[$map["uid"] ?: "uid"])) {
@@ -26,6 +25,14 @@ class VATROC_Rest_Utils
       if (isset($entry[$map["vatroc_vatsim_rating"] ?: "vatroc_vatsim_rating"])) {
         $arr[$idx]["vatroc_vatsim_rating_text"] = VATROC_Constants::$vatsim_rating[$entry["vatroc_vatsim_rating"]];
       }
+    }
+    return $arr;
+  }
+
+  public static function hydrate_comment_counts($arr, $map = [], $post_id)
+  {
+    foreach ($arr as $idx => $entry) {
+      $arr[$idx]['comment_count'] = VATROC_Form::get_comment_count($post_id, $entry['uuid']);
     }
     return $arr;
   }
